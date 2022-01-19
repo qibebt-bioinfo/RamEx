@@ -1,5 +1,5 @@
 # Function:  Ramanome RBCS Peak function  
-# Author: Rongze Chen
+# Author: Shi Huang, Rongze Chen
 # Last update: 2021-12-07, Rongze Chen, Gongchao Jing
 #################################################################
 # install necessary libraries
