@@ -9,7 +9,7 @@
 ## Clean R environment
 rm(list=ls())
 setwd("./")
-sourcedir <- Sys.getenv("RamEX")
+sourcedir <- Sys.getenv("RamEx")
 #sourcedir <- paste("/home/gene/jinggc/RamEX/databases/QC")
 source(paste(sourcedir, "/databases/QC/Function/RamanEx_plot.R", sep = "/"))
 source(paste(sourcedir, "/databases/QC/Function/folder_reader.R", sep = "/"))
