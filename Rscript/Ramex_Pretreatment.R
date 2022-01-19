@@ -9,7 +9,7 @@
 ## Clean R environment
 rm(list=ls())
 setwd('./')
-sourcedir <- Sys.getenv("RamEX")
+sourcedir <- Sys.getenv("RamEx")
 sourcedir <- paste(sourcedir,"/databases/QC/Function")
 source(paste(sourcedir, "util_ramex.R", sep = "/")) 
 source(paste(sourcedir, "baseline.R", sep = "/"))
