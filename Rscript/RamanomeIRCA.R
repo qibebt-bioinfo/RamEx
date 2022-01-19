@@ -19,8 +19,8 @@ invisible(lapply(p, usePackage))
 ## Clean R environment
 rm(list=ls())
 setwd('./')
-sourcedir <- Sys.getenv("RamEX")
-source(sprintf('%s/Rscript/util.R',"/home/gene/jinggc/RamEX"))
+sourcedir <- Sys.getenv("RamEx")
+source(sprintf('%s/Rscript/util.R',sourcedir))
 
 
 args <- commandArgs(trailingOnly=TRUE)
@@ -1006,7 +1006,7 @@ save(MP.pca, MC.pca, MI.pca, file = paste(outpath,"PCA_MP-MC-MI.RData",sep=""))
 #save(MP.pca,file = paste(outpath,"PCA_MP.RData",sep=""))
 #load(paste(input,"PCA_MP-MC-MI.RData.RData",sep = ""))
 
-# Desktop，PCA
+# Desktopï¼PCA
 ##########################
 #file.path<-"E:/RWAS/20201116_NetworkAnalysis_CC124/"
 #setwd(file.path)
@@ -1267,7 +1267,7 @@ save.image(file = paste(outpath,"mydata_by_", category,".RData",sep="")) #save a
 
 bands_cor_mats_rpvalue<-Peaks_fixed_cor_mats_rpvalue
 
-# # global_bands_annotation 鎷撳�?(+-3)
+# # global_bands_annotation é·æ³ç?(+-3)
 # Global_bands_annotation<-read.table(paste("E:/RWAS/IRCN_CC124_DU_20201022/",
 #                                           "Global_bands_annotation_new.txt",sep = ""),
 #                                     header = T,sep="\t")
