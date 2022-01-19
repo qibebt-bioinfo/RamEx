@@ -11,7 +11,7 @@ p <- c("optparse","RColorBrewer","igraph", "circlize", "permute", "ggplot2", "re
 usePackage <- function(p) {
   if (!is.element(p, installed.packages()[,1]))
     install.packages(p, dep=TRUE, repos="https://cloud.r-project.org/")
-	#install.packages(p, dep=TRUE)<F12>
+	#install.packages(p, dep=TRUE)
     suppressWarnings(suppressMessages(invisible(require(p, character.only=TRUE))))
 }
 invisible(lapply(p, usePackage))
@@ -19,8 +19,8 @@ invisible(lapply(p, usePackage))
 ## Clean R environment
 rm(list=ls())
 setwd('./')
-sourcedir <- Sys.getenv("RamEX")
-source(sprintf('%s/Rscript/util.R',"/home/gene/jinggc/RamEX"))
+sourcedir <- Sys.getenv("RamEx")
+source(sprintf('%s/Rscript/util.R',sourcedir))
 
 
 args <- commandArgs(trailingOnly=TRUE)
