@@ -27,7 +27,7 @@ if(is.null(opts$meta_data)) stop('Please input the meta data')
 matrixfile<-opts$clean_data
 metadatafile<-opts$meta_data
 plot_local_IRCN<-TRUE
-LocalBandsAnnfile<- sprintf('%s/databases/Local_bands_annotation.txt',"/home/gene/jinggc/RamEX") 
+LocalBandsAnnfile<- sprintf('%s/databases/Local_bands_annotation.txt',sourcedir) 
 if(!is.null(LocalBandsAnnfile)){ local_bands_ann<-read.table(LocalBandsAnnfile,header=T, sep="\t") }
 
 outpath <- opts$out_dir#"outputpath"
@@ -37,7 +37,7 @@ category<-c("group_A", "group_B", "group_C")
 
 #outputpath creation
 dir.create(outpath)
-outpath_png <- paste(outpath,"/Global-Local-IRCA_png/",sep="")
+outpath_png <- paste(outpath,"/Local-IRCA_png/",sep="")
 dir.create(outpath_png)
 options(warn=-1)
 #-------------------------------
