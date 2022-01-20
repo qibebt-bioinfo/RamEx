@@ -35,7 +35,7 @@ options(warn=-1)
 #-------------------------------
 # Spec range trimming
 #-------------------------------
-mat <- read.table(matrixfile, header = T, row.names = 1, sep=",");
+mat <- read.table(matrixfile, header = T, row.names = 1, sep="\t");
 mat <- data.frame(mat)
 raw_wn<-as.numeric(gsub("[A-Z]", "", colnames(mat)))
 #-------------------------------
