@@ -7,7 +7,7 @@
 rm(list=ls())
 setwd('./')
 sourcedir <- Sys.getenv("RamEx")
-sourcedir <- paste(sourcedir, "/databases/QC/Function")
+sourcedir <- paste(sourcedir, "/databases/QC/Function",sep="")
 source(paste(sourcedir, "util_ramex.R", sep = "/"))
 source(paste(sourcedir, "peak_util.R", sep = "/"))
 source(paste(sourcedir, "folder_reader.R", sep = "/"))
