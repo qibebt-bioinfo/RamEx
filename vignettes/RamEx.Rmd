@@ -1,0 +1,70 @@
+---
+title: "Introduction to RamEx"
+output: rmarkdown::html_vignette
+description: |
+   A package for comprehensive and efficient analysis and comparison of ramanomes.
+vignette: >
+  %\VignetteIndexEntry{Introduction to RamEx}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Ramanome Explorer (RamEx, Fig.1) is a R package for comprehensive and efficient analysis and comparison of ramanomes.
+By providing simple-to-use modules for computational tasks that otherwise would require substantial programming experience and algorithmic skills, RamEx should greatly facilitate the computational mining of ramanomes.
+
+More complete information about how to use RamEx can be found in the [github](https://github.com/qibebt-bioinfo/RamEx), but here you'll find a brief overview of the function and examples to mining of ramanomes:
+
+##Installaiton
+
+```{r install_info, echo = FALSE}
+#| RamEx will be installed from GitHub:
+library('devtools');
+install_github("qibebt-bioinfo/RamEx")
+```
+
+##Getting Started
+
+```{r package_load, echo=FALSE}
+#| after installed, you can load the package:
+library('RamEx')
+```
+
+Once the package loaded, the example data RamEx-data can be loaded automatically. RamEx also accepts manual data loading.
+```{r data_load, echo=FALSE}
+#| after the package loaded, you can load the data manually:
+RamEx-data <- read_spec("the folder path of your specture")
+```
+## Preprocessing
+
+```{r data_preprocessing, echo=FALSE}
+#| after the data loaded, data should preprocessed firstly:
+RamEx-data <- pre.smooth.sg(data)
+RamEx-data <- pre.baseline.polyfit(data)
+RamEx-data <- pre.normalize.ch(data)
+```
+## Quality control:
+```{r data quality control, echo=FALSE}
+RamEx-data_index <- qc_jump(data@datasets$normalized.data,var_tol = 0.4)
+RamEx-data <- RamEx-data[RamEx-data_index$index_good]
+```
+
+## Meta-based analysis
+```{r meta-based analysis, echo=FALSE}
+marker_info <- find_markers_roc(RamEx-data@datasets$normalized.data,RamEx-data@meta.data$group)
+```
+
+## Meta-free analysis
+```{r meta-free analysis, echo=FALSE}
+cluster_info <- louvain_clustering(object = RamEx-data, resolutions = c(0.01))
+```
+
+
+If you want to learn more, be sure to take a look at the [RamEx github page](https://github.com/qibebt-bioinfo/RamEx).
+
