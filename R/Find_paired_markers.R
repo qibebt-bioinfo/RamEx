@@ -105,7 +105,7 @@ find_markers_roc <- function(matrix,group, threshold=0.75){
 
   numCores <- detectCores() - 1
   cl <- makeCluster(numCores)
-  clusterEvalQ(cl, library(MLmetrics))
+  clusterEvalQ(cl, suppressPackageStartupMessages(library(MLmetrics)))
   clusterExport(cl, varlist = c("group","combinations_two","wave","matrix", 'threshold'), envir = environment())
 
 
