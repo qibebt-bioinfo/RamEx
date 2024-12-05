@@ -73,8 +73,8 @@ read.spec <- function(data_path, group.index = 1, group.levels = NULL, cutoff = 
   cl <- makeCluster(num_cores)
 
   clusterEvalQ(cl, {
-    library(data.table)
-    library(stringr)
+    suppressPackageStartupMessages(library(data.table))
+    suppressPackageStartupMessages(library(stringr))
   })
 
   clusterExport(cl, varlist = c( "read.single", "cut.spec"))
