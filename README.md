@@ -51,22 +51,22 @@ data <- read_spec("the folder path of your specture")
 ```
 3. Preprocessing:
 ```  
-data <- pre.smooth.sg(data)
-data <- pre.baseline.polyfit(data)
-data <- pre.normalize.ch(data)
+data_smoothed <- pre.smooth.sg(data)
+data_baselined <- pre.baseline.polyfit(data_smoothed)
+data_normalized <- pre.normalize.ch(data_baselined)
 ```
 4. Quality control:
 ```  
-data_index <- qc_jump(data@datasets$normalized.data,var_tol = 0.4)
-data <- data[data$index_good]
+data_index <- qc_jump(data_normalized@datasets$normalized.data,var_tol = 0.4)
+data_clean <- data_normalized[data$index_good]
 ```   
 5. Meta-based analysis 
 ```  
-marker_info <- find_markers_roc(data@datasets$normalized.data,data@meta.data$group)
+marker_info <- find_markers_roc(data_clean@datasets$normalized.data,data_clean@meta.data$group)
 ```
 6. Meta-free analysis
 ```  
-cluster_info <- louvain_clustering(object = data, resolutions = c(0.01))
+cluster_info <- louvain_clustering(object = data_clean, resolutions = c(0.01))
 ```    
 ### Raw data formats
 
