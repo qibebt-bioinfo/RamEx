@@ -1,6 +1,6 @@
 Package: RamEx
 Type: Package
-Title: Ramanome Explorer (RamEx, Fig.1) is a R package for comprehensive and efficient analysis and comparison of ramanomes.
+Title: Ramanome Explorer is a R package for comprehensive and efficient analysis and comparison of ramanomes.
 Version: 0.1.0
 Author: Yanmei Zhang & Gongchao Jing
 Maintainer: Gongchao Jing<jinggc@qibebt.ac.cn>
@@ -14,4 +14,4 @@ Imports:
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2024-10-29
+Packaged: 2024-12-11
