@@ -133,4 +133,4 @@ He Y,,Huang S,,,Zhang P,,Ji Y, Xu J,, 2021. Intra-Ramanome Correlation Analysis 
 
 
 ### Contact
-Please post any questions, feedback, comments or suggestions on the [GitHub Discussion board](https://github.com/qibebt-bioinfo) (alternatively can create a GitHub issue) or email SCC 
+Please post any questions, feedback, comments or suggestions on the [GitHub Discussion board](https://github.com/qibebt-bioinfo) (alternatively can create a GitHub issue) or email SCC.
