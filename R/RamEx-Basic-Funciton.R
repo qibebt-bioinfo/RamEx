@@ -449,6 +449,7 @@ save.renishaw <- function(dir_path) {
 #' @param single_spec A data frame containing spectral data with wavelengths in the first column (V1).
 #' @param cutoff A numeric vector of two values specifying the lower and upper bounds of the wavelength range.
 #' @return A data frame containing the subset of spectral data within the specified wavelength range.
+#' @export cut.spec
 
 
 cut.spec <- function(single_spec, cutoff) {
