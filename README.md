@@ -1,6 +1,6 @@
 
 <p align="center" style="margin-bottom: 0px !important;">
-  <img src="xxx" width="100" height="100">
+  <img src="http://bioinfo.single-cell.cn/Released_Software/fig1.png" width="100" height="100">
 </p>
 <h1 align="center" style="margin-top: -10px; font-size: 20px">RamEx</h1>
 
