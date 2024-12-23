@@ -24,7 +24,7 @@ RamEx is built on the following principles:
 **[Output](#output)**<br>
 **[Changing default settings](#changing-default-settings)**<br>
 **[Visualisation](#visualisation)**<br>
-**[Automated pipelines](#automated-pipelines)**<br>
+<!--**[Automated pipelines](#automated-pipelines)**<br>--->
 **[Functions](#functions)**<br>
 **[Frequently asked questions (FAQ)](#frequently-asked-questions)**<br>
 **[Contact](#contact)**<br>
@@ -83,8 +83,6 @@ RamEx can be successfully used to process almost any experiment with default set
 ### Visualisation
 RamEx also offers an online version. Please visit (http://ramex.single-cell.cn).
 
-### Automated pipelines
-The pipeline allows to xxx.
 
 <!--### functions
 
