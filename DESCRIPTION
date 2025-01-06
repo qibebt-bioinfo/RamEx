@@ -2,15 +2,21 @@ Package: RamEx
 Type: Package
 Title: Ramanome Explorer is a R package for comprehensive and efficient analysis and comparison of ramanomes.
 Version: 0.99.0
-Author: Yanmei Zhang & Gongchao Jing
-Maintainer: Gongchao Jing<jinggc@qibebt.ac.cn>
+Authors@R: 
+    c(
+        person("Yanmei", "Zhang", role = c("aut"), comment = "Co-Author"),
+        person("Gongchao", "Jing", email = "jinggc@qibebt.ac.cn", role = c("aut", "cre"))
+    )
 Description: By providing simple-to-use modules for computational tasks that otherwise would require substantial programming experience and algorithmic skills, RamEx should greatly facilitate the computational mining of ramanomes.More complete information about how to use RamEx can be found in the [github](https://github.com/qibebt-bioinfo/RamEx), but here you'll find a brief overview of the function and examples to mining of ramanomes:
 License: GPL
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 Depends: R (>= 3.0), RColorBrewer, Rcpp, circlize
 Imports:
-   MASS, MLmetrics, Matrix, NMF, parallel, Rtsne, cowplot, data.table, dbscan, disprofas, doParallel, dplyr, e1071, fastICA, foreach, ggforce, ggplot2, ggthemes, grDevices, graphics, hyperSpec, ica, igraph, mdatools, methods, pheatmap, irlba, prospectr, purrr, randomForest, rlist, scales, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, proxy, reshape2, testthat, knitr, ggtext, mclust, corr2D, RcppAnnoy, ade4, gpuR, magrittr
+   MASS, MLmetrics, Matrix, NMF, parallel, Rtsne, cowplot, data.table, dbscan, disprofas, doParallel, dplyr, e1071, fastICA, foreach, ggforce, ggplot2, ggthemes, grDevices, graphics, hyperSpec, ica, igraph, mdatools, methods, pheatmap, irlba, prospectr, purrr, randomForest, rlist, scales, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, proxy, reshape2, ggtext, mclust, RcppAnnoy, ade4, magrittr, corr2D
+Suggests:
+    testthat,knitr, RcppParallel, Rcpp, gpuR
+biocViews: Visualization, Clustering, Software
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 NeedsCompilation: no
