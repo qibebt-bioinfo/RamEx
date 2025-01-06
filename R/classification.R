@@ -1,3 +1,16 @@
+#' Perform stratified partitioning of data indices
+#'
+#' This function performs stratified sampling to split data indices into training and test sets
+#' while maintaining class proportions.
+#'
+#' @param labels A vector of class labels
+#' @param p The proportion of data to include in the training set (default: 0.7)
+#' @return A vector of indices for the training set
+#' @examples
+#' # Create example labels
+#' labels <- c(rep(1,10), rep(2,10), rep(3,10))
+#' 
+
 stratified_partition <- function(labels, p = 0.7) {
   unique_labels <- unique(labels)
   train_indices <- unlist(lapply(unique_labels, function(label) {
@@ -17,9 +30,19 @@ stratified_partition <- function(labels, p = 0.7) {
 #' @param show Whether user want to show the results
 #' @param save Wether user want to save the results
 #' @param seed The random seed
+#' @return A list containing:
+#'   \item{pred.train}{The confusion matrix plot for training data}
+#'   \item{pred.test}{The confusion matrix plot for test data}
 #' @importFrom MASS lda
 #' @importFrom ggplot2 ggsave
 #' @export Classification.Lda
+#' @examples
+#' # Load example data
+#' data_file <- system.file("extdata", "data", package = "RamEx")
+#' RamEx_data <- read.spec.load(data_file, group.index = 2)
+#' 
+#' # Perform LDA classification with single dataset (auto split)
+#' Classification.Lda(RamEx_data)
 Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42) {
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
@@ -36,7 +59,7 @@ Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
     label_val <- test@meta.data$group
   }
 
-data.pca <- prcomp(data_train, scale = TRUE, retx = T)
+data.pca <- prcomp(data_train, scale = TRUE, retx = TRUE)
 data_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
 
 model.lda <- lda(label_train ~ ., data = data_20)
@@ -65,10 +88,19 @@ if(show){print(pred.train)
 #' @param show Whether user want to show the results
 #' @param save Wether user want to save the results
 #' @param seed The random seed
+#' @return A list containing:
+#'   \item{pred.train}{The confusion matrix plot for training data}
+#'   \item{pred.test}{The confusion matrix plot for test data}
 #' @importFrom e1071 svm
 #' @importFrom ggplot2 ggsave
-#'
 #' @export Classification.Svm
+#' @examples
+#' # Load example data
+#' data_file <- system.file("extdata", "data", package = "RamEx")
+#' RamEx_data <- read.spec.load(data_file, group.index = 2)
+#' 
+#' # Perform SVM classification with auto split
+#' Classification.Svm(RamEx_data)
 Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42) {
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
@@ -106,9 +138,19 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
   #' @param show Whether user want to show the results
   #' @param save Wether user want to save the results
   #' @param seed The random seed
+  #' @return A list containing:
+  #'   \item{pred.train}{The confusion matrix plot for training data}
+  #'   \item{pred.test}{The confusion matrix plot for test data}
   #' @importFrom ggplot2 ggsave
   #' @importFrom randomForest randomForest
   #' @export Classification.Rf
+  #' @examples
+  #' # Load example data
+  #' data_file <- system.file("extdata", "data", package = "RamEx")
+  #' RamEx_data <- read.spec.load(data_file, group.index = 2)
+  #' 
+  #' # Perform RF classification with auto split
+  #' Classification.Rf(RamEx_data)
   Classification.Rf <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42) {
     if (is.null(test)) {
       data_set <- get.nearest.dataset(train)
@@ -137,7 +179,6 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
       print(pred.test)}
     }
 
-
     #' Gaussian Mixture Model (GMM)
     #'
     #' A probabilistic model that assumes data is generated from
@@ -149,6 +190,10 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
     #' @return The GMM model.
     #' @export Classification.Gmm
     #' @importFrom mclust Mclust
+    #' @examples
+    #' # Load example data
+    #' data_file <- system.file("extdata", "data", package = "RamEx")
+    #' RamEx_data <- read.spec.load(data_file, group.index = 2)
     Classification.Gmm <- function(train, test = NULL) {
       if (is.null(test)) {
         data_set <- get.nearest.dataset(train)
@@ -164,7 +209,7 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
         data_val <- get.nearest.dataset(test)
         label_val <- test@meta.data$group
       }
-      data.pca <- prcomp(data_train, scale = TRUE, retx = T)
+      data.pca <- prcomp(data_train, scale = TRUE, retx = TRUE)
       data_train_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
       gmm_model <- Mclust(data_train_20)
       data_test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame

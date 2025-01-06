@@ -24,6 +24,15 @@
 #' @importFrom doParallel registerDoParallel
 #' @importFrom parallel detectCores
 #' @importFrom RcppAnnoy AnnoyEuclidean
+#' @examples
+#' # Load example Ramanome data
+#' data_file <- system.file("extdata", "data", package = "RamEx")
+#' RamEx_data <- read.spec.load(data_file, group.index = 2)
+#' 
+#' # Define resolution values for clustering
+#' resolutions <- c(0.5, 1.0, 1.5)
+#' 
+
 Phenotype.Analysis.Louvaincluster <- function(object, resolutions,npc=10, threshold=0.001, k=30, n_tree=50) {
 
   data.red <- prcomp_irlba(get.nearest.dataset(object), n = npc, center = TRUE, scale. = TRUE)
@@ -120,7 +129,8 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,npc=10, thresh
 
 
 
-#' k-Means
+#' k-Means Clustering Analysis
+#' 
 #' A centroid-based clustering algorithm that partitions
 #' data into a predefined number of clusters by assigning
 #' sample to the nearest center
@@ -129,6 +139,12 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,npc=10, thresh
 #' @return The datafram which contains Kmeans result.
 #' @export Phenotype.Analysis.Kmeans
 #' @importFrom stats kmeans
+#' @examples
+#' # Load example Ramanome data
+#' data_file <- system.file("extdata", "data", package = "RamEx")
+#' RamEx_data <- read.spec.load(data_file, group.index = 2)
+#' 
+
 Phenotype.Analysis.Kmeans <- function(object) {
   data_x <- get.nearest.dataset(object)
   cl <- kmeans(data_x, 2)
@@ -152,6 +168,12 @@ Phenotype.Analysis.Kmeans <- function(object) {
 #' @importFrom stats hclust
 #' @importFrom vegan vegdist
 #' @importFrom graphics plot
+#' @examples
+#' # Load example Ramanome data
+#' data_file <- system.file("extdata", "data", package = "RamEx")
+#' RamEx_data <- read.spec.load(data_file, group.index = 2)
+#' 
+
 Phenotype.Analysis.Hca <- function(object) {
   dataset <- get.nearest.dataset(object)
   distance.matrix <- vegdist(dataset, method = "euclidean")

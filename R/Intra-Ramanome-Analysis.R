@@ -5,6 +5,10 @@
 #' @param data The input data matrix.
 #'
 #' @return A vector containing the Mahalanobis distance for each observation.
+#' @examples
+#' # Create a sample data matrix
+#' data <- matrix(rnorm(100), nrow=20)
+
 mahalDistForEvery <- function(data) {
   data <- as.matrix(data)
   inv_cov <- solve(cov(data))
@@ -27,6 +31,13 @@ mahalDistForEvery <- function(data) {
 #' @param data A numeric matrix or data frame.
 #' @param p Threshold probability (default is 0.1).
 #' @return A vector containing the indices of the detected outliers.
+#' @examples
+#' # Create sample data with outliers
+#' set.seed(123)
+#' normal_data <- matrix(rnorm(100), nrow=20)
+#' outlier_data <- matrix(rnorm(10, mean=5), nrow=2)
+#' data <- rbind(normal_data, outlier_data)
+#' 
 
 outliers_maha_chisquare <- function(data, p = 0.1) {
   del <- which(colMeans(data) < 0.02 | colMeans(data) == 1)
@@ -54,7 +65,14 @@ outliers_maha_chisquare <- function(data, p = 0.1) {
 #' @importFrom proxy as.matrix
 #' @param df A data frame.
 #' @return A list containing the correlation matrix, p-values, and the number of observations used for each correlation.
-
+#' @examples
+#' # Create sample data frame
+#' df <- data.frame(
+#'   x = rnorm(100),
+#'   y = rnorm(100),
+#'   z = rnorm(100)
+#' )
+#' 
 rcorr_df <- function(df) {
   df_mat <- as.matrix(df)
   return(rcorr(df_mat))
@@ -167,6 +185,12 @@ vectorize_dm_rcorr <- function(dm, group = NULL, duplicate = TRUE) {
 #' @importFrom stringr str_replace_all
 #' @import circlize
 #' @import circlize
+#' @examples
+#' # Create sample correlation matrix
+#' n <- 10
+#' corr_mat <- matrix(runif(n*n, -1, 1), n, n)
+#' colnames(corr_mat) <- rownames(corr_mat) <- paste0("W", 1:n)
+#' 
 
 Plot_global_chordDiagram_rpvalue <- function(
     Corr_mat,
@@ -336,10 +360,28 @@ Plot_global_chordDiagram_rpvalue <- function(
 #' @param Threshold The threshold value for correlation. Default is 0.6.
 #' @param bands_ann Annotation for the bands.
 #'
+#' @return A chord diagram plot showing correlations between variables. The plot includes:
+#'   \item{Correlation links}{Colored edges showing correlations between variables, with colors indicating correlation strength}
+#'   \item{Band annotations}{Labels and groupings for the variables}
+#'   \item{Sector highlights}{Visual grouping of related variables}
+#'   The function has no explicit return value as it generates the plot directly.
+#'
 #' @import RColorBrewer
 #' @import circlize
 #' @importFrom graphics par
 #' @importFrom graphics plot
+#' @examples
+#' # Create sample data
+#' n <- 10
+#' data <- matrix(rnorm(n*100), ncol=n)
+#' colnames(data) <- paste0("W", 1:n)
+#' 
+#' # Create band annotations
+#' bands_ann <- data.frame(
+#'   Wave_num = paste0("W", 1:n),
+#'   Group = rep(c("A", "B"), each=5)
+#' )
+#' 
 
 Plot_local_chordDiagram_rpvalue <- function(
     x,
@@ -476,7 +518,6 @@ Plot_local_chordDiagram_rpvalue <- function(
   par(op)
 }
 
-
 #' Perform IRCA analysis on global scale
 #'
 #' This function performs IRCA analysis on the global scale using the input dataset and group information.
@@ -487,6 +528,15 @@ Plot_local_chordDiagram_rpvalue <- function(
 #'
 #' @return A dataframe containing the significant correlations between variables
 #' @importFrom Hmisc rcorr
+#' @examples
+#' # Create sample dataset
+#' n <- 100  # samples
+#' p <- 20   # variables
+#' dataset <- matrix(rnorm(n*p), nrow=n)
+#' colnames(dataset) <- paste0("V", 1:p)
+#' group <- rep(c("A", "B"), each=n/2)
+#' 
+
 Intraramanome.Analysis.Irca.Global.draw <- function(dataset, group) {
   outliers <- outliers_maha_chisquare(dataset)
   if (length(outliers) != 0) {
@@ -541,7 +591,21 @@ Intraramanome.Analysis.Irca.Global.cal <- function(dataset, group, threshold=0.6
 #'
 #' @param dataset The input dataset for analysis
 #' @param bands_ann The bands annotation information
-#'
+#' @return A chord diagram plot showing the significant correlations between variables within each band
+#' @examples
+#' # Create sample dataset
+#' n <- 100  # samples
+#' p <- 10   # variables
+#' dataset <- matrix(rnorm(n*p), nrow=n)
+#' colnames(dataset) <- paste0("W", 1:p)
+#' 
+#' # Create bands annotation
+#' bands_ann <- data.frame(
+#'   Wave_num = paste0("W", 1:p),
+#'   Group = rep(c("A", "B"), each=p/2)
+#' )
+#' 
+
 Intraramanome.Analysis.Irca.Local.draw <- function(dataset, bands_ann) {
   outliers <- outliers_maha_chisquare(dataset)
   if (length(outliers) != 0) {
@@ -565,7 +629,19 @@ Intraramanome.Analysis.Irca.Local.draw <- function(dataset, bands_ann) {
 #' @return A matrix containing the global IRCA interests.
 #'
 #' @export Intraramanome.Analysis.Irca.Global
+#' @examples
+#' # Create sample Ramanome object
+#' wavenumbers <- seq(500, 3500, length.out=100)
+#' spectra <- matrix(rnorm(1000), nrow=10)
+#' metadata <- data.frame(
+#'   group = rep(c("Control", "Treatment"), each=5)
+#' )
+#' raman_obj <- new("Ramanome", 
+#'                  datasets=list(raw.data=spectra),
+#'                  wavenumber=wavenumbers,
+#'                  meta.data=metadata)
 #'
+
 Intraramanome.Analysis.Irca.Global <- function(object) {
   dataset <- get.nearest.dataset(object)
   waves <- object@wavenumber
@@ -594,8 +670,27 @@ Intraramanome.Analysis.Irca.Global <- function(object) {
 #' @importFrom Cairo Cairo
 #' @param object The Raman spectroscopy data object.
 #' @param bands_ann The band annotation data.
+#' @return No return value, called for side effects. The function generates and saves PNG files
+#'         containing negative IRCA plots for each group in the dataset.
 #' @export Intraramanome.Analysis.Irca.Local
-
+#' @examples
+#' # Create sample Ramanome object
+#' wavenumbers <- seq(500, 3500, length.out=100)
+#' spectra <- matrix(rnorm(1000), nrow=10)
+#' metadata <- data.frame(
+#'   group = rep(c("Control", "Treatment"), each=5)
+#' )
+#' raman_obj <- new("Ramanome", 
+#'                  datasets=list(raw.data=spectra),
+#'                  wavenumber=wavenumbers,
+#'                  meta.data=metadata)
+#'
+#' # Create band annotations
+#' bands_ann <- data.frame(
+#'   Wave_num = c(1000, 1500, 2000),
+#'   Group = c("A", "B", "C")
+#' )
+#'
 Intraramanome.Analysis.Irca.Local <- function(object, bands_ann) {
   dataset <- get.nearest.dataset(object)
   waves <- round(object@wavenumber, 0)
@@ -627,6 +722,20 @@ Intraramanome.Analysis.Irca.Local <- function(object, bands_ann) {
 #' @return synchronous and asynchronous correlation spectra result
 #' @export Intraramanome.Analysis.2Dcos
 #' @import corr2D
+#' @examples
+#' # Create sample Ramanome object with time-series data
+#' wavenumbers <- seq(500, 3500, length.out=50)
+#' time_points <- 10
+#' spectra <- matrix(rnorm(50*time_points), nrow=time_points)
+#' metadata <- data.frame(
+#'   time = 1:time_points,
+#'   group = rep("TimeSeries", time_points)
+#' )
+#' raman_obj <- new("Ramanome", 
+#'                  datasets=list(raw.data=spectra),
+#'                  wavenumber=wavenumbers,
+#'                  meta.data=metadata)
+#'
 Intraramanome.Analysis.2Dcos <- function(object) {
   data <- get.nearest.dataset(object)
   twod<-corr2d(data)

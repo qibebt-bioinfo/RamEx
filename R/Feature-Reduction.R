@@ -18,6 +18,11 @@
 #' @importFrom dplyr %>%
 #' @importFrom ggthemes theme_tufte
 #' @import ggtext
+#' @examples
+#' # Load example data
+#' data_file <- system.file("extdata", "data", package = "RamEx")
+#' RamEx_data <- read.spec.load(data_file, group.index = 2)
+
 Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE) {
   dataset <- get.nearest.dataset(object)
   data.red <- data.frame(prcomp_irlba(dataset, n = 20, center = TRUE, scale. = TRUE)$x[, 1:2])
@@ -75,6 +80,11 @@ Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE) {
 #' @importFrom ggplot2 theme
 #' @importFrom ggplot2 ggsave
 #' @import ggtext
+#' @examples
+#' # Load example data
+#' data_file <- system.file("extdata", "data", package = "RamEx")
+#' RamEx_data <- read.spec.load(data_file, group.index = 2)
+#' 
 Feature.Reduction.Tsne <- function(object, draw = TRUE, save=FALSE) {
   dataset <- get.nearest.dataset(object)
 
@@ -143,10 +153,15 @@ return(object)
 #' @importFrom ggplot2 scale_color_manual
 #' @importFrom ggplot2 ggsave
 #' @import ggtext
+#' @examples
+#' # Load example data
+#' data_file <- system.file("extdata", "data", package = "RamEx")
+#' RamEx_data <- read.spec.load(data_file, group.index = 2)
+#' 
 Feature.Reduction.Umap <- function(object, draw = TRUE, save=FALSE) {
   dataset <- get.nearest.dataset(object)
   data.red.pca <- data.frame(prcomp_irlba(dataset, n = 20, center = TRUE, scale. = TRUE)$x[, 1:20])
-  data.red <- data.frame(uwot::umap(data.red.pca, scale = F,  n_threads = detectCores(),n_neighbors = 30, a=0.9922, b=1.112, metric = 'cosine',seed=123))
+  data.red <- data.frame(uwot::umap(data.red.pca, scale = FALSE,  n_threads = detectCores(),n_neighbors = 30, a=0.9922, b=1.112, metric = 'cosine',seed=123))
   colnames(data.red) <- c("UMAP 1", "UMAP 2")
 
   object@reductions <- append(object@reductions, list(data.red))
@@ -207,11 +222,15 @@ return(object)
 #' @importFrom ggplot2 ggsave
 #' @importFrom ade4 dudi.pco
 #' @import ggtext
-#'
+#' @examples
+#' # Load example data
+#' data_file <- system.file("extdata", "data", package = "RamEx")
+#' RamEx_data <- read.spec.load(data_file, group.index = 2)
+
 Feature.Reduction.Pcoa <- function(object, draw = TRUE, save=FALSE) {
   dataset <- get.nearest.dataset(object)
   distance.matrix <- vegdist(dataset, method = "euclidean")
-  data.red <- data.frame(dudi.pco(distance.matrix, scannf = F, nf=2)$li)
+  data.red <- data.frame(dudi.pco(distance.matrix, scannf = FALSE, nf=2)$li)
   names(data.red) <- c('PC 1', 'PC 2')
 
   object@reductions <- append(object@reductions, list(data.red))
@@ -258,6 +277,13 @@ Feature.Reduction.Pcoa <- function(object, draw = TRUE, save=FALSE) {
 #' @return The updated Ramanome object with the extracted Feature.Reduction.Intensity values appended to
 #' the `interested.bands` slot.
 #' @export Feature.Reduction.Intensity
+#' @examples
+#' # Load example data
+#' data_file <- system.file("extdata", "data", package = "RamEx")
+#' RamEx_data <- read.spec.load(data_file, group.index = 2)
+#' 
+#' # Extract intensity values at specific wavelengths
+#' RamEx_data <- Feature.Reduction.Intensity(RamEx_data, c(1000, 1500))
 Feature.Reduction.Intensity <- function(object, wavenumber) {
   wavenumber <- as.list(wavenumber)
   a <- lapply(wavenumber, function(x) confirm.select(object, x))

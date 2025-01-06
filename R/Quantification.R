@@ -10,6 +10,33 @@
 #' @return The PLS model.
 #' @export Quantification.Pls
 #' @importFrom mdatools pls
+#' @examples
+#' # Create sample Ramanome training object
+#' wavenumbers <- seq(500, 3500, length.out=100)
+#' train_spectra <- matrix(rnorm(1000), nrow=10)
+#' train_metadata <- data.frame(
+#'   group = factor(rep(c("Low", "High"), each=5))
+#' )
+#' train_obj <- new("Ramanome",
+#'                  datasets=list(raw.data=train_spectra),
+#'                  wavenumber=wavenumbers,
+#'                  meta.data=train_metadata)
+#'
+#' # Create sample test object
+#' test_spectra <- matrix(rnorm(500), nrow=5)
+#' test_metadata <- data.frame(
+#'   group = factor(rep(c("Low", "High"), c(3,2)))
+#' )
+#' test_obj <- new("Ramanome",
+#'                 datasets=list(raw.data=test_spectra),
+#'                 wavenumber=wavenumbers,
+#'                 meta.data=test_metadata)
+#'
+#' # Perform PLS prediction
+#' \dontrun{
+#' pls_result <- Quantification.Pls(train_obj, test_obj)
+#' print(pls_result)
+#' }
 Quantification.Pls <- function(train, test = NULL) {
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
@@ -31,8 +58,6 @@ Quantification.Pls <- function(train, test = NULL) {
   return(pre_result)
 }
 
-
-
 #' Multiple linear regression (MLR)
 #' Simple and interpretable regression method, but assumes
 #' no multicollinearity among predictors and a linear
@@ -42,6 +67,33 @@ Quantification.Pls <- function(train, test = NULL) {
 #' @return The MLR prediction result.
 #' @export Quantification.Mlr
 #' @importFrom stats lm
+#' @examples
+#' # Create sample Ramanome training object with concentration data
+#' wavenumbers <- seq(500, 3500, length.out=100)
+#' train_spectra <- matrix(rnorm(1000), nrow=10)
+#' train_metadata <- data.frame(
+#'   group = rnorm(10, mean=50, sd=10) # Concentration values
+#' )
+#' train_obj <- new("Ramanome",
+#'                  datasets=list(raw.data=train_spectra),
+#'                  wavenumber=wavenumbers,
+#'                  meta.data=train_metadata)
+#'
+#' # Create sample test object
+#' test_spectra <- matrix(rnorm(500), nrow=5)
+#' test_metadata <- data.frame(
+#'   group = rnorm(5, mean=50, sd=10)
+#' )
+#' test_obj <- new("Ramanome",
+#'                 datasets=list(raw.data=test_spectra),
+#'                 wavenumber=wavenumbers,
+#'                 meta.data=test_metadata)
+#'
+#' # Perform MLR prediction
+#' \dontrun{
+#' mlr_result <- Quantification.Mlr(train_obj, test_obj)
+#' print(mlr_result)
+#' }
 Quantification.Mlr <- function(train, test = NULL) {
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
@@ -63,7 +115,6 @@ Quantification.Mlr <- function(train, test = NULL) {
   return(pre_result)
 }
 
-
 #' Generalized linear model (GLM)
 #' SExtends linear regression by allowing the dependent
 #' variable to follow distributions other than
@@ -75,6 +126,33 @@ Quantification.Mlr <- function(train, test = NULL) {
 #' @return The GLM prediction result.
 #' @export Quantification.Glm
 #' @importFrom stats glm
+#' @examples
+#' # Create sample Ramanome training object with count data
+#' wavenumbers <- seq(500, 3500, length.out=100)
+#' train_spectra <- matrix(rnorm(1000), nrow=10)
+#' train_metadata <- data.frame(
+#'   group = rpois(10, lambda=5) # Count data following Poisson distribution
+#' )
+#' train_obj <- new("Ramanome",
+#'                  datasets=list(raw.data=train_spectra),
+#'                  wavenumber=wavenumbers,
+#'                  meta.data=train_metadata)
+#'
+#' # Create sample test object
+#' test_spectra <- matrix(rnorm(500), nrow=5)
+#' test_metadata <- data.frame(
+#'   group = rpois(5, lambda=5)
+#' )
+#' test_obj <- new("Ramanome",
+#'                 datasets=list(raw.data=test_spectra),
+#'                 wavenumber=wavenumbers,
+#'                 meta.data=test_metadata)
+#'
+#' # Perform GLM prediction
+#' \dontrun{
+#' glm_result <- Quantification.Glm(train_obj, test_obj)
+#' print(glm_result)
+#' }
 Quantification.Glm <- function(train, test = NULL) {
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)

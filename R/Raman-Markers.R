@@ -1,4 +1,3 @@
-
 #' Calculate mislabel scores for classification results
 #'
 #' This function calculates mislabel scores based on class probabilities for classification results.
@@ -8,6 +7,15 @@
 #'
 #' @return A matrix containing mislabel scores for each class.
 #' @importFrom stats model.matrix
+#' @examples
+#' # Create sample data
+#' y <- factor(c("A", "A", "B", "B", "A"))
+#' y.prob <- matrix(c(0.8, 0.7, 0.3, 0.2, 0.6,
+#'                    0.2, 0.3, 0.7, 0.8, 0.4),
+#'                  nrow=5, ncol=2,
+#'                  dimnames=list(NULL, c("A", "B")))
+#' 
+
 get.mislabel.scores <- function(y, y.prob) {
   result <- matrix(0, nrow = length(y), ncol = 3)
   mm <- stats::model.matrix(~0 + y)
@@ -27,6 +35,10 @@ get.mislabel.scores <- function(y, y.prob) {
 #' @param nfolds The number of folds to generate.
 #'
 #' @return A vector containing the fold assignments for each sample.
+#' @examples
+#' # Create sample class labels
+#' y <- factor(rep(c("A", "B", "C"), each=10))
+
 balanced.folds <- function(y, nfolds = 10) {
   folds <- rep(0, length(y))
   classes <- levels(y)
@@ -59,6 +71,13 @@ balanced.folds <- function(y, nfolds = 10) {
 #' @return A list containing the cross-validation results including predicted labels, class probabilities, feature importances, and error rates.
 #' @importFrom randomForest randomForest
 #' @importFrom stats predict
+#' @examples
+#' # Create sample spectral data
+#' set.seed(123)
+#' x <- matrix(rnorm(200), nrow=20)
+#' colnames(x) <- paste0("Wave", 1:10)
+#' y <- factor(rep(c("A", "B"), each=10))
+#' 
 
 rf.cross.validation <- function(x, y, nfolds = 10, verbose = FALSE, ...) {
   if (nfolds == -1) nfolds <- length(y)
@@ -120,6 +139,13 @@ rf.cross.validation <- function(x, y, nfolds = 10, verbose = FALSE, ...) {
 #'   \item{importances}{A vector of feature importances based on mean decrease accuracy.}
 #' }
 #' @importFrom randomForest randomForest
+#' @examples
+#' # Create sample spectral data
+#' set.seed(123)
+#' x <- matrix(rnorm(500), nrow=50)
+#' colnames(x) <- paste0("Wave", 1:10)
+#' y <- factor(rep(c("Control", "Treatment"), each=25))
+#' 
 
 rf.out.of.bag <- function(x, y, verbose = FALSE, ntree = 500, ...) {
   rf.model <- randomForest::randomForest(
@@ -151,6 +177,13 @@ rf.out.of.bag <- function(x, y, verbose = FALSE, ntree = 500, ...) {
 #' @param x A matrix or data frame containing the predictors.
 #'
 #' @return A matrix with the predicted class probabilities for each sample.
+#' @examples
+#' # Create sample data and fit random forest model
+#' set.seed(123)
+#' x <- matrix(rnorm(200), nrow=20)
+#' y <- factor(rep(c("A", "B"), each=10))
+#' rf_model <- randomForest::randomForest(x, y, keep.inbag=TRUE)
+#' 
 get.oob.probability.from.forest <- function(model, x) {
   # get aggregated class votes for each sample using only OOB trees
   votes <- get.oob.votes.from.forest(model, x)
@@ -169,13 +202,15 @@ get.oob.probability.from.forest <- function(model, x) {
 #' @param x A matrix or data frame containing the predictor variables.
 #'
 #' @return A matrix of class votes for each sample, with rows representing samples and columns representing classes.
-#'
-#'
-#' # Get the Out-of-Bag class votes for a new data set
-#' x_new <- iris[-1]
-#' votes <- get.oob.votes.from.forest(model, x_new)
-
 #' @importFrom stats predict
+#' @examples
+#' # Create sample data and fit random forest model
+#' set.seed(123)
+#' x <- matrix(rnorm(200), nrow=20)
+#' y <- factor(rep(c("A", "B"), each=10))
+#' rf_model <- randomForest::randomForest(x, y, keep.inbag=TRUE)
+#' 
+
 get.oob.votes.from.forest <- function(model, x) {
   # Get aggregated class votes for each sample using only OOB trees
   votes <- matrix(0, nrow = nrow(x), ncol = length(model$classes))
@@ -203,7 +238,26 @@ get.oob.votes.from.forest <- function(model, x) {
 #' @param feature.ids The ids of the features used for classification.
 #' @param outdir The directory where the results will be saved.
 #'
+#' @return None. The function saves multiple files to the specified output directory:
+#'   - A summary file with error metrics and model parameters
+#'   - A file containing classification probabilities for each sample
+#'   - A file with potential mislabeling information
+#'   - A file with feature importance scores
+#'   - A confusion matrix file showing classification performance
+#'
 #' @importFrom utils write.table
+#' @examples
+#' # Create sample results
+#' set.seed(123)
+#' result <- list(
+#'   errs = rnorm(10, 0.2, 0.05),
+#'   probabilities = matrix(runif(100), 10, 10),
+#'   y = factor(rep(c("A", "B"), each=5)),
+#'   importances = runif(10)
+#' )
+#' rf.opts <- list(errortype = "oob", ntree = 500)
+#' feature.ids <- paste0("Feature", 1:10)
+#' 
 save.rf.results <- function(result, rf.opts, feature.ids, outdir) {
   save.rf.results.summary(result, rf.opts, outdir = outdir)
   save.rf.results.probabilities(result, outdir = outdir)
@@ -222,7 +276,16 @@ save.rf.results <- function(result, rf.opts, feature.ids, outdir) {
 #' @param outdir The output directory to save the summary file
 #'
 #' @return None
-#'
+#' @examples
+#' # Create sample results
+#' set.seed(123)
+#' result <- list(
+#'   errs = rnorm(10, 0.2, 0.05),
+#'   error.type = "oob",
+#'   params = list(ntree = 500)
+#' )
+#' rf.opts <- list(errortype = "oob")
+#' 
 save.rf.results.summary <- function(result, rf.opts, filename = 'summary.xls', outdir) {
   err <- hyperSpec::mean(result$errs)
   err.sd <- stats::sd(result$errs)
@@ -250,8 +313,16 @@ save.rf.results.summary <- function(result, rf.opts, filename = 'summary.xls', o
 #' @param result The result object from random forest classification
 #' @param filename The filename for the probabilities file (default is "cv_probabilities.xls")
 #' @param outdir The output directory to save the probabilities file
-#'
-
+#' @return NULL. The function saves a tab-delimited text file containing class probabilities
+#'         for each sample, with rows for samples and columns for class probabilities.
+#' @examples
+#' # Create sample results with probabilities
+#' result <- list(
+#'   probabilities = matrix(runif(100), 10, 10,
+#'                         dimnames=list(paste0("Sample", 1:10),
+#'                                      paste0("Class", 1:10)))
+#' )
+#' 
 save.rf.results.probabilities <- function(result, filename = 'cv_probabilities.xls', outdir) {
   filepath <- sprintf('%s/%s', outdir, filename)
   sink(filepath)
@@ -260,20 +331,29 @@ save.rf.results.probabilities <- function(result, filename = 'cv_probabilities.x
   sink(NULL)
 }
 
-# Print "mislabeling" file
-#' Title
+#' Save mislabeling scores from random forest classification
 #'
 #' @param result The result object from random forest classification
 #' @param filename The filename for the probabilities file (default is "mislabeling.xls")
 #' @param outdir The output directory to save the probabilities file
-#'
-
-
+#' @return NULL. The function saves a tab-delimited text file containing mislabeling scores
+#'         for each sample, with columns for sample ID and corresponding mislabeling score.
+#' @examples
+#' # Create sample results
+#' result <- list(
+#'   y = factor(rep(c("A", "B"), each=5)),
+#'   probabilities = matrix(c(rep(0.8, 5), rep(0.2, 5),
+#'                           rep(0.2, 5), rep(0.8, 5)),
+#'                         nrow=10, ncol=2,
+#'                         dimnames=list(paste0("Sample", 1:10),
+#'                                      c("A", "B")))
+#' )
+#' 
 save.rf.results.mislabeling <- function(result, filename = 'mislabeling.xls', outdir) {
   filepath <- sprintf('%s/%s', outdir, filename)
   sink(filepath)
   cat('SampleID\t')
-  write.table(get.mislabel.scores(result$y, result$probabilities), sep = '\t', quote = F)
+  write.table(get.mislabel.scores(result$y, result$probabilities), sep = '\t', quote = FALSE)
   sink(NULL)
 }
 
@@ -288,7 +368,14 @@ save.rf.results.mislabeling <- function(result, filename = 'mislabeling.xls', ou
 #' @param outdir The path to the output directory
 #'
 #' @return None
-#'
+#' @examples
+#' # Create sample results with importances
+#' result <- list(
+#'   importances = matrix(runif(50), 10, 5)
+#' )
+#' feature.ids <- paste0("Wave", 1:10)
+#' 
+
 save.rf.results.importances <- function(result, feature.ids, filename = 'feature_importance_scores.xls', outdir) {
   filepath <- sprintf('%s/%s', outdir, filename)
 
@@ -321,6 +408,14 @@ save.rf.results.importances <- function(result, feature.ids, filename = 'feature
 #' @param outdir The path to the output directory
 #'
 #' @return None
+#' @examples
+#' # Create sample results with confusion matrix
+#' result <- list(
+#'   confusion.matrix = matrix(c(45, 5, 8, 42), 2, 2,
+#'                            dimnames=list(c("Class1", "Class2"),
+#'                                         c("Class1", "Class2")))
+#' )
+#' 
 
 save.rf.results.confusion.matrix <- function(result, filename = 'confusion_matrix.xls', outdir) {
   filepath <- sprintf('%s/%s', outdir, filename)
@@ -356,7 +451,6 @@ save.rf.results.confusion.matrix <- function(result, filename = 'confusion_matri
 #' @importFrom stats kruskal.test
 #' @importFrom stats bartlett.test
 #' @importFrom stats p.adjust
-
 BetweenGroup.test <- function(data, group, p.adj.method = "bonferroni", paired = FALSE) {
   # p.adjust.methods
   # c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none")
@@ -394,7 +488,7 @@ BetweenGroup.test <- function(data, group, p.adj.method = "bonferroni", paired =
       if (output1[i, 5] < 0.01)
         output1[i, 6] <- t.test(data[, i] ~ group, paired = paired)$p.value
       else
-        output1[i, 6] <- t.test(data[, i] ~ group, var.equal = T, paired = paired)$p.value
+        output1[i, 6] <- t.test(data[, i] ~ group, var.equal = TRUE, paired = paired)$p.value
 
       output1[i, 7] <- wilcox.test(data[, i] ~ group, paired = paired, conf.int = TRUE, exact = FALSE, correct = FALSE)$p.value
     }
@@ -433,7 +527,7 @@ BetweenGroup.test <- function(data, group, p.adj.method = "bonferroni", paired =
       if (output2[i, (n_group + 1)] < 0.01)
         output2[i, (n_group + 2)] <- oneway.test(data[, i] ~ group)$p.value
       else
-        output2[i, (n_group + 2)] <- oneway.test(data[, i] ~ group, var.equal = T)$p.value
+        output2[i, (n_group + 2)] <- oneway.test(data[, i] ~ group, var.equal = TRUE)$p.value
 
       output2[i, (n_group + 3)] <- kruskal.test(data[, i] ~ group)$p.value
     }
@@ -466,6 +560,11 @@ BetweenGroup.test <- function(data, group, p.adj.method = "bonferroni", paired =
 #' @importFrom magrittr %<>%
 #' @importFrom grDevices pdf
 #' @export Raman.Markers.Rbcs
+#' @examples
+#' # Create sample Ramanome object
+#' set.seed(123)
+#' wavenumbers <- seq(500, 3500, length.out=100)
+#' spectra <- matrix(rnorm(2000), nrow=20)
 
 Raman.Markers.Rbcs <- function(
     object,
@@ -544,6 +643,11 @@ Raman.Markers.Rbcs <- function(
 #' @importFrom parallel clusterExport
 #' @importFrom parallel parLapply
 #' @importFrom doParallel registerDoParallel
+#' @examples
+#' # Create sample spectral data
+#' set.seed(123)
+#' wavenumbers <- seq(500, 1500, by=100)
+#' X <- data.frame(matrix(rnorm(100), nrow=10))
 Raman.Markers.Correlations <- function(X, y,min.cor=0.8) {
   X <- as.data.frame(X)
 
@@ -602,6 +706,7 @@ Raman.Markers.Correlations <- function(X, y,min.cor=0.8) {
     combination_correlations_three = combination_correlations_three
   )
 }
+
 #' Find Markers Using ROC Analysis
 #'
 #' This function performs Receiver Operating Characteristic (ROC) analysis to identify
@@ -623,6 +728,11 @@ Raman.Markers.Correlations <- function(X, y,min.cor=0.8) {
 #' @importFrom parallel clusterExport
 #' @importFrom parallel parLapply
 #' @importFrom MLmetrics AUC
+#' @examples
+#' # Create sample spectral data matrix
+#' set.seed(123)
+#' wavenumbers <- seq(500, 1500, by=100)
+#' spectra <- matrix(rnorm(200), nrow=20)
 Raman.Markers.Roc <- function(matrix,group, threshold=0.75){
   wave <- as.numeric(colnames(matrix))
   u_group <- unique(group)
@@ -632,7 +742,7 @@ Raman.Markers.Roc <- function(matrix,group, threshold=0.75){
 
   numCores <- detectCores() - 1
   cl <- makeCluster(numCores)
-  clusterEvalQ(cl, suppressPackageStartupMessages(library(MLmetrics)))
+  clusterEvalQ(cl, suppressMessages(requireNamespace("MLmetrics", quietly = TRUE)))
   clusterExport(cl, varlist = c("group","combinations_two","wave","matrix", 'threshold'), envir = environment())
 
 

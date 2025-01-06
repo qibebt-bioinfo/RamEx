@@ -11,6 +11,23 @@
 #' @param tol The tolerance for convergence of the iterative fitting process.
 #' @param rep The maximum number of iterations to perform.
 #' @return A list containing the baseline and the corrected spectra.
+#' @examples
+#' # Create sample spectral data
+#' wavenumbers <- seq(400, 3200, by=10)
+#' n_spectra <- 5
+#' n_points <- length(wavenumbers)
+#' spectra <- matrix(0, nrow=n_spectra, ncol=n_points)
+#' 
+#' # Add some peaks and baseline
+#' for(i in 1:n_spectra) {
+#'   # Add baseline drift
+#'   spectra[i,] <- 0.001 * wavenumbers + rnorm(n_points, 0, 0.1)
+#'   # Add peaks
+#'   spectra[i, which.min(abs(wavenumbers-1000))] <- spectra[i, which.min(abs(wavenumbers-1000))] + 2
+#'   spectra[i, which.min(abs(wavenumbers-1500))] <- spectra[i, which.min(abs(wavenumbers-1500))] + 1.5
+#' }
+#' 
+
 polyfit <- function (spectra, t, degree = 4, tol = 0.001, rep = 100)
 {
   dimnames(spectra) <- NULL
@@ -45,6 +62,11 @@ polyfit <- function (spectra, t, degree = 4, tol = 0.001, rep = 100)
 #' @param spectrum A numeric vector representing the spectrum.
 #' @param alignment A character string specifying the alignment of the bubble, which can be "left", "right", or "center".
 #' @return A list containing the bubble values and the relative touching point.
+#' @examples
+#' # Create a sample spectrum with peaks
+#' x <- seq(0, 10, length.out=100)
+#' spectrum <- exp(-(x-5)^2) + 0.5*exp(-(x-3)^2) + 0.3*exp(-(x-7)^2)
+
 grow_bubble <- function(spectrum, alignment = "center") {
   xaxis <- 0:(length(spectrum)-1)
   # Adjusting bubble parameter based on alignment
@@ -82,6 +104,13 @@ grow_bubble <- function(spectrum, alignment = "center") {
 #' @param baseline A vector of baseline values.
 #' @param bubble A vector of bubble values.
 #' @return A vector of the larger values
+#' @examples
+#' # Create sample baseline and bubble data
+#' x <- seq(0, 10, length.out=100)
+#' baseline <- sin(x) + 2
+#' bubble <- cos(x) + 2
+#' 
+
 keep_largest <- function(baseline, bubble) {
   for (i in 1:length(baseline)) {
     if (baseline[i] < bubble[i]) {
@@ -101,6 +130,13 @@ keep_largest <- function(baseline, bubble) {
 #' @param baseline A numeric vector representing the baseline of the spectrum.
 #' @param min_bubble_widths A numeric value or vector specifying the minimum width of the bubbles.
 #' @return A list containing the adjusted baseline and the bounds of each bubble.
+#' @examples
+#' # Create a sample spectrum with multiple peaks
+#' x <- seq(0, 20, length.out=200)
+#' spectrum <- exp(-(x-5)^2) + 0.8*exp(-(x-10)^2) + 
+#'             0.6*exp(-(x-15)^2) + 0.2*sin(x)
+#' baseline <- rep(0, length(spectrum))
+#' min_bubble_widths <- 20
 bubbleloop <- function(spectrum, baseline, min_bubble_widths) {
   range_cue <- list(c(1, length(spectrum)))
   bounds <- list()
@@ -158,6 +194,9 @@ bubbleloop <- function(spectrum, baseline, min_bubble_widths) {
 #'   If a vector, it should be of the same length as the spectrum, specifying the minimum width for each point.
 #' @return A list containing the corrected spectrum (raman), the peak locations (peaks), and the band boundaries (bands).
 #' @importFrom prospectr savitzkyGolay
+#' @examples
+#' # Create a sample spectrum with baseline and peaks
+#' x <- seq(400, 3200, length.out=500)
 bubblefill <- function(spectrum, min_bubble_widths = 50) {
   if(is.null(names(spectrum))) xaxis <- as.numeric(colnames(spectrum)) else xaxis <- as.numeric(names(spectrum))
   spectrum_ <- spectrum
@@ -193,6 +232,15 @@ bubblefill <- function(spectrum, min_bubble_widths = 50) {
 #' @param kernel A numeric vector representing the convolution kernel.
 #' @return A numeric vector resulting from the convolution operation.
 #' @importFrom stats convolve
+#' @examples
+#' # Create a sample signal
+#' x <- seq(-5, 5, length.out=100)
+#' signal <- sin(x) + rnorm(length(x), 0, 0.1)
+#' 
+#' # Define different kernels
+#' gaussian_kernel <- dnorm(seq(-2, 2, length.out=5))
+#' moving_avg_kernel <- rep(1/3, 3)
+
 convolve_custom <- function(vec, kernel) {
   result <- convolve(as.numeric(vec), rev(kernel), type = "filter")
   return(result)
@@ -219,6 +267,23 @@ convolve_custom <- function(vec, kernel) {
 #'   - dist_from_center: The distances of each observation from the centroid.
 #' @importFrom stats qchisq
 #' @importFrom stats mahalanobis
+#' @examples
+#' # Create sample data with outliers
+#' set.seed(123)
+#' n <- 100
+#' p <- 3
+#' 
+#' # Generate normal data
+#' good_data <- matrix(rnorm(n*p), ncol=p)
+#' 
+#' # Add some outliers
+#' outliers <- matrix(rnorm(10*p, mean=5), ncol=p)
+#' data <- rbind(good_data, outliers)
+#' 
+#' # Mark initial good observations (all TRUE for initial estimation)
+#' index_good <- rep(TRUE, nrow(data))
+#' 
+
 outliers_mcdEst <- function(x,index_good,
                             h = .75, # fraction of data we wanna keep
                             # to compute the MCD (between 0 and 1)
@@ -289,187 +354,220 @@ outliers_mcdEst <- function(x,index_good,
 #' @importFrom stats qchisq
 #' @importFrom stats pgamma
 #' @importFrom stats mahalanobis
-covFastMCD = function(x, alpha, m, l, delta){
-  x = data.frame(as.matrix(x,nrow = nrow(x),ncol = ncol(x)))
-  p = ncol(x) #number of varaibles in data
-  n = nrow(x) #number of observations in data
-  h = h.alpha.n(alpha, n, p) #computing the subsetsize h using above p and n and given alpha
-  determ = as.vector(rep(0,m)) #initialization of determinant vector
-  q.alpha = qchisq(alpha,df = p)
-  q.delta = qchisq((1-delta),df = p)
-  c.a = alpha/pgamma(q.alpha/2, shape = p/2+1, scale = 1)
-  c.delta = (1-delta)/pgamma(q.delta/2, shape = p/2+1, scale = 1)
-  cnp = .MCDcnp2(p, n, alpha)
-  #Before we start we might wanna check whther some conditions for inputes are satisifiede
-  #condition of n&p
-  if (n <= p){
-    stop("Error: n <= p  the sample size is too small and MCD can not be performed!")
+#' @examples
+#' # Create sample data with outliers
+#' set.seed(123)
+#' n <- 100
+#' p <- 3
+#' 
+#' # Generate normal data
+#' good_data <- matrix(rnorm(n * p), ncol = p)
+#' 
+#' # Add some outliers
+#' outliers <- matrix(rnorm(10 * p, mean = 5), ncol = p)
+#' data <- rbind(good_data, outliers)
 
+covFastMCD <- function(x, alpha, m, l, delta) {
+  # Convert input to data frame
+  x <- data.frame(as.matrix(x, nrow = nrow(x), ncol = ncol(x)))
+  p <- ncol(x)  # Number of variables
+  n <- nrow(x)  # Number of observations
+  h <- h.alpha.n(alpha, n, p)  # Compute subset size h based on alpha, n, and p
+  
+  determinant_vec <- rep(0, m)  # Initialize determinant vector
+  q_alpha <- qchisq(alpha, df = p)
+  q_delta <- qchisq(1 - delta, df = p)
+  c_alpha <- alpha / pgamma(q_alpha / 2, shape = p / 2 + 1, scale = 1)
+  c_delta <- (1 - delta) / pgamma(q_delta / 2, shape = p / 2 + 1, scale = 1)
+  cnp <- .MCDcnp2(p, n, alpha)
+  
+  # Check conditions for input data
+  if (n <= p) {
+    stop("Error: n <= p. The sample size is too small and MCD cannot be performed!")
   }
-  if(n == p + 1){
-    stop("Error: n == p+1  is too small sample size for MCD")
-
+  if (n == p + 1) {
+    stop("Error: n == p + 1. The sample size is too small for MCD.")
   }
-  if(n<2*p){
-    warning("n<2*p this might be a too small sample size")
+  if (n < 2 * p) {
+    warning("Warning: n < 2 * p. The sample size might be too small.")
   }
-  #condition of nh&alpha
-  if(h > n ){
-    stop("Error: h value is too large: h > n choose lower alpha ")
+  if (h > n) {
+    stop("Error: h value is too large: h > n. Choose a lower alpha.")
   }
-  # if(h < (n + p + 1)/2 ){
-  #   print("Error: h value is too small: h < (n+p+1)/2 choose higher alpha")
-  #   break
-  # }
-  if(h == n){ #in this case the MCD location estimator T is average of the whole dataset and scatter MCD is the cov matrix
-    T_mcd = apply(x,2,mean)
-    S_mcd = (h-1)/h*var(x)
-    mcdh = list(centerh = T_mcd,scatterh = S_mcd)
-    return(mcdh)
-
+  if (h == n) {
+    # When h equals n, the MCD location estimator is the mean of the entire dataset
+    center_mcd <- apply(x, 2, mean)
+    scatter_mcd <- (h - 1) / h * var(x)
+    return(list(centerh = center_mcd, scatterh = scatter_mcd))
   }
-  # Determining top 10 initial subsets
-  #initialization of all required lists in which we will store the generated samples,matrices and vectors
-  T_0 = list()
-  S_0 = list()
-  H_0 = list()
-  T_1 = list()
-  S_1 = list()
-  H_1 = list()
-  T_2 = list()
-  S_2 = list()
-  H_2 = list()
-  T_3 = list()
-  S_3 = list()
-  H_3 = list()
-  H_final = list()
-  list_sets = list()
-  S_final = list()
-  sigma = list()
-  center = list()
-
-  for(i in 1:m){
-
-    H_0[[i]] = x[sample(1:n,p+1),] #randomly selecting p+1 observations from data
-    T_0[[i]] = apply(H_0[[i]],2,mean)
-    S_0[[i]] = p/(p+1)*var(H_0[[i]]) #correcting for 1/n-1 to have 1/n (multiplying (n-1)/n)
-
-    #if the det(S_0) is 0 we should keep adding observations to random subset untill it becomes nonzero
-    while (det(S_0[[i]]) == 0){
-      for (k in 1:(n-p-1)){
-        subsetnew = x[sample(n,(p+1)+k),]
+  
+  # Initialize lists to store subsets and their statistics
+  center_0 <- list()
+  scatter_0 <- list()
+  subset_0 <- list()
+  
+  center_1 <- list()
+  scatter_1 <- list()
+  subset_1 <- list()
+  
+  center_2 <- list()
+  scatter_2 <- list()
+  subset_2 <- list()
+  
+  center_3 <- list()
+  scatter_3 <- list()
+  subset_3 <- list()
+  
+  final_sets <- list()
+  final_scatter <- list()
+  
+  list_sets <- list()
+  S_final <- list()
+  sigma <- list()
+  center <- list()
+  
+  # Iterate over the number of initial subsets
+  for (i in 1:m) {
+    # Randomly select p + 1 observations to form the initial subset
+    subset_0[[i]] <- x[sample(1:n, p + 1), ]
+    center_0[[i]] <- apply(subset_0[[i]], 2, mean)
+    scatter_0[[i]] <- (p / (p + 1)) * var(subset_0[[i]])
+    
+    # Ensure the covariance matrix is non-singular
+    while (det(scatter_0[[i]]) == 0) {
+      for (k in 1:(n - p - 1)) {
+        subset_new <- x[sample(n, (p + 1) + k), ]
       }
-      H_0[[i]] = subsetnew
-      T_0[[i]] = apply(subsetnew,2,mean)
-      S_0[[i]] = (p+k)/(p+1+k)*var(subsetnew)
+      subset_0[[i]] <- subset_new
+      center_0[[i]] <- apply(subset_new, 2, mean)
+      scatter_0[[i]] <- ((p + k) / (p + 1 + k)) * var(subset_new)
     }
-
-    mah_dist0 = mahalanobis(x,T_0[[i]],S_0[[i]], tol=-1)
-    d_sqr0 = sort(mah_dist0,decreasing = FALSE,index.return = TRUE)
-    H1_index = d_sqr0$ix[1:h]
-    H_1[[i]] = x[H1_index,] #the first subset with h components that will be used in C1-step
-    #C1-step looking at H1
-    T_1[[i]] = apply(H_1[[i]],2,mean) #center based on H1
-    S_1[[i]] = (h-1)/h*var(H_1[[i]]) #scatter based on H1
-    mah_dist1 = mahalanobis(x,T_1[[i]],S_1[[i]], tol=-1)
-    d_sqr1 = sort(mah_dist1,decreasing = FALSE,index.return = TRUE)
-    H2_index = d_sqr1$ix[1:h] #indeces of h small d^2's observations
-    H_2[[i]] = x[H2_index,] #H2 subset
-    T_2[[i]] = apply(H_2[[i]],2,mean) #center based on H2
-    S_2[[i]] = (h-1)/h*var(H_2[[i]]) #scatter based on H2
-
-    #C2-step looking at H2
-    mah_dist2 = mahalanobis(x,T_2[[i]],S_2[[i]], tol=-1)
-    d_sqr2= sort(mah_dist2,decreasing = FALSE,index.return = TRUE)
-    H3_index = d_sqr2$ix[1:h] #indeces of h small d^2's observations
-    H_3[[i]] = x[H3_index,] #H3 subset
-    T_3[[i]] = apply(H_3[[i]],2,mean) #center based on H3
-    S_3[[i]] = (h-1)/h*var(H_3[[i]]) #scatter based on H3
-    determ[i] = det(S_3[[i]]) #we take the det of the best subset
+    
+    # Compute Mahalanobis distances for the current subset
+    mahal_dist0 <- mahalanobis(x, center_0[[i]], scatter_0[[i]], tol = -1)
+    d_sqr0 <- sort(mahal_dist0, decreasing = FALSE, index.return = TRUE)
+    idx_h1 <- d_sqr0$ix[1:h]
+    subset_1[[i]] <- x[idx_h1, ]
+    center_1[[i]] <- apply(subset_1[[i]], 2, mean)
+    scatter_1[[i]] <- ((h - 1) / h) * var(subset_1[[i]])
+    
+    mahal_dist1 <- mahalanobis(x, center_1[[i]], scatter_1[[i]], tol = -1)
+    d_sqr1 <- sort(mahal_dist1, decreasing = FALSE, index.return = TRUE)
+    idx_h2 <- d_sqr1$ix[1:h]
+    subset_2[[i]] <- x[idx_h2, ]
+    center_2[[i]] <- apply(subset_2[[i]], 2, mean)
+    scatter_2[[i]] <- ((h - 1) / h) * var(subset_2[[i]])
+    
+    mahal_dist2 <- mahalanobis(x, center_2[[i]], scatter_2[[i]], tol = -1)
+    d_sqr2 <- sort(mahal_dist2, decreasing = FALSE, index.return = TRUE)
+    idx_h3 <- d_sqr2$ix[1:h]
+    subset_3[[i]] <- x[idx_h3, ]
+    center_3[[i]] <- apply(subset_3[[i]], 2, mean)
+    scatter_3[[i]] <- ((h - 1) / h) * var(subset_3[[i]])
+    determinant_vec[i] <- det(scatter_3[[i]])
   }
-
-
-  D = sort(determ, decreasing = FALSE, index.return = TRUE) #sorting the deteminant of all m subsets  and picking smallest l determinant
-  det10 = D$ix[1:l] #getting indexes of these 10 low det sets
-
-  #getting the best busets and the corresponding covariances
-  for(r in 1:l){
-    list_sets[[r]] = H_3[[det10[r]]] #in this case H3 has been used
-    S_final[[r]] = S_3[[det10[r]]]
+  
+  # Select the l subsets with the smallest determinants
+  D_sorted <- sort(determinant_vec, decreasing = FALSE, index.return = TRUE)
+  idx_top_l <- D_sorted$ix[1:l]
+  
+  # Store the selected subsets and their covariance matrices
+  for (r in 1:l) {
+    final_sets[[r]] <- subset_3[[idx_top_l[r]]]
+    final_scatter[[r]] <- scatter_3[[idx_top_l[r]]]
   }
-
-  objectmcd = list(call = match.call(),H0sets = H_0,H1sets = H_1,H2sets = H_2, H3sets = H_3,final10_set = list_sets, finalS = S_final, index_10 = det10)
-  # while loop for C-steps of convergence for top 10 subsets from initial step
-  for(k in 1:l){
-    H_new = data.frame(as.matrix(objectmcd$final10_set[[k]],nrow = h,ncol = p)) #H1 for k =1 is the first subset of 10 finial subsets
-    term1 = 1 #determinant of new one
-    term2 = 2 #determinant of old one
-
-    while(term1 != term2 && term1 != 0 ){ #continue c-steps until det(S_new) = det(S_old) or det(S_new) = 0
-
-      T_old = apply(H_new,2,mean)
-      S_old = (h-1)/h*var(H_new)
-      term2 = det(S_old) #determinant of the initial subset
-      mah_distnew = mahalanobis(x,T_old,S_old, tol=-1)
-      d_ksqr = sort(mah_distnew,decreasing = FALSE,index.return = TRUE)
-      index_new = d_ksqr$ix[1:h]
-      #updating infromation based on new indices
-      H_old = H_new  #new new sumbset becomes old subset to compare it weith new one
-      H_new = x[index_new,] #updating H_new using the indices determined by H_old
-      T_new = apply(H_new,2,mean)
-      S_new = (h-1)/h*var(H_new)
-      term1 = det(S_new) #updating new determinant
-
+  
+  object_mcd <- list(
+    call = match.call(),
+    H0sets = subset_0,
+    H1sets = subset_1,
+    H2sets = subset_2,
+    H3sets = subset_3,
+    final_l_set = final_sets,
+    finalS = final_scatter,
+    index_l = idx_top_l
+  )
+  
+  # Perform C-steps for convergence on the selected subsets
+  best_centers <- list()
+  best_scatters <- list()
+  best_subsets <- list()
+  
+  for (k in 1:l) {
+    subset_current <- data.frame(as.matrix(object_mcd$final_l_set[[k]], nrow = h, ncol = p))
+    det_new <- 1
+    det_old <- 2
+    
+    while (det_new != det_old && det_new != 0) {
+      center_old <- apply(subset_current, 2, mean)
+      scatter_old <- ((h - 1) / h) * var(subset_current)
+      det_old <- det(scatter_old)
+      
+      mahal_dist_current <- mahalanobis(x, center_old, scatter_old, tol = -1)
+      d_sqr_current <- sort(mahal_dist_current, decreasing = FALSE, index.return = TRUE)
+      idx_new <- d_sqr_current$ix[1:h]
+      
+      # Update subset with new indices
+      subset_old <- subset_current
+      subset_current <- x[idx_new, ]
+      center_new <- apply(subset_current, 2, mean)
+      scatter_new <- ((h - 1) / h) * var(subset_current)
+      det_new <- det(scatter_new)
     }
-
-    center[[k]] = T_new # storing the final center estimate in list of this final 10 centers
-    sigma[[k]] = S_new  #store in the final 10 scatters
-    H_final[[k]] = H_new  #store in the final 10 subsets
-
+    
+    best_centers[[k]] <- center_new
+    best_scatters[[k]] <- scatter_new
+    best_subsets[[k]] <- subset_current
   }
-  #deciding which one has the minimum determiniant of these final 10 sets
-  d = rep(0,l)
-  for(i in 1:l){
-    d[i] = det(sigma[[i]])
-  }
-  det10= sort(d,decreasing = FALSE,index.return = TRUE) #det10 is sorted vector of top 10 final final determinant
-  #index of the one with smallest determinant from all 10, where first one is the one with smallest det
-  mindet = det10$ix[1] #the index of the best set  corresponding the smallest det
-  # the final T and S estimators with index mindet
-  T_mcd = center[[mindet]] #center estimater of the minimal det set
-  S_mcd = c.a*cnp*sigma[[mindet]] #scatter estimator of the minimal det set
-  H_mcd = H_final[[mindet]] #final subset with smallest det
-  indeces_H_mcd = as.integer(rownames(H_mcd)) #indeces of the final subset
-  result1 = list(raw.center  = T_mcd, raw.cov = S_mcd , best = indeces_H_mcd)
+  
+  # Select the subset with the smallest determinant from the final subsets
+  final_dets <- sapply(best_scatters, det)
+  final_sorted <- sort(final_dets, decreasing = FALSE, index.return = TRUE)
+  best_idx <- final_sorted$ix[1]
+  
+  center_mcd <- best_centers[[best_idx]]
+  scatter_mcd <- c_alpha * cnp * best_scatters[[best_idx]]
+  best_subset <- best_subsets[[best_idx]]
+  idx_best_subset <- as.integer(rownames(best_subset))
+  
+  # Raw results
+  result_raw <- list(
+    raw.center = center_mcd,
+    raw.cov = scatter_mcd,
+    best = idx_best_subset
+  )
+  
   # Reweighting step
-  #(1-delta quantile of Chi-square dist. we will use 0.025 to expect that 97.5% of data will be included)
-  w = rep(0,n) #initialization of weight vector
-  d_sqr_r = mahalanobis(x,result1$raw.center,result1$raw.cov, tol=-1) #mah. distanaces for all observations
-  cutoff = qchisq((1-delta), df = p) #quantile of chi-square distribution with o degrees of freedom
-  for(i in 1:n){
-    if(d_sqr_r[i]<=cutoff){
-      w[i] = 1
-    }
-  }
-  weights = t(w) #weights matrix
+  weights_vector <- rep(0, n)
+  dist_raw <- mahalanobis(x, result_raw$raw.center, result_raw$raw.cov, tol = -1)
+  cutoff <- qchisq(1 - delta, df = p)
+  weights_vector[dist_raw <= cutoff] <- 1
+  weights <- t(weights_vector)
+  
   # Reweighted MCD location estimator
-  x = as.matrix(x,nrow=n,ncol = p)
-  T_rwgt = 1/sum(weights)*(weights%*%x)
-  #Reweighted MCD scatter estimator
-  S = diag(0,p) #zero diagonal matrix
-  sigmas = list() #list to stor each ith sigma matrix
-  T = as.matrix(T_rwgt,nrow = nrow(T),ncol =ncol(T))
-  for(i in 1:n){
-    sigmas[[i]] = t(x[i,]-T)%*%(x[i,]-T)*weights[i]
-    S = S + sigmas[[i]] #adding each time the new sigma
+  x_matrix <- as.matrix(x, nrow = n, ncol = p)
+  center_rwgt <- as.numeric((weights %*% x_matrix) / sum(weights))
+  
+  # Reweighted MCD covariance estimator
+  S_accum <- matrix(0, nrow = p, ncol = p)
+  for (i in 1:n) {
+    diff <- matrix(x_matrix[i, ] - center_rwgt, ncol = 1)
+    S_accum <- S_accum + weights[i] * (diff %*% t(diff))
   }
-  S_rwgt = S/sum(weights) #the sum of all covariance matrices devided by sum of weights
-  Srwgt = c.delta*cnp*S_rwgt
-  #the output adding the newresults to result1 with raw estimates
-  list = list.append(result1, weights = weights,center = T_rwgt,cov = Srwgt )
-  return(list)
+  scatter_rwgt <- (S_accum / sum(weights)) * c_delta * cnp
+  
+  # Final output combining raw and reweighted estimates
+  result <- list(
+    raw.center = result_raw$raw.center,
+    raw.cov = result_raw$raw.cov,
+    best = result_raw$best,
+    weights = weights,
+    center = center_rwgt,
+    cov = scatter_rwgt
+  )
+  
+  return(result)
 }
-
 
 
 #' Quality Control by Identifying Jumps in a Matrix
@@ -489,6 +587,13 @@ covFastMCD = function(x, alpha, m, l, delta){
 #' and the iterations matrix.
 #' @export Qualitycontrol.ICOD
 #' @importFrom stats kmeans
+#' @examples
+#' # Create sample spectral data matrix
+#' set.seed(123)
+#' wavenumbers <- seq(500, 3500, length.out=100)
+#' spectra <- matrix(rnorm(1000), nrow=10)
+#' 
+
 Qualitycontrol.ICOD <- function(matrix, var_tol=0.5, max_iterations=100, kernel = c(1,1,1)){
   resolution <- (max(as.numeric(colnames(matrix))) - min(as.numeric(colnames(matrix))))/ncol(matrix)
   group <- rep(1, nrow(matrix))
@@ -551,6 +656,13 @@ Qualitycontrol.ICOD <- function(matrix, var_tol=0.5, max_iterations=100, kernel 
 #' @export Qualitycontrol.T2
 #' @importFrom parallel makeCluster parApply
 #' @importFrom disprofas get_hotellings
+#' @examples
+#' # Create sample spectral data
+#' set.seed(123)
+#' wavenumbers <- seq(500, 3500, length.out=100)
+#' spectra <- matrix(rnorm(2000), nrow=20)
+#' 
+
 Qualitycontrol.T2 <- function(x){
   pred_outliers <- rep(TRUE, nrow(x))
   n_out <- 0
@@ -561,7 +673,7 @@ Qualitycontrol.T2 <- function(x){
     mean_spec <- as.matrix(parApply(cl, x[temp_outliers,],2, median))
     temp_outliers <- pred_outliers
     hotel_p <- parApply(cl,as.matrix(x),1,function(x,spec=mean_spec){
-      return(disprofas::get_hotellings(as.matrix(x), spec, 0.05)$Parameters['p.F'])
+      return(disprofas::get_hotellings(as.matrix(x), spec, 0.05)$Parameters['p.FALSE'])
     })
     temp_outliers[hotel_p < 0.05] <- FALSE
     if(n_out==length(temp_outliers[!temp_outliers]))
@@ -589,6 +701,12 @@ Qualitycontrol.T2 <- function(x){
 #'         outlier, and 'dis' containing the corresponding distance values.
 #' @export Qualitycontrol.Dis
 #' @importFrom stats quantile
+#' @examples
+#' # Create sample spectral data
+#' set.seed(123)
+#' wavenumbers <- seq(500, 3500, length.out=100)
+#' spectra <- matrix(rnorm(3000), nrow=30)
+
 Qualitycontrol.Dis <- function(x, min.dis=1){
   pred_outliers <- rep(TRUE, nrow(x))
   n_out <- length(pred_outliers[!pred_outliers])
@@ -609,6 +727,7 @@ Qualitycontrol.Dis <- function(x, min.dis=1){
 
   return(data.frame(out=pred_outliers, dis=dis_matrix))
 }
+
 #' Detect outliers using the Minimum Covariance Determinant (MCD) method
 #'
 #' This function extends the outliers_mcdEst function to detect outliers in a dataset
@@ -627,6 +746,20 @@ Qualitycontrol.Dis <- function(x, min.dis=1){
 #'   - nb: A named number giving the total number of outliers detected.
 #' @export Qualitycontrol.Mcd
 #' @importFrom stats qchisq
+#' @examples
+#' # Create sample multivariate data
+#' set.seed(123)
+#' n <- 100
+#' p <- 5
+#' X <- matrix(rnorm(n*p), ncol=p)
+#' 
+#' # Add some outliers
+#' X[1:5,] <- X[1:5,] + 10
+#' 
+#' # Create index of initially good observations
+#' index_good <- rep(TRUE, n)
+#' 
+
 Qualitycontrol.Mcd <- function(x,index_good,h = .5,alpha = .01, na.rm = TRUE){
   out <- outliers_mcdEst(x,index_good,h,alpha,na.rm)
   out$distance <- out$MaxDist
@@ -638,9 +771,6 @@ Qualitycontrol.Mcd <- function(x,index_good,h = .5,alpha = .01, na.rm = TRUE){
   out
 }
 
-
-
-
 #' Calculate the Signal-to-Noise Ratio (SNR) for a dataset
 #'
 #' This function calculates the SNR for a dataset by comparing the signal and noise levels.
@@ -650,20 +780,15 @@ Qualitycontrol.Mcd <- function(x,index_good,h = .5,alpha = .01, na.rm = TRUE){
 #' @return A vector indicating whether each spectrum passes the SNR test.
 #' @export Qualitycontrol.Snr
 #' @importFrom stats sd
+#' @examples
+#' # Create sample spectral data
+#' set.seed(123)
+#' wavenumbers <- seq(500, 3500, length.out=200)
+#' spectra <- matrix(rnorm(4000), nrow=20)
+
 Qualitycontrol.Snr <- function(data, level = "medium")
 {
-  # library('baseline')
-  # library('signal')
   data <- as.matrix(data)
-  # data <- data[,apply(data,2,min)>15]
-  # ba_li <- baseline.modpolyfit(t(data), degree = 3)$corrected
-  # # smooth_data <- t(data)
-  # for( i in 1:nrow(ba_li))
-  # {
-  #   smooth_data[i,] <- as.matrix(sgolayfilt(ba_li[i,],m=0,p=3,n=9))
-  # }
-  # nor_data <- smooth_data/apply(smooth_data, 1, max)
-  #
   waves <- as.numeric(colnames(data))
   band_noise <- c(which((waves > 1800) & (waves < 1900)))
   band_signal <- c(which(waves > 600 & waves < 3050))
@@ -693,11 +818,9 @@ Qualitycontrol.Snr <- function(data, level = "medium")
 
   index_good <- apply(abs(data[,band_noise]),1,function(x) {return((sd(x)<QC2)&(mean(x)<QC1))}) &
     SNR > QC3 &     !duplicated(data)
-  # data_good <- data[index_good,]
   index_good[is.na(index_good)] <- 'FALSE'
   return(index_good)
 }
-
 
 #' Detect outliers in a dataset using various quality control methods
 #'
@@ -712,6 +835,11 @@ Qualitycontrol.Snr <- function(data, level = "medium")
 #' @importFrom stats quantile
 #' @importFrom magrittr %<>%
 #' @importFrom stats mahalanobis
+#' @examples
+#' # Create sample spectral data
+#' set.seed(123)
+#' wavenumbers <- seq(500, 3500, length.out=100)
+#' spectra <- matrix(rnorm(5000), nrow=50)
 Qualitycontrol.All <- function(matrix, var_tol=0.5){
   data <- new('Ramanome', datasets = list(data=matrix), wavenumber=as.numeric(colnames(matrix)))
   data %<>% Preprocesssing.Cosmicspikesremove() %>% pre.smooth(.,m = 0, p = 5, w = 7, delta.wav = 2) %>% pre.baseline %>% pre.normalize(.,'CH')
@@ -743,11 +871,6 @@ Qualitycontrol.All <- function(matrix, var_tol=0.5){
   outliers_all$dis <- Qualitycontrol.Dis(matrix, min.dis=ncol(matrix)*0.01)$out %>% gsub('TRUE','Good',.) %>% gsub('FALSE','Bad',.)
   end_time <- Sys.time()
   cal_time$dis <- as.numeric(difftime(end_time, start_time, units = "secs"))
-  # print('Start Valley-MCD!')
-  # start_time <- Sys.time()
-  # outliers_all$valley_mcd <- Qualitycontrol.ICOD_peaks_mcd(matrix)$index_good %>% gsub('TRUE','Good',.) %>% gsub('FALSE','Bad',.)
-  # end_time <- Sys.time()
-  # cal_time$valley_mcd <- as.numeric(difftime(end_time, start_time, units = "secs"))
   print('Start Jump!')
   start_time <- Sys.time()
   outliers_all$jump <- Qualitycontrol.ICOD(matrix, var_tol=var_tol, max_iterations=100)$index_good %>% gsub('TRUE','Good',.) %>% gsub('FALSE','Bad',.)

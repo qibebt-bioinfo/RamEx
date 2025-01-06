@@ -8,6 +8,25 @@
 #' @slot reductions A list of data reduction results
 #' @slot interested.bands A list of interested Raman bands
 #'
+#' @return A new Ramanome object
+#' @examples
+#' # Create sample data
+#' wavenumbers <- seq(500, 3500, by = 10)
+#' spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
+#' metadata <- data.frame(
+#'   group = factor(rep(c("Control", "Treatment"), each = 50)),
+#'   filenames = paste0("sample_", 1:100, ".txt")
+#' )
+#' 
+#' # Create a Ramanome object
+#' raman_obj <- new("Ramanome",
+#'   datasets = list(raw = spectra),
+#'   wavenumber = wavenumbers,
+#'   meta.data = metadata,
+#'   reductions = list(),
+#'   interested.bands = list()
+#' )
+#'
 #' @importFrom hyperSpec nrow
 #' @importFrom hyperSpec print
 #' @importFrom methods setClass
@@ -28,8 +47,23 @@ Ramanome <- setClass(
 #' Show method for Ramanome objects
 #' This method will give brief information about the Ramanome object
 #' @param object The Ramanome object
+#' @return No return value, prints object information to console
+#' @examples
+#' # Create sample Ramanome object
+#' wavenumbers <- seq(500, 3500, by = 10)
+#' spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
+#' metadata <- data.frame(
+#'   group = factor(rep(c("Control", "Treatment"), each = 50))
+#' )
+#' raman_obj <- new("Ramanome",
+#'   datasets = list(raw = spectra),
+#'   wavenumber = wavenumbers,
+#'   meta.data = metadata
+#' )
+#' 
+#' # Display object information
+#' show(raman_obj)
 #' @export
-
 
 setMethod(
   f = "show",
@@ -59,6 +93,20 @@ setMethod(
 #' @param j Index or name of the slot to subset
 #' @param ... Additional arguments
 #' @param drop Boolean indicating whether to drop unused slots (default: TRUE)
+#' @return A new Ramanome object containing the subset of data
+#' @examples
+#' # Create sample Ramanome object
+#' wavenumbers <- seq(500, 3500, by = 10)
+#' spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
+#' metadata <- data.frame(
+#'   group = factor(rep(c("Control", "Treatment"), each = 50))
+#' )
+#' raman_obj <- new("Ramanome",
+#'   datasets = list(raw = spectra),
+#'   wavenumber = wavenumbers,
+#'   meta.data = metadata
+#' )
+#' 
 #' @export
 
 setMethod("[", "Ramanome", function(x, i, j, ..., drop = TRUE) {
@@ -75,6 +123,23 @@ setMethod("[", "Ramanome", function(x, i, j, ..., drop = TRUE) {
 #' Length method for Ramanome objects
 #'
 #' @param x The Ramanome object
+#' @return An integer indicating the number of samples in the Ramanome object
+#' @examples
+#' # Create sample Ramanome object
+#' wavenumbers <- seq(500, 3500, by = 10)
+#' spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
+#' metadata <- data.frame(
+#'   group = factor(rep(c("Control", "Treatment"), each = 50))
+#' )
+#' raman_obj <- new("Ramanome",
+#'   datasets = list(raw = spectra),
+#'   wavenumber = wavenumbers,
+#'   meta.data = metadata
+#' )
+#' 
+#' # Get number of samples
+#' n_samples <- length(raman_obj)
+#' print(n_samples)
 #' @export
 
 setMethod("length", "Ramanome", function(x) {
@@ -104,8 +169,34 @@ setMethod("length", "Ramanome", function(x) {
 #'
 #' @param x The first Ramanome object
 #' @param y The second Ramanome object
+#' @return A new Ramanome object containing the combined data from both input objects
+#' @examples
+#' # Create two sample Ramanome objects
+#' wavenumbers <- seq(500, 3500, by = 10)
+#' spectra1 <- matrix(rnorm(50 * length(wavenumbers)), nrow = 50)
+#' spectra2 <- matrix(rnorm(50 * length(wavenumbers)), nrow = 50)
+#' metadata1 <- data.frame(
+#'   group = factor(rep("Control", 50))
+#' )
+#' metadata2 <- data.frame(
+#'   group = factor(rep("Treatment", 50))
+#' )
+#' 
+#' raman_obj1 <- new("Ramanome",
+#'   datasets = list(raw = spectra1),
+#'   wavenumber = wavenumbers,
+#'   meta.data = metadata1
+#' )
+#' 
+#' raman_obj2 <- new("Ramanome",
+#'   datasets = list(raw = spectra2),
+#'   wavenumber = wavenumbers,
+#'   meta.data = metadata2
+#' )
+#' 
+#' # Combine the two objects
+#' combined_obj <- rbind2(raman_obj1, raman_obj2)
 #' @export
-
 
 setMethod("rbind2", signature(x = "Ramanome", y = "Ramanome"),
           function(x, y) {
