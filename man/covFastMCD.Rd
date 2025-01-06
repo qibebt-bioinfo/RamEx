@@ -26,3 +26,16 @@ This function implements the Fast Minimum Covariance Determinant (MCD) method to
 the covariance matrix and identify potential outliers in the data. The MCD method is
 robust to outliers and can be used for multivariate data.
 }
+\examples{
+# Create sample data with outliers
+set.seed(123)
+n <- 100
+p <- 3
+
+# Generate normal data
+good_data <- matrix(rnorm(n * p), ncol = p)
+
+# Add some outliers
+outliers <- matrix(rnorm(10 * p, mean = 5), ncol = p)
+data <- rbind(good_data, outliers)
+}

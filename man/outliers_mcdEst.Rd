@@ -31,3 +31,20 @@ outliers in a dataset. It calculates the MCD estimate of scatter and location,
 and identifies observations that are likely to be outliers based on their distance
 from the centroid.
 }
+\examples{
+# Create sample data with outliers
+set.seed(123)
+n <- 100
+p <- 3
+
+# Generate normal data
+good_data <- matrix(rnorm(n*p), ncol=p)
+
+# Add some outliers
+outliers <- matrix(rnorm(10*p, mean=5), ncol=p)
+data <- rbind(good_data, outliers)
+
+# Mark initial good observations (all TRUE for initial estimation)
+index_good <- rep(TRUE, nrow(data))
+
+}

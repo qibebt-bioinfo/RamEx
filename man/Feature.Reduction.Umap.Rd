@@ -22,3 +22,9 @@ dataset stored in a Ramanome object. It first applies PCA to reduce the dataset
 to 20 dimensions and then applies UMAP to reduce it to two dimensions. The reduced
 data is stored in the object and a plot is generated if specified.
 }
+\examples{
+# Load example data
+data_file <- system.file("extdata", "data", package = "RamEx")
+RamEx_data <- read.spec.load(data_file, group.index = 2)
+
+}

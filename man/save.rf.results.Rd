@@ -15,6 +15,27 @@ save.rf.results(result, rf.opts, feature.ids, outdir)
 
 \item{outdir}{The directory where the results will be saved.}
 }
+\value{
+None. The function saves multiple files to the specified output directory:
+  - A summary file with error metrics and model parameters
+  - A file containing classification probabilities for each sample
+  - A file with potential mislabeling information
+  - A file with feature importance scores
+  - A confusion matrix file showing classification performance
+}
 \description{
 This function saves the various results of random forest classification to the specified output directory.
+}
+\examples{
+# Create sample results
+set.seed(123)
+result <- list(
+  errs = rnorm(10, 0.2, 0.05),
+  probabilities = matrix(runif(100), 10, 10),
+  y = factor(rep(c("A", "B"), each=5)),
+  importances = runif(10)
+)
+rf.opts <- list(errortype = "oob", ntree = 500)
+feature.ids <- paste0("Feature", 1:10)
+
 }

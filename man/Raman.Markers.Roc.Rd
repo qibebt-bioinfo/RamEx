@@ -24,3 +24,9 @@ This function performs Receiver Operating Characteristic (ROC) analysis to ident
 markers in a dataset that are associated with different groups. It calculates the
 Area Under the Curve (AUC) for single markers and paired markers.
 }
+\examples{
+# Create sample spectral data matrix
+set.seed(123)
+wavenumbers <- seq(500, 1500, by=100)
+spectra <- matrix(rnorm(200), nrow=20)
+}

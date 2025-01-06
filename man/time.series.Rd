@@ -12,7 +12,9 @@
 \item{reduction}{The reduction method to use (default is "UMAP").}
 }
 \value{
-A combined ggplot object of the time series plots.
+A cowplot object containing multiple plots arranged in a grid, with each plot showing the time series
+        visualization for a different group in the dataset. The function also saves the plot as a PNG file
+        named 'Time.series_[reduction].png'.
 }
 \description{
 This function generates time series plots for Raman data using a specified reduction method (e.g., UMAP).

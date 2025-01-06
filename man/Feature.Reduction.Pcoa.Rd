@@ -23,3 +23,8 @@ and then applies PCoA to reduce the dimensionality to two principal components.
 If drawing is enabled, it creates a plot of the PCoA results, colored by group.
 The plot can also be saved as a PNG file if specified.
 }
+\examples{
+# Load example data
+data_file <- system.file("extdata", "data", package = "RamEx")
+RamEx_data <- read.spec.load(data_file, group.index = 2)
+}

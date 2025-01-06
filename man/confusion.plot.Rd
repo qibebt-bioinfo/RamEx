@@ -12,8 +12,22 @@ confusion.plot(true_labels, pred_labels)
 \item{pred_labels}{The predicted labels}
 }
 \value{
-A tile plot of the prediction results
+A ggplot2 object containing a tile plot visualization of the confusion matrix with:
+  \item{x-axis}{Predicted labels}
+  \item{y-axis}{True labels}
+  \item{tile colors}{Normalized prediction frequencies (in percentages)}
+  \item{text annotations}{Percentage values in each tile}
 }
 \description{
 This function plots the prediction results using a tile plot.
+}
+\examples{
+# Create sample true and predicted labels
+true_labels <- factor(rep(c("A", "B", "C"), each = 20))
+pred_labels <- factor(c(
+  rep("A", 15), rep("B", 3), rep("C", 2),
+  rep("A", 4), rep("B", 12), rep("C", 4),
+  rep("A", 2), rep("B", 3), rep("C", 15)
+))
+
 }

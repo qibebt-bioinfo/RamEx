@@ -23,3 +23,31 @@ Simple and interpretable regression method, but assumes
 no multicollinearity among predictors and a linear
 relationship between predictors and response
 }
+\examples{
+# Create sample Ramanome training object with concentration data
+wavenumbers <- seq(500, 3500, length.out=100)
+train_spectra <- matrix(rnorm(1000), nrow=10)
+train_metadata <- data.frame(
+  group = rnorm(10, mean=50, sd=10) # Concentration values
+)
+train_obj <- new("Ramanome",
+                 datasets=list(raw.data=train_spectra),
+                 wavenumber=wavenumbers,
+                 meta.data=train_metadata)
+
+# Create sample test object
+test_spectra <- matrix(rnorm(500), nrow=5)
+test_metadata <- data.frame(
+  group = rnorm(5, mean=50, sd=10)
+)
+test_obj <- new("Ramanome",
+                datasets=list(raw.data=test_spectra),
+                wavenumber=wavenumbers,
+                meta.data=test_metadata)
+
+# Perform MLR prediction
+\dontrun{
+mlr_result <- Quantification.Mlr(train_obj, test_obj)
+print(mlr_result)
+}
+}

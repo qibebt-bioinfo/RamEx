@@ -17,6 +17,19 @@ save.rf.results.probabilities(
 
 \item{outdir}{The output directory to save the probabilities file}
 }
+\value{
+NULL. The function saves a tab-delimited text file containing class probabilities
+        for each sample, with rows for samples and columns for class probabilities.
+}
 \description{
 This function saves the probabilities of random forest classification results to a file.
+}
+\examples{
+# Create sample results with probabilities
+result <- list(
+  probabilities = matrix(runif(100), 10, 10,
+                        dimnames=list(paste0("Sample", 1:10),
+                                     paste0("Class", 1:10)))
+)
+
 }

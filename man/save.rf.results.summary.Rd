@@ -21,3 +21,14 @@ None
 \description{
 This function saves a summary of the random forest classification results to a file.
 }
+\examples{
+# Create sample results
+set.seed(123)
+result <- list(
+  errs = rnorm(10, 0.2, 0.05),
+  error.type = "oob",
+  params = list(ntree = 500)
+)
+rf.opts <- list(errortype = "oob")
+
+}

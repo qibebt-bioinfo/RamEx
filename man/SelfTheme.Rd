@@ -6,6 +6,14 @@
 \usage{
 SelfTheme()
 }
+\value{
+A ggplot2 theme object with customized settings:
+  \item{panel.grid}{Removed grid lines}
+  \item{panel.border}{Removed border}
+  \item{axis.ticks}{Removed axis ticks}
+  \item{axis.text}{Removed axis text}
+  \item{strip.background}{White background for facet strips}
+}
 \description{
 This function defines a custom theme for time series plots.
 }

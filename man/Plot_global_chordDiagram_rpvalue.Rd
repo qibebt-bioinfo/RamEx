@@ -41,3 +41,10 @@ No explicit return value. The function generates the plot directly.
 \description{
 This function plots a global chord diagram based on a correlation matrix, highlighting edges with statistical significance.
 }
+\examples{
+# Create sample correlation matrix
+n <- 10
+corr_mat <- matrix(runif(n*n, -1, 1), n, n)
+colnames(corr_mat) <- rownames(corr_mat) <- paste0("W", 1:n)
+
+}

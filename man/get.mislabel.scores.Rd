@@ -17,3 +17,12 @@ A matrix containing mislabel scores for each class.
 \description{
 This function calculates mislabel scores based on class probabilities for classification results.
 }
+\examples{
+# Create sample data
+y <- factor(c("A", "A", "B", "B", "A"))
+y.prob <- matrix(c(0.8, 0.7, 0.3, 0.2, 0.6,
+                   0.2, 0.3, 0.7, 0.8, 0.4),
+                 nrow=5, ncol=2,
+                 dimnames=list(NULL, c("A", "B")))
+
+}

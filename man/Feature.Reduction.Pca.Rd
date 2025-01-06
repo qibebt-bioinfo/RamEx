@@ -21,3 +21,8 @@ This function performs Principal Component Analysis (PCA) on the dataset stored 
 a Ramanome object and plots the first two principal components. The function can
 also save the plot as a PNG file.
 }
+\examples{
+# Load example data
+data_file <- system.file("extdata", "data", package = "RamEx")
+RamEx_data <- read.spec.load(data_file, group.index = 2)
+}

@@ -20,3 +20,10 @@ MCR-ALS is a chemometric technique used to resolve overlapping spectra into thei
 constituent pure components. The function returns the estimated components and
 concentrations.
 }
+\examples{
+# Create sample spectral data
+wavenumbers <- seq(500, 3500, by = 10)
+n_samples <- 100
+n_waves <- length(wavenumbers)
+
+}

@@ -10,9 +10,22 @@ get.nearest.dataset(object)
 \item{object}{A Ramanome object that contains datasets in its `datasets` slot.}
 }
 \value{
-The most recently added dataset from the Ramanome object.
+A matrix or data frame containing the most recently added dataset from the Ramanome object.
 }
 \description{
 This function extracts the most recently added dataset from a Ramanome object.
 It is assumed that the dataset is stored in the `datasets` slot of the Ramanome object.
+}
+\examples{
+# Create a sample Ramanome object with multiple datasets
+wavenumbers <- seq(500, 3500, by = 10)
+raw_spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
+processed_spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
+raman_obj <- new("Ramanome",
+  datasets = list(
+    raw = raw_spectra,
+    processed = processed_spectra
+  )
+)
+
 }

@@ -37,3 +37,12 @@ object. It first reduces the dimensionality of the data using PCA, then calculat
 the k-nearest neighbors for each point, and finally applies the Louvain algorithm
 to detect communities at different resolutions.
 }
+\examples{
+# Load example Ramanome data
+data_file <- system.file("extdata", "data", package = "RamEx")
+RamEx_data <- read.spec.load(data_file, group.index = 2)
+
+# Define resolution values for clustering
+resolutions <- c(0.5, 1.0, 1.5)
+
+}

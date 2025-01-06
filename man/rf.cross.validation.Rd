@@ -23,3 +23,11 @@ A list containing the cross-validation results including predicted labels, class
 \description{
 This function performs cross-validation for random forest classification on Raman data.
 }
+\examples{
+# Create sample spectral data
+set.seed(123)
+x <- matrix(rnorm(200), nrow=20)
+colnames(x) <- paste0("Wave", 1:10)
+y <- factor(rep(c("A", "B"), each=10))
+
+}

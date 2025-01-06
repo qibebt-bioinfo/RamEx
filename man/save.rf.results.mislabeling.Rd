@@ -2,7 +2,7 @@
 % Please edit documentation in R/Raman-Markers.R
 \name{save.rf.results.mislabeling}
 \alias{save.rf.results.mislabeling}
-\title{Title}
+\title{Save mislabeling scores from random forest classification}
 \usage{
 save.rf.results.mislabeling(result, filename = "mislabeling.xls", outdir)
 }
@@ -13,6 +13,22 @@ save.rf.results.mislabeling(result, filename = "mislabeling.xls", outdir)
 
 \item{outdir}{The output directory to save the probabilities file}
 }
+\value{
+NULL. The function saves a tab-delimited text file containing mislabeling scores
+        for each sample, with columns for sample ID and corresponding mislabeling score.
+}
 \description{
-Title
+Save mislabeling scores from random forest classification
+}
+\examples{
+# Create sample results
+result <- list(
+  y = factor(rep(c("A", "B"), each=5)),
+  probabilities = matrix(c(rep(0.8, 5), rep(0.2, 5),
+                          rep(0.2, 5), rep(0.8, 5)),
+                        nrow=10, ncol=2,
+                        dimnames=list(paste0("Sample", 1:10),
+                                     c("A", "B")))
+)
+
 }

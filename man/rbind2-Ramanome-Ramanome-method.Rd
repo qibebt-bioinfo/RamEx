@@ -17,6 +17,9 @@
 
 \item{y}{The second Ramanome object}
 }
+\value{
+A new Ramanome object containing the combined data from both input objects
+}
 \description{
 setMethod("plot",
           signature(x = "Ramanome", y = "character"),
@@ -28,4 +31,31 @@ setMethod("plot",
           }
 )
 Combine Ramanome objects by row binding
+}
+\examples{
+# Create two sample Ramanome objects
+wavenumbers <- seq(500, 3500, by = 10)
+spectra1 <- matrix(rnorm(50 * length(wavenumbers)), nrow = 50)
+spectra2 <- matrix(rnorm(50 * length(wavenumbers)), nrow = 50)
+metadata1 <- data.frame(
+  group = factor(rep("Control", 50))
+)
+metadata2 <- data.frame(
+  group = factor(rep("Treatment", 50))
+)
+
+raman_obj1 <- new("Ramanome",
+  datasets = list(raw = spectra1),
+  wavenumber = wavenumbers,
+  meta.data = metadata1
+)
+
+raman_obj2 <- new("Ramanome",
+  datasets = list(raw = spectra2),
+  wavenumber = wavenumbers,
+  meta.data = metadata2
+)
+
+# Combine the two objects
+combined_obj <- rbind2(raman_obj1, raman_obj2)
 }

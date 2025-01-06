@@ -23,6 +23,26 @@ Plot_local_chordDiagram_rpvalue(
 
 \item{bands_ann}{Annotation for the bands.}
 }
+\value{
+A chord diagram plot showing correlations between variables. The plot includes:
+  \item{Correlation links}{Colored edges showing correlations between variables, with colors indicating correlation strength}
+  \item{Band annotations}{Labels and groupings for the variables}
+  \item{Sector highlights}{Visual grouping of related variables}
+  The function has no explicit return value as it generates the plot directly.
+}
 \description{
 This function plots a local chord diagram based on a correlation matrix and p-value thresholds.
+}
+\examples{
+# Create sample data
+n <- 10
+data <- matrix(rnorm(n*100), ncol=n)
+colnames(data) <- paste0("W", 1:n)
+
+# Create band annotations
+bands_ann <- data.frame(
+  Wave_num = paste0("W", 1:n),
+  Group = rep(c("A", "B"), each=5)
+)
+
 }

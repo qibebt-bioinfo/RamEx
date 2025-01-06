@@ -2,10 +2,7 @@
 % Please edit documentation in R/Phenotype-Analysis.R
 \name{Phenotype.Analysis.Kmeans}
 \alias{Phenotype.Analysis.Kmeans}
-\title{k-Means
-A centroid-based clustering algorithm that partitions
-data into a predefined number of clusters by assigning
-sample to the nearest center}
+\title{k-Means Clustering Analysis}
 \usage{
 Phenotype.Analysis.Kmeans(object)
 }
@@ -16,8 +13,13 @@ Phenotype.Analysis.Kmeans(object)
 The datafram which contains Kmeans result.
 }
 \description{
-k-Means
 A centroid-based clustering algorithm that partitions
 data into a predefined number of clusters by assigning
 sample to the nearest center
+}
+\examples{
+# Load example Ramanome data
+data_file <- system.file("extdata", "data", package = "RamEx")
+RamEx_data <- read.spec.load(data_file, group.index = 2)
+
 }

@@ -18,3 +18,10 @@ A list containing the results of the ICA decomposition.
 This function applies the FastICA algorithm to the dataset retrieved from the Ramanome
 object using `get.nearest.dataset`. It returns the result of the ICA decomposition.
 }
+\examples{
+# Create sample spectral data with mixed sources
+wavenumbers <- seq(500, 3500, by = 10)
+n_samples <- 100
+n_waves <- length(wavenumbers)
+
+}

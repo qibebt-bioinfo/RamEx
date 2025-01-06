@@ -11,7 +11,30 @@ Intraramanome.Analysis.Irca.Local(object, bands_ann)
 
 \item{bands_ann}{The band annotation data.}
 }
+\value{
+No return value, called for side effects. The function generates and saves PNG files
+        containing negative IRCA plots for each group in the dataset.
+}
 \description{
 This function performs local IRCA analysis on the given Raman spectroscopy data object.
 It generates negative IRCA plots for each group and saves them as png files.
+}
+\examples{
+# Create sample Ramanome object
+wavenumbers <- seq(500, 3500, length.out=100)
+spectra <- matrix(rnorm(1000), nrow=10)
+metadata <- data.frame(
+  group = rep(c("Control", "Treatment"), each=5)
+)
+raman_obj <- new("Ramanome", 
+                 datasets=list(raw.data=spectra),
+                 wavenumber=wavenumbers,
+                 meta.data=metadata)
+
+# Create band annotations
+bands_ann <- data.frame(
+  Wave_num = c(1000, 1500, 2000),
+  Group = c("A", "B", "C")
+)
+
 }

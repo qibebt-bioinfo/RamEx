@@ -9,6 +9,26 @@
 \arguments{
 \item{x}{The Ramanome object}
 }
+\value{
+An integer indicating the number of samples in the Ramanome object
+}
 \description{
 Length method for Ramanome objects
+}
+\examples{
+# Create sample Ramanome object
+wavenumbers <- seq(500, 3500, by = 10)
+spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
+metadata <- data.frame(
+  group = factor(rep(c("Control", "Treatment"), each = 50))
+)
+raman_obj <- new("Ramanome",
+  datasets = list(raw = spectra),
+  wavenumber = wavenumbers,
+  meta.data = metadata
+)
+
+# Get number of samples
+n_samples <- length(raman_obj)
+print(n_samples)
 }

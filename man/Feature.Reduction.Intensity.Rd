@@ -21,3 +21,11 @@ This function retrieves the Feature.Reduction.Intensity values at specified wave
 ranges from a Ramanome object. It uses `confirm.select` to get the spectral data and
 `confirm.name` to format the names of the selected wavelengths or ranges.
 }
+\examples{
+# Load example data
+data_file <- system.file("extdata", "data", package = "RamEx")
+RamEx_data <- read.spec.load(data_file, group.index = 2)
+
+# Extract intensity values at specific wavelengths
+RamEx_data <- Feature.Reduction.Intensity(RamEx_data, c(1000, 1500))
+}

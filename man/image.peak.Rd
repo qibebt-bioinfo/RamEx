@@ -11,6 +11,25 @@
 
 \item{peak}{The specified peak for Raman imaging}
 }
+\value{
+NULL. The function saves a JPEG file named 'Raman_Imaging_[peak].jpeg' in the current working directory.
+        The image shows a heatmap-style visualization of the Raman intensity distribution at the specified peak.
+}
 \description{
 This function generates a Raman imaging plot for a specified peak in a Ramanome object.
+}
+\examples{
+# Create a sample Ramanome object with spatial information
+wavenumbers <- seq(500, 3500, by = 10)
+spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
+metadata <- data.frame(
+  x = rep(1:10, 10),
+  y = rep(1:10, each = 10)
+)
+raman_obj <- new("Ramanome",
+  datasets = list(raw = spectra),
+  meta.data = metadata,
+  interested.bands = list("1000" = rnorm(100))
+)
+
 }

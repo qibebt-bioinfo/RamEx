@@ -12,10 +12,18 @@
 \item{cutoff}{A numeric vector of two values specifying the lower and upper bounds of the wavelength range.}
 }
 \value{
-A data frame containing the subset of spectral data within the specified wavelength range.
+A data frame containing the subset of the input spectral data where the wavelength values (V1)
+        fall within the specified cutoff range.
 }
 \description{
 This function extracts a subset of spectral data based on a specified wavelength range.
 It filters the data to include only the rows where the wavelength (V1) is within the
 lower and upper bounds of the cutoff range.
+}
+\examples{
+# Create sample spectral data
+single_spec <- data.frame(
+  V1 = seq(400, 3600, by = 100),
+  V2 = rnorm(33)
+)
 }

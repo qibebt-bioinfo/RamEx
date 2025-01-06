@@ -18,3 +18,9 @@ Ramanome object using the average linkage method. It calculates the Euclidean di
 matrix and then applies the hierarchical clustering algorithm to create a dendrogram.
 The function also plots the resulting dendrogram.
 }
+\examples{
+# Load example Ramanome data
+data_file <- system.file("extdata", "data", package = "RamEx")
+RamEx_data <- read.spec.load(data_file, group.index = 2)
+
+}

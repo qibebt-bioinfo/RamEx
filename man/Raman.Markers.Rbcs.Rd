@@ -41,3 +41,9 @@ A data frame containing the selected feature importances.
 \description{
 This function performs random forest classification on Raman data and generates feature importances.
 }
+\examples{
+# Create sample Ramanome object
+set.seed(123)
+wavenumbers <- seq(500, 3500, length.out=100)
+spectra <- matrix(rnorm(2000), nrow=20)
+}

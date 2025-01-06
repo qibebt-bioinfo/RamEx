@@ -18,3 +18,12 @@ A dataframe containing the significant correlations between variables
 This function performs IRCA analysis on the global scale using the input dataset and group information.
 It generates a chord diagram that represents the significant correlations between variables.
 }
+\examples{
+# Create sample dataset
+n <- 100  # samples
+p <- 20   # variables
+dataset <- matrix(rnorm(n*p), nrow=n)
+colnames(dataset) <- paste0("V", 1:p)
+group <- rep(c("A", "B"), each=n/2)
+
+}

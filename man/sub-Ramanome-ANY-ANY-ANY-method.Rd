@@ -17,6 +17,23 @@
 
 \item{drop}{Boolean indicating whether to drop unused slots (default: TRUE)}
 }
+\value{
+A new Ramanome object containing the subset of data
+}
 \description{
 Subset method for Ramanome objects
+}
+\examples{
+# Create sample Ramanome object
+wavenumbers <- seq(500, 3500, by = 10)
+spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
+metadata <- data.frame(
+  group = factor(rep(c("Control", "Treatment"), each = 50))
+)
+raman_obj <- new("Ramanome",
+  datasets = list(raw = spectra),
+  wavenumber = wavenumbers,
+  meta.data = metadata
+)
+
 }

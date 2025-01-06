@@ -29,3 +29,17 @@ This function extends the outliers_mcdEst function to detect outliers in a datas
 using the Minimum Covariance Determinant method. It modifies the output to include
 additional information such as the distance and center of the outliers.
 }
+\examples{
+# Create sample multivariate data
+set.seed(123)
+n <- 100
+p <- 5
+X <- matrix(rnorm(n*p), ncol=p)
+
+# Add some outliers
+X[1:5,] <- X[1:5,] + 10
+
+# Create index of initially good observations
+index_good <- rep(TRUE, n)
+
+}

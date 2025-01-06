@@ -20,3 +20,31 @@ variables while maximizing the covariance between predictors and response
  variables, ideal for situations where predictors are highly collinear
  or when the number of predictors exceeds the number of observations
 }
+\examples{
+# Create sample Ramanome training object
+wavenumbers <- seq(500, 3500, length.out=100)
+train_spectra <- matrix(rnorm(1000), nrow=10)
+train_metadata <- data.frame(
+  group = factor(rep(c("Low", "High"), each=5))
+)
+train_obj <- new("Ramanome",
+                 datasets=list(raw.data=train_spectra),
+                 wavenumber=wavenumbers,
+                 meta.data=train_metadata)
+
+# Create sample test object
+test_spectra <- matrix(rnorm(500), nrow=5)
+test_metadata <- data.frame(
+  group = factor(rep(c("Low", "High"), c(3,2)))
+)
+test_obj <- new("Ramanome",
+                datasets=list(raw.data=test_spectra),
+                wavenumber=wavenumbers,
+                meta.data=test_metadata)
+
+# Perform PLS prediction
+\dontrun{
+pls_result <- Quantification.Pls(train_obj, test_obj)
+print(pls_result)
+}
+}

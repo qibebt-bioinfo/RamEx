@@ -32,3 +32,10 @@ This function performs quality control on a matrix by identifying jumps or outli
 It uses a combination of bubble filling, peak detection, and clustering to identify
 regions of the matrix that are significantly different from the rest.
 }
+\examples{
+# Create sample spectral data matrix
+set.seed(123)
+wavenumbers <- seq(500, 3500, length.out=100)
+spectra <- matrix(rnorm(1000), nrow=10)
+
+}

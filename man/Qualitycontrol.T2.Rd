@@ -17,3 +17,10 @@ and 'dis' containing the corresponding Hotelling's T2 distance values.
 This function identifies outliers in a dataset by applying Hotelling's T2 statistical method.
 It uses parallel processing to speed up the computation.
 }
+\examples{
+# Create sample spectral data
+set.seed(123)
+wavenumbers <- seq(500, 3500, length.out=100)
+spectra <- matrix(rnorm(2000), nrow=20)
+
+}

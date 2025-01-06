@@ -11,7 +11,24 @@ Intraramanome.Analysis.Irca.Local.draw(dataset, bands_ann)
 
 \item{bands_ann}{The bands annotation information}
 }
+\value{
+A chord diagram plot showing the significant correlations between variables within each band
+}
 \description{
 This function performs IRCA analysis on the local scale using the input dataset and bands annotation information.
 It generates a chord diagram that represents the significant correlations between variables within each band.
+}
+\examples{
+# Create sample dataset
+n <- 100  # samples
+p <- 10   # variables
+dataset <- matrix(rnorm(n*p), nrow=n)
+colnames(dataset) <- paste0("W", 1:p)
+
+# Create bands annotation
+bands_ann <- data.frame(
+  Wave_num = paste0("W", 1:p),
+  Group = rep(c("A", "B"), each=p/2)
+)
+
 }

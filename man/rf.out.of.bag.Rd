@@ -33,3 +33,11 @@ A list containing the following components:
 \description{
 This function performs out-of-bag analysis for random forest classification on Raman data.
 }
+\examples{
+# Create sample spectral data
+set.seed(123)
+x <- matrix(rnorm(500), nrow=50)
+colnames(x) <- paste0("Wave", 1:10)
+y <- factor(rep(c("Control", "Treatment"), each=25))
+
+}

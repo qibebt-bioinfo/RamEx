@@ -19,3 +19,10 @@ technique used to normalize the data and reduce the impact of multiplicative sca
 The function also reports the number of spectra and the wavelength range after
 the transformation.
 }
+\examples{
+# Create a sample Ramanome object
+data <- matrix(rnorm(1000), nrow=10)
+wavenumbers <- seq(500, 3500, length.out=100)
+raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
+
+}

@@ -12,8 +12,18 @@
 \item{wave}{The wavenumber for which to retrieve the Feature.Reduction.Intensity value.}
 }
 \value{
-The Raman Feature.Reduction.Intensity value for the given wavenumber.
+A numeric vector containing the Feature.Reduction.Intensity values at the specified wavenumber for all spectra in the dataset.
 }
 \description{
 This function selects a single Raman Feature.Reduction.Intensity value for a given wavenumber from a Ramanome object.
+}
+\examples{
+# Create a sample Ramanome object
+wavenumbers <- seq(500, 3500, by = 10)
+spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
+raman_obj <- new("Ramanome",
+  datasets = list(raw = spectra),
+  wavenumber = wavenumbers
+)
+
 }

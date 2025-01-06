@@ -23,3 +23,9 @@ dataset extracted from a Ramanome object. It reduces the dimensionality to two
 dimensions and creates a plot of the results. The plot can be customized with various
 themes and labels.
 }
+\examples{
+# Load example data
+data_file <- system.file("extdata", "data", package = "RamEx")
+RamEx_data <- read.spec.load(data_file, group.index = 2)
+
+}

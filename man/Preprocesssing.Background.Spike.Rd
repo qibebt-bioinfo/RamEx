@@ -17,3 +17,18 @@ A rammanome object
 \description{
 This function performs Pre spike function
 }
+\examples{
+# Create a sample Ramanome object with spikes
+data <- matrix(rnorm(1000), nrow=10)
+wavenumbers <- seq(500, 3500, length.out=100)
+raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
+
+# Remove spikes using CPU
+despike_cpu <- Preprocesssing.Background.Spike(raman_obj, device="CPU")
+
+# Remove spikes using GPU (if available)
+\dontrun{
+despike_gpu <- Preprocesssing.Background.Spike(raman_obj, device="GPU")
+}
+
+}

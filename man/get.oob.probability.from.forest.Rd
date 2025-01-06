@@ -17,3 +17,11 @@ A matrix with the predicted class probabilities for each sample.
 \description{
 This function calculates the out-of-bag class probabilities for each sample in the dataset, based on the aggregated class votes from the out-of-bag trees.
 }
+\examples{
+# Create sample data and fit random forest model
+set.seed(123)
+x <- matrix(rnorm(200), nrow=20)
+y <- factor(rep(c("A", "B"), each=10))
+rf_model <- randomForest::randomForest(x, y, keep.inbag=TRUE)
+
+}

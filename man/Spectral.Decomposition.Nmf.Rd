@@ -19,3 +19,32 @@ a Ramanome object. NMF is a technique used to decompose a non-negative matrix in
 two non-negative matrices, often used for data dimensionality reduction and feature
 extraction.
 }
+\examples{
+# Create sample non-negative spectral data
+wavenumbers <- seq(500, 3500, by = 10)
+n_samples <- 100
+n_waves <- length(wavenumbers)
+
+# Generate two non-negative basis spectra
+basis1 <- dnorm(wavenumbers, mean = 1000, sd = 100)
+basis2 <- dnorm(wavenumbers, mean = 2000, sd = 150)
+
+# Create non-negative coefficients
+coef1 <- abs(rnorm(n_samples, 2, 0.5))
+coef2 <- abs(rnorm(n_samples, 1, 0.3))
+
+# Create mixture spectra (ensuring non-negativity)
+spectra <- matrix(0, nrow = n_samples, ncol = n_waves)
+for(i in 1:n_samples) {
+  spectra[i,] <- coef1[i] * basis1 + coef2[i] * basis2
+}
+
+# Create Ramanome object
+raman_obj <- new("Ramanome",
+  datasets = list(raw = spectra),
+  wavenumber = wavenumbers
+)
+
+# Apply NMF
+nmf_result <- Spectral.Decomposition.Nmf(raman_obj)
+}

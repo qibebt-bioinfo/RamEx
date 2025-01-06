@@ -2,9 +2,7 @@
 % Please edit documentation in R/RamEx-Basic-Funciton.R
 \name{confirm.name}
 \alias{confirm.name}
-\title{string. If two values are provided, they are combined into a range string with a
-tilde (~) separator. If more than two values are provided, the function stops with
-an error.}
+\title{Format wavelength values into a string}
 \usage{
 confirm.name(waves)
 }
@@ -13,10 +11,13 @@ confirm.name(waves)
 wavelengths or a wavelength range.}
 }
 \value{
-A character string representing the formatted wavelength name or range.
+A character string representing either:
+  \item{Single wavelength}{The wavelength value as a string}
+  \item{Wavelength range}{Two wavelength values separated by a tilde (~)}
 }
 \description{
-string. If two values are provided, they are combined into a range string with a
+This function takes one or two wavelength values and formats them into a string.
+If two values are provided, they are combined into a range string with a
 tilde (~) separator. If more than two values are provided, the function stops with
 an error.
 }

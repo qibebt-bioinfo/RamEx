@@ -17,3 +17,7 @@ A vector containing the fold assignments for each sample.
 \description{
 This function generates balanced folds for cross-validation, ensuring an equal number of samples from each class in each fold.
 }
+\examples{
+# Create sample class labels
+y <- factor(rep(c("A", "B", "C"), each=10))
+}

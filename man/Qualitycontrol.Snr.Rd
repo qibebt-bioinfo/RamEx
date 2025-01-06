@@ -17,3 +17,9 @@ A vector indicating whether each spectrum passes the SNR test.
 \description{
 This function calculates the SNR for a dataset by comparing the signal and noise levels.
 }
+\examples{
+# Create sample spectral data
+set.seed(123)
+wavenumbers <- seq(500, 3500, length.out=200)
+spectra <- matrix(rnorm(4000), nrow=20)
+}

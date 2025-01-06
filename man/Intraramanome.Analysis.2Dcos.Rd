@@ -21,3 +21,18 @@ Captures both synchronous (simultaneous changes) and
 asynchronous (sequential changes) relationships, providing
 detailed insights into spectral changes
 }
+\examples{
+# Create sample Ramanome object with time-series data
+wavenumbers <- seq(500, 3500, length.out=50)
+time_points <- 10
+spectra <- matrix(rnorm(50*time_points), nrow=time_points)
+metadata <- data.frame(
+  time = 1:time_points,
+  group = rep("TimeSeries", time_points)
+)
+raman_obj <- new("Ramanome", 
+                 datasets=list(raw.data=spectra),
+                 wavenumber=wavenumbers,
+                 meta.data=metadata)
+
+}

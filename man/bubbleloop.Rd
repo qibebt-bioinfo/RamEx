@@ -20,3 +20,11 @@ A list containing the adjusted baseline and the bounds of each bubble.
 This function iteratively applies the bubble growing algorithm to a spectrum, adjusting the baseline
 and identifying the bounds of each bubble.
 }
+\examples{
+# Create a sample spectrum with multiple peaks
+x <- seq(0, 20, length.out=200)
+spectrum <- exp(-(x-5)^2) + 0.8*exp(-(x-10)^2) + 
+            0.6*exp(-(x-15)^2) + 0.2*sin(x)
+baseline <- rep(0, length(spectrum))
+min_bubble_widths <- 20
+}

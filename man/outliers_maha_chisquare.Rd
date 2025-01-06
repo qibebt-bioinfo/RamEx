@@ -18,3 +18,11 @@ A vector containing the indices of the detected outliers.
 This function detects outliers in a dataset using the Mahalanobis distance and chi-squared test.
 Outliers are defined as observations with Mahalanobis distances that have chi-squared test p-values below a certain threshold.
 }
+\examples{
+# Create sample data with outliers
+set.seed(123)
+normal_data <- matrix(rnorm(100), nrow=20)
+outlier_data <- matrix(rnorm(10, mean=5), nrow=2)
+data <- rbind(normal_data, outlier_data)
+
+}

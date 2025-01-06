@@ -22,3 +22,9 @@ from the mean spectrum of non-outlier spectra. The distance is calculated as the
 root of the sum of the squared differences between each spectrum and the mean spectrum.
 Spectra with a distance greater than a specified threshold are marked as outliers.
 }
+\examples{
+# Create sample spectral data
+set.seed(123)
+wavenumbers <- seq(500, 3500, length.out=100)
+spectra <- matrix(rnorm(3000), nrow=30)
+}

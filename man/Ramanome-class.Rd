@@ -5,6 +5,9 @@
 \alias{Ramanome-class}
 \alias{Ramanome}
 \title{Ramanome class}
+\value{
+A new Ramanome object
+}
 \description{
 This class represents a Ramanome object, which contains Raman data and associated metadata.
 }
@@ -22,3 +25,22 @@ This class represents a Ramanome object, which contains Raman data and associate
 \item{\code{interested.bands}}{A list of interested Raman bands}
 }}
 
+\examples{
+# Create sample data
+wavenumbers <- seq(500, 3500, by = 10)
+spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
+metadata <- data.frame(
+  group = factor(rep(c("Control", "Treatment"), each = 50)),
+  filenames = paste0("sample_", 1:100, ".txt")
+)
+
+# Create a Ramanome object
+raman_obj <- new("Ramanome",
+  datasets = list(raw = spectra),
+  wavenumber = wavenumbers,
+  meta.data = metadata,
+  reductions = list(),
+  interested.bands = list()
+)
+
+}

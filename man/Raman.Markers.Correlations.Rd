@@ -22,3 +22,9 @@ This function calculates the correlations between each column of a dataset X and
 variable y. It also computes the correlations for combinations of two and three
 variables, after applying certain transformations.
 }
+\examples{
+# Create sample spectral data
+set.seed(123)
+wavenumbers <- seq(500, 1500, by=100)
+X <- data.frame(matrix(rnorm(100), nrow=10))
+}

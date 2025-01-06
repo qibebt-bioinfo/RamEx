@@ -25,3 +25,31 @@ variable to follow distributions other than
 normal (e.g., binomial, Poisson) and uses a link function
  to relate predictors to the response
 }
+\examples{
+# Create sample Ramanome training object with count data
+wavenumbers <- seq(500, 3500, length.out=100)
+train_spectra <- matrix(rnorm(1000), nrow=10)
+train_metadata <- data.frame(
+  group = rpois(10, lambda=5) # Count data following Poisson distribution
+)
+train_obj <- new("Ramanome",
+                 datasets=list(raw.data=train_spectra),
+                 wavenumber=wavenumbers,
+                 meta.data=train_metadata)
+
+# Create sample test object
+test_spectra <- matrix(rnorm(500), nrow=5)
+test_metadata <- data.frame(
+  group = rpois(5, lambda=5)
+)
+test_obj <- new("Ramanome",
+                datasets=list(raw.data=test_spectra),
+                wavenumber=wavenumbers,
+                meta.data=test_metadata)
+
+# Perform GLM prediction
+\dontrun{
+glm_result <- Quantification.Glm(train_obj, test_obj)
+print(glm_result)
+}
+}

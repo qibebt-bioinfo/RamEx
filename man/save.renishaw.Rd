@@ -9,6 +9,30 @@ save.renishaw(dir_path)
 \arguments{
 \item{dir_path}{The directory path where the Raman data is located.}
 }
+\value{
+NULL. The function processes the input text files and saves new text files in the same directory
+        with modified names based on the grouping of the data. The original input files are removed.
+}
 \description{
 This function saves the Renishaw Raman data after processing.
+}
+\examples{
+\dontrun{
+# Create a temporary directory with sample data
+temp_dir <- tempdir()
+sample_data <- data.frame(
+  V1 = rep(1:2, each = 3),
+  V2 = rep(LETTERS[1:3], 2),
+  V3 = rnorm(6),
+  V4 = rnorm(6)
+)
+write.table(sample_data, 
+            file = file.path(temp_dir, "sample.txt"),
+            sep = "\t",
+            row.names = FALSE,
+            col.names = FALSE)
+
+# Process and save the Raman data
+save.renishaw(temp_dir)
+}
 }

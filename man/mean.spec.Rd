@@ -14,10 +14,20 @@
 \item{gap}{A numeric value representing the vertical gap between the mean lines of different groups.}
 }
 \value{
-A ggplot object representing the plot.
+A ggplot2 object containing:
+  \item{Lines}{Mean spectra for each group}
+  \item{Ribbons}{Standard deviation bands around each mean spectrum}
+  \item{x-axis}{Wavenumber values}
+  \item{y-axis}{Normalized intensity values}
+  \item{Legend}{Group identifiers}
 }
 \description{
 This function calculates the mean and standard deviation of spectral data for each group.
 It then creates a ggplot2 plot with ribbons representing the standard deviation and lines
 representing the mean for each group.
+}
+\examples{
+# Create sample spectral data
+wavenumbers <- seq(500, 3500, by = 10)
+spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
 }

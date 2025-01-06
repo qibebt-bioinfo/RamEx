@@ -16,3 +16,16 @@ A matrix containing the global IRCA interests.
 This function performs global IRCA analysis on the given Raman spectroscopy data object.
 It generates negative IRCA plots for each group and saves them as jpeg files.
 }
+\examples{
+# Create sample Ramanome object
+wavenumbers <- seq(500, 3500, length.out=100)
+spectra <- matrix(rnorm(1000), nrow=10)
+metadata <- data.frame(
+  group = rep(c("Control", "Treatment"), each=5)
+)
+raman_obj <- new("Ramanome", 
+                 datasets=list(raw.data=spectra),
+                 wavenumber=wavenumbers,
+                 meta.data=metadata)
+
+}
