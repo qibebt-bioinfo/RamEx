@@ -6,16 +6,9 @@
 #'
 #' @return A data frame containing the accuracy matrix with the following columns:
 #'   \item{true_labels}{The true class labels}
-#'   \item{pred_labels}{The predicted class labels} 
+#'   \item{pred_labels}{The predicted class labels}
 #'   \item{Freq}{The normalized frequencies/probabilities for each true-predicted label pair}
-#' @examples
-#' # Create a sample prediction matrix
-#' pred_matrix <- data.frame(
-#'   true_labels = c("A", "A", "B", "B", "C", "C"),
-#'   pred_labels = c("A", "B", "B", "C", "C", "A"),
-#'   Freq = c(10, 5, 15, 3, 12, 4)
-#' )
-#' 
+
 
 confusion.cal <- function(pred_matrix) {
   acc_matrix <- pred_matrix
@@ -41,17 +34,6 @@ confusion.cal <- function(pred_matrix) {
 #'   \item{text annotations}{Percentage values in each tile}
 #' @import ggplot2
 #' @import dplyr
-#' @examples
-#' # Create sample true and predicted labels
-#' true_labels <- factor(rep(c("A", "B", "C"), each = 20))
-#' pred_labels <- factor(c(
-#'   rep("A", 15), rep("B", 3), rep("C", 2),
-#'   rep("A", 4), rep("B", 12), rep("C", 4),
-#'   rep("A", 2), rep("B", 3), rep("C", 15)
-#' ))
-#' 
-
-
 confusion.plot <- function(true_labels, pred_labels) {
   pred_matrix <- as.data.frame(table(true_labels, pred_labels))
   colnames(pred_matrix) <- c('true_labels', 'pred_labels', 'Freq')
@@ -96,10 +78,7 @@ confusion.plot <- function(true_labels, pred_labels) {
 #' Defaults to 0.
 #' @return NULL. The function saves the plot as a PNG file named 'mean spec.png' in the current working directory.
 #' @importFrom ggplot2 ggsave
-#' @examples
-#' # Create a sample Ramanome object
-#' wavenumbers <- seq(500, 3500, by = 10)
-#' spectra <- matrix(rnorm(1000 * length(wavenumbers)), nrow = 1000)
+
 
 spec.mean.draw <- function(object, gap=0) {
   plot <- mean.spec(get.nearest.dataset(object), object@meta.data$group, gap)
@@ -129,10 +108,14 @@ spec.mean.draw <- function(object, gap=0) {
 #' @importFrom hyperSpec aggregate
 #' @importFrom ggplot2 ggplot aes geom_ribbon geom_line theme_bw labs scale_x_continuous theme
 #' @importFrom stats sd
+#' @export mean.spec
 #' @examples
-#' # Create sample spectral data
-#' wavenumbers <- seq(500, 3500, by = 10)
-#' spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' mean.spec(data_normalized@datasets$baseline.data, data_normalized@meta.data$group)
 
 mean.spec <- function(data, group, gap = 0.3) {
   levels <- levels(group)
@@ -225,20 +208,7 @@ mean.spec <- function(data, group, gap = 0.3) {
 #' @importFrom graphics image
 #' @importFrom rlist list.map
 #' @importFrom grDevices dev.off
-#' @examples
-#' # Create a sample Ramanome object with spatial information
-#' wavenumbers <- seq(500, 3500, by = 10)
-#' spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
-#' metadata <- data.frame(
-#'   x = rep(1:10, 10),
-#'   y = rep(1:10, each = 10)
-#' )
-#' raman_obj <- new("Ramanome",
-#'   datasets = list(raw = spectra),
-#'   meta.data = metadata,
-#'   interested.bands = list("1000" = rnorm(100))
-#' )
-#' 
+
 
 image.peak <- function(object, peak) {
   data <- data.frame(
@@ -283,7 +253,7 @@ image.peak <- function(object, peak) {
 #'     processed = processed_spectra
 #'   )
 #' )
-#' 
+#'
 
 get.nearest.dataset <- function(object) {
   dataset <- tail(names(object@datasets), 1)
@@ -306,7 +276,7 @@ get.nearest.dataset <- function(object) {
 #'   datasets = list(raw = spectra),
 #'   wavenumber = wavenumbers
 #' )
-#' 
+#'
 
 select.value <- function(object, wave) {
   loc <- which.min(abs(object@wavenumber - wave))
@@ -321,15 +291,7 @@ select.value <- function(object, wave) {
 #' @param object A Ramanome object.
 #' @param waves A vector with two values representing the lower and upper bounds of the wavenumber range.
 #' @return A numeric vector containing the summed Feature.Reduction.Intensity values across the specified wavenumber range for all spectra in the dataset.
-#' @examples
-#' # Create a sample Ramanome object
-#' wavenumbers <- seq(500, 3500, by = 10)
-#' spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
-#' raman_obj <- new("Ramanome",
-#'   datasets = list(raw = spectra),
-#'   wavenumber = wavenumbers
-#' )
-#' 
+
 
 select.band <- function(object, waves) {
   locs <- object@wavenumber <= waves[2] & object@wavenumber >= waves[1]
@@ -377,15 +339,7 @@ confirm.name <- function(waves) {
 #'   \item{Wavelength range}{Summed Feature.Reduction.Intensity values across the specified range}
 #' @seealso select.value for retrieving data at a single wavelength.
 #' @seealso select.band for retrieving the sum of data within a wavelength range.
-#' @examples
-#' # Create a sample Ramanome object
-#' wavenumbers <- seq(500, 3500, by = 10)
-#' spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
-#' raman_obj <- new("Ramanome",
-#'   datasets = list(raw = spectra),
-#'   wavenumber = wavenumbers
-#' )
-#' 
+
 confirm.select <- function(object, waves) {
   if (length(waves) == 1) {
     values <- select.value(object, waves)
@@ -476,14 +430,6 @@ SelfTheme <- function() {
 #' @importFrom ggthemes theme_tufte
 #' @importFrom ggplot2 scale_fill_manual
 #' @importFrom ggplot2 scale_color_manual
-#' @examples
-#' # Create sample data
-#' data <- data.frame(
-#'   UMAP1 = rnorm(100),
-#'   UMAP2 = rnorm(100),
-#'   group = factor(rep(c("Control", "Treatment"), each = 50)),
-#'   cluster = factor(rep(c("Cluster_1", "Cluster_2"), times = 50))
-#' )
 
 cluster.color <- function(data, group) {
   ncluster <- length(unique(data$cluster))
@@ -521,15 +467,7 @@ cluster.color <- function(data, group) {
 #'
 #' @return A data frame containing columns 3 and 4 of the input data frame for the rows where
 #'         the concatenated values of V1 and V2 match the input x value.
-#' @examples
-#' # Create sample spectral data
-#' spec <- data.frame(
-#'   V1 = rep(1:3, each = 2),
-#'   V2 = rep(c("A", "B"), 3),
-#'   V3 = rnorm(6),
-#'   V4 = rnorm(6)
-#' )
-#' 
+
 
 single <- function(spec, x) {
   return(spec[paste(spec$V1, spec$V2) == x, 3:4])
@@ -546,25 +484,6 @@ single <- function(spec, x) {
 #' @importFrom data.table fread
 #' @importFrom data.table fwrite
 #' @importFrom dplyr %>%
-#' @examples
-#' \dontrun{
-#' # Create a temporary directory with sample data
-#' temp_dir <- tempdir()
-#' sample_data <- data.frame(
-#'   V1 = rep(1:2, each = 3),
-#'   V2 = rep(LETTERS[1:3], 2),
-#'   V3 = rnorm(6),
-#'   V4 = rnorm(6)
-#' )
-#' write.table(sample_data, 
-#'             file = file.path(temp_dir, "sample.txt"),
-#'             sep = "\t",
-#'             row.names = FALSE,
-#'             col.names = FALSE)
-#' 
-#' # Process and save the Raman data
-#' save.renishaw(temp_dir)
-#' }
 
 save.renishaw <- function(dir_path) {
   setwd(dir_path)
@@ -579,7 +498,7 @@ save.renishaw <- function(dir_path) {
     filename <- filenames[j] %>% gsub('.txt', '', .)
     spec <- fread(filenames[j], header = FALSE, sep = "\t")
     groups <- base::unique(paste(spec$V1, spec$V2))
-    aa <- map(as.list(groups), single, spec = spec)
+    aa <- purrr::map(as.list(groups), single, spec = spec)
     names(aa) <- seq_along(aa)
     for (i in seq_along(aa)) {
       fwrite(
@@ -604,13 +523,6 @@ save.renishaw <- function(dir_path) {
 #' @param cutoff A numeric vector of two values specifying the lower and upper bounds of the wavelength range.
 #' @return A data frame containing the subset of the input spectral data where the wavelength values (V1)
 #'         fall within the specified cutoff range.
-#' @export cut.spec
-#' @examples
-#' # Create sample spectral data
-#' single_spec <- data.frame(
-#'   V1 = seq(400, 3600, by = 100),
-#'   V2 = rnorm(33)
-#' )
 cut.spec <- function(single_spec, cutoff) {
   return(single_spec[single_spec$V1 < cutoff[2] & single_spec$V1 > cutoff[1]])
 }

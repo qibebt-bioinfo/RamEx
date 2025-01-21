@@ -11,22 +11,7 @@
 #' @importFrom data.table fread
 #' @importFrom stats splinefun
 #' @export read.single
-#' @examples
-#' # Create a temporary spectral data file
-#' temp_file <- tempfile(fileext = ".txt")
-#' wave <- seq(500, 3000, by = 10)
-#' inten <- sin(wave/500) + rnorm(length(wave), 0, 0.1)
-#' write.table(data.frame(wave, inten), temp_file, 
-#'             sep = "\t", row.names = FALSE, col.names = FALSE)
-#'
-#' # Define wavelengths for interpolation
-#' xout <- seq(600, 2900, by = 50)
-#'
-#' # Read and process the spectral file
-#' result <- read.single(temp_file, xout)
-#'
-#' # Clean up
-#' unlink(temp_file)
+
 read.single <- function(cell_path,xout){
   if(!is.na(cell_path)&&cell_path!="")
     spec <- fread(cell_path, header = FALSE, sep = "\t")
@@ -64,22 +49,8 @@ read.single <- function(cell_path,xout){
 #' @importFrom parallel stopCluster
 #' @importFrom data.table fread
 #' @importFrom stringr str_split
-#' @examples
-#' # Create a temporary directory for sample spectral files
-#' temp_dir <- tempdir()
-#'
-#' # Create sample spectral files
-#' groups <- c("Control", "Treatment")
-#' for(i in 1:4) {
-#'   for(g in groups) {
-#'     fname <- file.path(temp_dir, paste0(g, "_sample_", i, ".txt"))
-#'     wave <- seq(500, 3000, by = 10)
-#'     inten <- sin(wave/500) + rnorm(length(wave), 0, 0.1)
-#'     write.table(data.frame(wave, inten), fname,
-#'                 sep = "\t", row.names = FALSE, col.names = FALSE)
-#'   }
-#' }
-#'
+
+
 read.spec <- function(data_path, group.index = 1, group.levels = NULL, cutoff = c(500, 3150), interpolation = FALSE) {
   filenames <- list.files(data_path, pattern = "*.txt",  full.names = TRUE,include.dirs = TRUE, recursive = TRUE)
   if(length(grep('Metadata.txt', filenames)) != 0)filenames <- filenames[-grep('Metadata.txt', filenames)]
@@ -156,21 +127,6 @@ read.spec <- function(data_path, group.index = 1, group.levels = NULL, cutoff = 
 #' @importFrom parallel parLapply
 #' @importFrom data.table fread
 #' @importFrom stringr str_split
-#' @examples
-#' # Create a temporary directory for sample spectral files
-#' temp_dir <- tempdir()
-#'
-#' # Create sample spectral files without parallel processing
-#' groups <- c("Control", "Treatment")
-#' for(i in 1:4) {
-#'   for(g in groups) {
-#'     fname <- file.path(temp_dir, paste0(g, "_sample_", i, ".txt"))
-#'     wave <- seq(500, 3000, by = 10)
-#'     inten <- sin(wave/500) + rnorm(length(wave), 0, 0.1)
-#'     write.table(data.frame(wave, inten), fname,
-#'                 sep = "\t", row.names = FALSE, col.names = FALSE)
-#'   }
-#' }
 read.spec.load <- function(data_path, group.index = 1, group.levels = NULL, cutoff = c(500, 3150), interpolation = FALSE) {
   filenames <- list.files(data_path, pattern = "*.txt",  full.names = TRUE,include.dirs = TRUE, recursive = TRUE)
   if(length(grep('Metadata.txt', filenames)) != 0)

@@ -19,9 +19,14 @@
 #' @importFrom ggthemes theme_tufte
 #' @import ggtext
 #' @examples
-#' # Load example data
-#' data_file <- system.file("extdata", "data", package = "RamEx")
-#' RamEx_data <- read.spec.load(data_file, group.index = 2)
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data.reduction.pca <- Feature.Reduction.Pca(data_cleaned, draw=TRUE, save = FALSE)
 
 Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE) {
   dataset <- get.nearest.dataset(object)
@@ -40,14 +45,14 @@ Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE) {
         panel.grid = element_blank(),
         panel.grid.minor = element_blank(),
         legend.title = element_blank(),
-        legend.text = element_markdown(size = 15, family = "myFont"),
+        legend.text = element_markdown(size = 15, family = "Helvetica"),
         legend.background = element_blank(),
         text = element_text(color = "black"),
-        axis.text.x = element_text(size = 15, angle = 0, family = "myFont"),
-        axis.text.y = element_text(size = 15, family = "myFont"),
+        axis.text.x = element_text(size = 15, angle = 0, family = "Helvetica"),
+        axis.text.y = element_text(size = 15, family = "Helvetica"),
         axis.ticks = element_line(linewidth = 1),
         axis.ticks.length = unit(0.4, "lines"),
-        axis.title = element_text(family = "myFont", size = 15)
+        axis.title = element_text(family = "Helvetica", size = 15)
       )
     print(plot)
   }
@@ -81,10 +86,14 @@ Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE) {
 #' @importFrom ggplot2 ggsave
 #' @import ggtext
 #' @examples
-#' # Load example data
-#' data_file <- system.file("extdata", "data", package = "RamEx")
-#' RamEx_data <- read.spec.load(data_file, group.index = 2)
-#' 
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data.reduction.tsne <- Feature.Reduction.Tsne(data_cleaned, draw=TRUE, save = FALSE)
 Feature.Reduction.Tsne <- function(object, draw = TRUE, save=FALSE) {
   dataset <- get.nearest.dataset(object)
 
@@ -110,14 +119,14 @@ Feature.Reduction.Tsne <- function(object, draw = TRUE, save=FALSE) {
       panel.grid = element_blank(),
       panel.grid.minor = element_blank(),
       legend.title = element_blank(),
-      legend.text = element_markdown(size = 15, family = "myFont"),
+      legend.text = element_markdown(size = 15, family = "Helvetica"),
       legend.background = element_blank(),
       text = element_text(color = "black"),
-      axis.text.x = element_text(size = 15, angle = 0, family = "myFont"),
-      axis.text.y = element_text(size = 15, family = "myFont"),
+      axis.text.x = element_text(size = 15, angle = 0, family = "Helvetica"),
+      axis.text.y = element_text(size = 15, family = "Helvetica"),
       axis.ticks = element_line(linewidth = 1),
       axis.ticks.length = unit(0.4, "lines"),
-      axis.title = element_text(family = "myFont", size = 15)
+      axis.title = element_text(family = "Helvetica", size = 15)
     )
   print(plot)
   }
@@ -154,10 +163,15 @@ return(object)
 #' @importFrom ggplot2 ggsave
 #' @import ggtext
 #' @examples
-#' # Load example data
-#' data_file <- system.file("extdata", "data", package = "RamEx")
-#' RamEx_data <- read.spec.load(data_file, group.index = 2)
-#' 
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data.reduction.umap <- Feature.Reduction.Umap(data_cleaned, draw=TRUE, save = FALSE)
+#'
 Feature.Reduction.Umap <- function(object, draw = TRUE, save=FALSE) {
   dataset <- get.nearest.dataset(object)
   data.red.pca <- data.frame(prcomp_irlba(dataset, n = 20, center = TRUE, scale. = TRUE)$x[, 1:20])
@@ -177,14 +191,14 @@ Feature.Reduction.Umap <- function(object, draw = TRUE, save=FALSE) {
       panel.grid = element_blank(),
       panel.grid.minor = element_blank(),
       legend.title = element_blank(),
-      legend.text = element_markdown(size = 15, family = "myFont"),
+      legend.text = element_markdown(size = 15, family = "Helvetica"),
       legend.background = element_blank(),
       text = element_text(color = "black"),
-      axis.text.x = element_text(size = 15, angle = 0, family = "myFont"),
-      axis.text.y = element_text(size = 15, family = "myFont"),
+      axis.text.x = element_text(size = 15, angle = 0, family = "Helvetica"),
+      axis.text.y = element_text(size = 15, family = "Helvetica"),
       axis.ticks = element_line(linewidth = 1),
       axis.ticks.length = unit(0.4, "lines"),
-      axis.title = element_text(family = "myFont", size = 15)
+      axis.title = element_text(family = "Helvetica", size = 15)
     )
   print(plot)
   }
@@ -223,9 +237,14 @@ return(object)
 #' @importFrom ade4 dudi.pco
 #' @import ggtext
 #' @examples
-#' # Load example data
-#' data_file <- system.file("extdata", "data", package = "RamEx")
-#' RamEx_data <- read.spec.load(data_file, group.index = 2)
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data.reduction.pcoa <- Feature.Reduction.Pcoa(data_cleaned, draw=TRUE, save = FALSE)
 
 Feature.Reduction.Pcoa <- function(object, draw = TRUE, save=FALSE) {
   dataset <- get.nearest.dataset(object)
@@ -245,14 +264,14 @@ Feature.Reduction.Pcoa <- function(object, draw = TRUE, save=FALSE) {
         panel.grid = element_blank(),
         panel.grid.minor = element_blank(),
         legend.title = element_blank(),
-        legend.text = element_markdown(size = 15, family = "myFont"),
+        legend.text = element_markdown(size = 15, family = "Helvetica"),
         legend.background = element_blank(),
         text = element_text(color = "black"),
-        axis.text.x = element_text(size = 15, angle = 0, family = "myFont"),
-        axis.text.y = element_text(size = 15, family = "myFont"),
+        axis.text.x = element_text(size = 15, angle = 0, family = "Helvetica"),
+        axis.text.y = element_text(size = 15, family = "Helvetica"),
         axis.ticks = element_line(linewidth = 1),
         axis.ticks.length = unit(0.4, "lines"),
-        axis.title = element_text(family = "myFont", size = 15)
+        axis.title = element_text(family = "Helvetica", size = 15)
       )
     print(plot)
   }
@@ -278,12 +297,14 @@ Feature.Reduction.Pcoa <- function(object, draw = TRUE, save=FALSE) {
 #' the `interested.bands` slot.
 #' @export Feature.Reduction.Intensity
 #' @examples
-#' # Load example data
-#' data_file <- system.file("extdata", "data", package = "RamEx")
-#' RamEx_data <- read.spec.load(data_file, group.index = 2)
-#' 
-#' # Extract intensity values at specific wavelengths
-#' RamEx_data <- Feature.Reduction.Intensity(RamEx_data, c(1000, 1500))
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
 Feature.Reduction.Intensity <- function(object, wavenumber) {
   wavenumber <- as.list(wavenumber)
   a <- lapply(wavenumber, function(x) confirm.select(object, x))

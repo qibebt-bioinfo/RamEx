@@ -6,10 +6,7 @@
 #' @param labels A vector of class labels
 #' @param p The proportion of data to include in the training set (default: 0.7)
 #' @return A vector of indices for the training set
-#' @examples
-#' # Create example labels
-#' labels <- c(rep(1,10), rep(2,10), rep(3,10))
-#' 
+
 
 stratified_partition <- function(labels, p = 0.7) {
   unique_labels <- unique(labels)
@@ -37,12 +34,15 @@ stratified_partition <- function(labels, p = 0.7) {
 #' @importFrom ggplot2 ggsave
 #' @export Classification.Lda
 #' @examples
-#' # Load example data
-#' data_file <- system.file("extdata", "data", package = "RamEx")
-#' RamEx_data <- read.spec.load(data_file, group.index = 2)
-#' 
-#' # Perform LDA classification with single dataset (auto split)
-#' Classification.Lda(RamEx_data)
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+#' Classification.Lda(data_cleaned)
 Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42) {
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
@@ -95,12 +95,15 @@ if(show){print(pred.train)
 #' @importFrom ggplot2 ggsave
 #' @export Classification.Svm
 #' @examples
-#' # Load example data
-#' data_file <- system.file("extdata", "data", package = "RamEx")
-#' RamEx_data <- read.spec.load(data_file, group.index = 2)
-#' 
-#' # Perform SVM classification with auto split
-#' Classification.Svm(RamEx_data)
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+#' Classification.Svm(data_cleaned)
 Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42) {
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
@@ -129,28 +132,31 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
   }
 
 
-  #' Perform classification use RandomForest model
-  #'
-  #' This function performs classification using RF
-  #'
-  #' @param train The training data object
-  #' @param test The test data object (optional)
-  #' @param show Whether user want to show the results
-  #' @param save Wether user want to save the results
-  #' @param seed The random seed
-  #' @return A list containing:
-  #'   \item{pred.train}{The confusion matrix plot for training data}
-  #'   \item{pred.test}{The confusion matrix plot for test data}
-  #' @importFrom ggplot2 ggsave
-  #' @importFrom randomForest randomForest
-  #' @export Classification.Rf
-  #' @examples
-  #' # Load example data
-  #' data_file <- system.file("extdata", "data", package = "RamEx")
-  #' RamEx_data <- read.spec.load(data_file, group.index = 2)
-  #' 
-  #' # Perform RF classification with auto split
-  #' Classification.Rf(RamEx_data)
+#' Perform classification use RandomForest model
+#'
+#' This function performs classification using RF
+#'
+#' @param train The training data object
+#' @param test The test data object (optional)
+#' @param show Whether user want to show the results
+#' @param save Wether user want to save the results
+#' @param seed The random seed
+#' @return A list containing:
+#'   \item{pred.train}{The confusion matrix plot for training data}
+#'   \item{pred.test}{The confusion matrix plot for test data}
+#' @importFrom ggplot2 ggsave
+#' @importFrom randomForest randomForest
+#' @export Classification.Rf
+#' @examples
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+#' Classification.Rf(data_cleaned)
   Classification.Rf <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42) {
     if (is.null(test)) {
       data_set <- get.nearest.dataset(train)
@@ -179,21 +185,28 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
       print(pred.test)}
     }
 
-    #' Gaussian Mixture Model (GMM)
-    #'
-    #' A probabilistic model that assumes data is generated from
-    #' a mixture of Gaussian distributions and assigns probabilities
-    #'  to each class
-    #'
-    #' @param train The training data object
-    #' @param test The test data object (optional)
-    #' @return The GMM model.
-    #' @export Classification.Gmm
-    #' @importFrom mclust Mclust
-    #' @examples
-    #' # Load example data
-    #' data_file <- system.file("extdata", "data", package = "RamEx")
-    #' RamEx_data <- read.spec.load(data_file, group.index = 2)
+#' Gaussian Mixture Model (GMM)
+#'
+#' A probabilistic model that assumes data is generated from
+#' a mixture of Gaussian distributions and assigns probabilities
+#'  to each class
+#'
+#' @param train The training data object
+#' @param test The test data object (optional)
+#' @return The GMM model.
+#' @export Classification.Gmm
+#' @importFrom mclust Mclust
+#' @importFrom mclust mclustBIC
+#' @examples
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+#' Classification.Gmm(data_cleaned)
     Classification.Gmm <- function(train, test = NULL) {
       if (is.null(test)) {
         data_set <- get.nearest.dataset(train)

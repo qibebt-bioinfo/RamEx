@@ -12,14 +12,18 @@
 #' @importFrom mdatools mcrals
 #' @importFrom mdatools constraint
 #' @examples
-#' # Create sample spectral data
-#' wavenumbers <- seq(500, 3500, by = 10)
-#' n_samples <- 100
-#' n_waves <- length(wavenumbers)
-#' 
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+#' decom_mcrals <- Spectral.Decomposition.Mcrals(data_cleaned, 2)
 
 Spectral.Decomposition.Mcrals<- function(object, ncomp) {
-  mcrals <- mdatools::mcrals(get.nearest.dataset(object), ncomp,cont.constraints =list(
+  mcrals <- mdatools::mcrals(object@datasets$normalized.data, ncomp,cont.constraints =list(
     constraint("norm", params = list(type = "sum"))
   ), spec.constraints=list(
     constraint("angle", params = list(weight = 0.05)),
@@ -44,14 +48,18 @@ Spectral.Decomposition.Mcrals<- function(object, ncomp) {
 #' @importFrom fastICA fastICA
 #' @importFrom ica icafast
 #' @examples
-#' # Create sample spectral data with mixed sources
-#' wavenumbers <- seq(500, 3500, by = 10)
-#' n_samples <- 100
-#' n_waves <- length(wavenumbers)
-#' 
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+#' decom_ica <- Spectral.Decomposition.Ica(data_cleaned, 2)
 
 Spectral.Decomposition.Ica <- function(object, ncomp) {
-  ica.result <- icafast(get.nearest.dataset(object), ncomp)
+  ica.result <- icafast(object@datasets$normalized.data, ncomp)
   return(ica.result)
 }
 
@@ -70,36 +78,20 @@ Spectral.Decomposition.Ica <- function(object, ncomp) {
 #' @export Spectral.Decomposition.Nmf
 #' @importFrom NMF nmf
 #' @examples
-#' # Create sample non-negative spectral data
-#' wavenumbers <- seq(500, 3500, by = 10)
-#' n_samples <- 100
-#' n_waves <- length(wavenumbers)
-#' 
-#' # Generate two non-negative basis spectra
-#' basis1 <- dnorm(wavenumbers, mean = 1000, sd = 100)
-#' basis2 <- dnorm(wavenumbers, mean = 2000, sd = 150)
-#' 
-#' # Create non-negative coefficients
-#' coef1 <- abs(rnorm(n_samples, 2, 0.5))
-#' coef2 <- abs(rnorm(n_samples, 1, 0.3))
-#' 
-#' # Create mixture spectra (ensuring non-negativity)
-#' spectra <- matrix(0, nrow = n_samples, ncol = n_waves)
-#' for(i in 1:n_samples) {
-#'   spectra[i,] <- coef1[i] * basis1 + coef2[i] * basis2
-#' }
-#' 
-#' # Create Ramanome object
-#' raman_obj <- new("Ramanome",
-#'   datasets = list(raw = spectra),
-#'   wavenumber = wavenumbers
-#' )
-#' 
-#' # Apply NMF
-#' nmf_result <- Spectral.Decomposition.Nmf(raman_obj)
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+#' decom_nmf <- Spectral.Decomposition.Nmf(data_cleaned)
+
 
 Spectral.Decomposition.Nmf <- function(object) {
-  dataset <- get.nearest.dataset(object)
+  dataset <- object@datasets$normalized.data
+  dataset[dataset<0] <- 0
   res <- nmf(dataset, 2, method="ns", seed=123456)
   return(res)
 }

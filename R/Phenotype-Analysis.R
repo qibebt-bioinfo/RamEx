@@ -17,6 +17,7 @@
 #' @export Phenotype.Analysis.Louvaincluster
 #' @importFrom igraph graph_from_adjacency_matrix
 #' @importFrom igraph cluster_louvain
+#' @importFrom igraph membership
 #' @importFrom Matrix sparseMatrix
 #' @importFrom foreach %dopar%
 #' @import foreach foreach
@@ -25,13 +26,16 @@
 #' @importFrom parallel detectCores
 #' @importFrom RcppAnnoy AnnoyEuclidean
 #' @examples
-#' # Load example Ramanome data
-#' data_file <- system.file("extdata", "data", package = "RamEx")
-#' RamEx_data <- read.spec.load(data_file, group.index = 2)
-#' 
-#' # Define resolution values for clustering
-#' resolutions <- c(0.5, 1.0, 1.5)
-#' 
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+#' #options(mc.cores = 2)
+#' #clusters_Louvaincluster <- Phenotype.Analysis.Louvaincluster(object = data_cleaned, resolutions = c(0.8))
 
 Phenotype.Analysis.Louvaincluster <- function(object, resolutions,npc=10, threshold=0.001, k=30, n_tree=50) {
 
@@ -130,7 +134,7 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,npc=10, thresh
 
 
 #' k-Means Clustering Analysis
-#' 
+#'
 #' A centroid-based clustering algorithm that partitions
 #' data into a predefined number of clusters by assigning
 #' sample to the nearest center
@@ -140,10 +144,15 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,npc=10, thresh
 #' @export Phenotype.Analysis.Kmeans
 #' @importFrom stats kmeans
 #' @examples
-#' # Load example Ramanome data
-#' data_file <- system.file("extdata", "data", package = "RamEx")
-#' RamEx_data <- read.spec.load(data_file, group.index = 2)
-#' 
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+#' clusters_kmneans <- Phenotype.Analysis.Kmeans(data_cleaned)
 
 Phenotype.Analysis.Kmeans <- function(object) {
   data_x <- get.nearest.dataset(object)
@@ -169,13 +178,18 @@ Phenotype.Analysis.Kmeans <- function(object) {
 #' @importFrom vegan vegdist
 #' @importFrom graphics plot
 #' @examples
-#' # Load example Ramanome data
-#' data_file <- system.file("extdata", "data", package = "RamEx")
-#' RamEx_data <- read.spec.load(data_file, group.index = 2)
-#' 
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' data_cleaned <- data_normalized[data_cleaned$index_good,]
+#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+#' clusters_hca <- Phenotype.Analysis.Hca(data_cleaned)
 
 Phenotype.Analysis.Hca <- function(object) {
-  dataset <- get.nearest.dataset(object)
+  dataset <- object@datasets$normalized.data
   distance.matrix <- vegdist(dataset, method = "euclidean")
   fit.average <- hclust(distance.matrix, method="average")
   plot(
@@ -184,4 +198,5 @@ Phenotype.Analysis.Hca <- function(object) {
     cex=.8,
     main="Vaerage Linkage Clustering"
   )
+  return(fit.average)
 }

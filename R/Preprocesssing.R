@@ -6,19 +6,13 @@
 #' @param order The order of the polynomial used in the baseline calculation (default: 1)
 #'
 #' @return The modified object with preprocessed baseline data
-#'
-#' @examples
-#' # Create a sample Ramanome object
-#' data <- matrix(rnorm(1000), nrow=10)
-#' wavenumbers <- seq(500, 3500, length.out=100)
-#' raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
-#' 
-#' # Apply baseline correction
-#' baseline_corrected <- Preprocesssing.Baseline.Polyfit(raman_obj, order=2)
-#'
 #' @importFrom hyperSpec spc.fit.poly.below
 #' @importFrom hyperSpec spc.fit.poly
 #' @export Preprocesssing.Baseline.Polyfit
+#' @examples
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
 Preprocesssing.Baseline.Polyfit <- function(object, order = 1) {
   wavenumber <- object@wavenumber
   spc2hs <- new(
@@ -99,15 +93,12 @@ Preprocesssing.Baseline.Polyfit <- function(object, order = 1) {
 #' @param object Ramanome object
 #'
 #' @return The baseline corrected spectra with bubble method
-#' 
-#' @examples
-#' # Create a sample Ramanome object
-#' data <- matrix(rnorm(1000), nrow=10)
-#' wavenumbers <- seq(500, 3500, length.out=100)
-#' raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
-#' 
-#' 
 #' @export Preprocesssing.Baseline.Bubble
+#' @examples
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
 Preprocesssing.Baseline.Bubble <- function(object){
   band_1 <- which(object@wavenumber < 1800)
   band_2 <- which(object@wavenumber > 1800 & object@wavenumber < 2700)
@@ -133,16 +124,14 @@ Preprocesssing.Baseline.Bubble <- function(object){
 #'
 #' @return The updated Ramanome object with the wavenumber range cut and the corresponding dataset.
 #'
-#' @examples
-#' # Create a sample Ramanome object
-#' data <- matrix(rnorm(1000), nrow=10)
-#' wavenumbers <- seq(500, 3500, length.out=100)
-#' raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
-#' 
-#' # Cut the wavenumber range from 1000 to 2000
-#' cut_obj <- Preprocesssing.Cutoff(raman_obj, from=1000, to=2000)
-#'
 #' @export Preprocesssing.Cutoff
+#' @examples
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+#' Preprocesssing.Cutoff(data_normalized,550, 1800)
 Preprocesssing.Cutoff <- function(object, from, to) {
   waves <- object@wavenumber
   pred.data <- get.nearest.dataset(object)
@@ -161,20 +150,16 @@ Preprocesssing.Cutoff <- function(object, from, to) {
 #' @param method The normalize method
 #' @param wave The interested wavenumber
 #' @return The updated Ramanome object with normalized Raman data.
-#'
-#' @examples
-#' # Create a sample Ramanome object
-#' data <- matrix(rnorm(1000), nrow=10)
-#' wavenumbers <- seq(500, 3500, length.out=100)
-#' raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
-#' 
-#' # Apply different normalization methods
-#' norm_area <- Preprocesssing.Normalize(raman_obj, method="area")
-#' norm_max <- Preprocesssing.Normalize(raman_obj, method="max") 
-#' norm_ch <- Preprocesssing.Normalize(raman_obj, method="ch")
-#' norm_specific <- Preprocesssing.Normalize(raman_obj, method="specific", wave=1500)
-#'
 #' @export Preprocesssing.Normalize
+#' @examples
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+#' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+#' data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+#' data_normalized_ch <- Preprocesssing.Normalize(data_baseline, "ch")
+#' #data_normalized_specific <- Preprocesssing.Normalize(data_baseline, "specific")
+#' data_normalized_max <- Preprocesssing.Normalize(data_baseline, "max")
+#' data_normalized_area <- Preprocesssing.Normalize(data_baseline, "area")
 Preprocesssing.Normalize <- function(object, method, wave = NULL){
 
   dataset <- get.nearest.dataset(object)
@@ -217,19 +202,11 @@ Preprocesssing.Normalize <- function(object, method, wave = NULL){
 #' @param w The window size used in the Savitzky-Golay filter. Defaults to 11.
 #' @param delta.wav The change in wavelength between each data point. Defaults to 2.
 #' @return The updated Ramanome object with the smoothed spectral data.
-#'
-#' @examples
-#' # Create a sample Ramanome object with noisy data
-#' data <- matrix(rnorm(1000), nrow=10)
-#' wavenumbers <- seq(500, 3500, length.out=100)
-#' raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
-#' 
-#' # Apply Savitzky-Golay smoothing
-#' smoothed_obj <- Preprocesssing.Smooth.Sg(raman_obj, m=2, p=7, w=15)
-#'
-#' @export Preprocesssing.Smooth.Sg
 #' @importFrom prospectr savitzkyGolay
-
+#' @export Preprocesssing.Smooth.Sg
+#' @examples
+#' data(RamEx_data)
+#' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
 Preprocesssing.Smooth.Sg <- function(object, m = 0, p = 5, w = 11, delta.wav = 2) {
   pred.data <- get.nearest.dataset(object)
   pred.data <- cbind(
@@ -253,14 +230,11 @@ Preprocesssing.Smooth.Sg <- function(object, m = 0, p = 5, w = 11, delta.wav = 2
 #'
 #' @param object A Ramanome object containing the raw spectral data.
 #' @return The updated Ramanome object with the SNV-transformed data.
-#'
-#' @examples
-#' # Create a sample Ramanome object
-#' data <- matrix(rnorm(1000), nrow=10)
-#' wavenumbers <- seq(500, 3500, length.out=100)
-#' raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
-#' 
 #' @importFrom prospectr standardNormalVariate
+#' @export Preprocesssing.Smooth.Snv
+#' @examples
+#' data(RamEx_data)
+#' data_smoothed_snv <- Preprocesssing.Smooth.Snv(RamEx_data)
 
 Preprocesssing.Smooth.Snv <- function(object) {
   #pred.data <- get.nearest.dataset(object)
@@ -284,23 +258,13 @@ Preprocesssing.Smooth.Snv <- function(object) {
 #' @param cal_mean Logical value indicating whether to calculate the mean background spectrum.
 #'
 #' @return The modified Ramanome object.
-#'
-#' @examples
-#' # Create a sample Ramanome object with background spectra
-#' data <- matrix(rnorm(1000), nrow=10)
-#' filenames <- c("group1_cell1", "group1_BG", "group2_cell1", "group2_BG")
-#' wavenumbers <- seq(500, 3500, length.out=100)
-#' meta <- data.frame(filenames=filenames, group=c("group1","group1","group2","group2"))
-#' raman_obj <- new("Ramanome", datasets=list(raw.data=data), 
-#'                  wavenumber=wavenumbers, meta.data=meta)
-#' 
-#'
 #' @importFrom stringr str_extract
 #' @importFrom stringr str_split_i
 #' @importFrom stringr str_detect
 #' @importFrom hyperSpec aggregate
 #' @importFrom rlist list.map
 #' @export Preprocesssing.Background.Remove
+
 Preprocesssing.Background.Remove <- function(object, cell.index, cal_mean = FALSE) {
 
   # Extract group and cell information from filenames
@@ -358,17 +322,12 @@ Preprocesssing.Background.Remove <- function(object, cell.index, cal_mean = FALS
 #'
 #' @param image A numeric matrix representing the input image
 #' @param kernel_height Height of the kernel window
-#' @param kernel_width Width of the kernel window  
+#' @param kernel_width Width of the kernel window
 #' @param device Device to use for computation - either "CPU" or "GPU"
 #'
 #' @return A matrix where each column is a vectorized block from the input image.
 #'         For CPU device, returns a regular matrix.
 #'         For GPU device, returns a gpuMatrix.
-#'
-#' @examples
-#' # Create a sample image matrix
-#' img <- matrix(1:100, nrow=10)
-#' 
 matrix2vector <- function(image, kernel_height, kernel_width, device) {
   image_height <- nrow(image)
   image_width <- ncol(image)
@@ -404,11 +363,7 @@ matrix2vector <- function(image, kernel_height, kernel_width, device) {
 #' @param all_data The rammannome class
 #' @param device Parallel device, default is null for CPU, can be set to "GPU"
 #' @return A rammanome object
-#'
-#' @examples
-#' # Create sample data
-#' data <- matrix(rnorm(1000), nrow=10)
-#' 
+
 
 gpupre_spike_matrix <- function(all_data, device = NULL) {
   all_spc <- as.matrix(all_data[,-1])
@@ -480,21 +435,10 @@ gpupre_spike_matrix <- function(all_data, device = NULL) {
 #' @param device Parallel device, default is null for CPU, can be set to "GPU"
 #' @return A rammanome object
 #'
-#' @examples
-#' # Create a sample Ramanome object with spikes
-#' data <- matrix(rnorm(1000), nrow=10)
-#' wavenumbers <- seq(500, 3500, length.out=100)
-#' raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
-#' 
-#' # Remove spikes using CPU
-#' despike_cpu <- Preprocesssing.Background.Spike(raman_obj, device="CPU")
-#' 
-#' # Remove spikes using GPU (if available)
-#' \dontrun{
-#' despike_gpu <- Preprocesssing.Background.Spike(raman_obj, device="GPU")
-#' }
-#'
 #' @export Preprocesssing.Background.Spike
+#' @examples
+#' data(RamEx_data)
+#' data_spike <- Preprocesssing.Background.Spike(RamEx_data,"CPU")
 Preprocesssing.Background.Spike <- function(object, device){
   data <- get.nearest.dataset(object)
   pre.data <- gpupre_spike_matrix(data, device)
