@@ -1,6 +1,6 @@
 Package: RamEx
 Type: Package
-Title: Ramanome Explorer is a R package for comprehensive and efficient analysis and comparison of ramanomes.
+Title: Ramanome Explorer, a R package for comprehensive and efficient analysis and comparison of ramanomes.
 Version: 0.99.0
 Authors@R: 
     c(
@@ -11,11 +11,13 @@ Description: By providing simple-to-use modules for computational tasks that oth
 License: GPL
 Encoding: UTF-8
 RoxygenNote: 7.3.2
-Depends: R (>= 3.0), RColorBrewer, Rcpp, circlize
+Depends: R (>= 3.5.0)
 Imports:
-   MASS, MLmetrics, Matrix, NMF, parallel, Rtsne, cowplot, data.table, dbscan, disprofas, doParallel, dplyr, e1071, fastICA, foreach, ggforce, ggplot2, ggthemes, grDevices, graphics, hyperSpec, ica, igraph, mdatools, methods, pheatmap, irlba, prospectr, purrr, randomForest, rlist, scales, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, proxy, reshape2, ggtext, mclust, RcppAnnoy, ade4, magrittr, corr2D
+   MASS, RColorBrewer, Rcpp, RcppParallel, circlize, pls, mclust, MLmetrics, Matrix, NMF, parallel, Rtsne, cowplot, data.table, dbscan, disprofas, doParallel, dplyr, e1071, fastICA, foreach, ggforce, ggplot2, ggthemes, grDevices, graphics, hyperSpec, ica, igraph, mdatools, methods, pheatmap, irlba, prospectr, purrr, randomForest, rlist, scales, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, proxy, reshape2, ggtext, RcppAnnoy, ade4, magrittr, corr2D, robustbase
 Suggests:
-    testthat,knitr, RcppParallel, Rcpp, gpuR
+    testthat,knitr,gpuR, Biobase
+LinkingTo:
+    Rcpp, RcppParallel
 biocViews: Visualization, Clustering, Software
 Config/testthat/edition: 3
 VignetteBuilder: knitr
