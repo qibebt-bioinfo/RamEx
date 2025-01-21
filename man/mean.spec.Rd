@@ -27,7 +27,10 @@ It then creates a ggplot2 plot with ribbons representing the standard deviation 
 representing the mean for each group.
 }
 \examples{
-# Create sample spectral data
-wavenumbers <- seq(500, 3500, by = 10)
-spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+mean.spec(data_normalized@datasets$baseline.data, data_normalized@meta.data$group)
 }

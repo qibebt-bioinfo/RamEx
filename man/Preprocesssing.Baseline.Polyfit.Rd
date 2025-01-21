@@ -18,12 +18,7 @@ The modified object with preprocessed baseline data
 This function performs baseline pre-processing on the input object.
 }
 \examples{
-# Create a sample Ramanome object
-data <- matrix(rnorm(1000), nrow=10)
-wavenumbers <- seq(500, 3500, length.out=100)
-raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
-
-# Apply baseline correction
-baseline_corrected <- Preprocesssing.Baseline.Polyfit(raman_obj, order=2)
-
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
 }

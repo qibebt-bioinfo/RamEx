@@ -20,21 +20,14 @@ This function performs local IRCA analysis on the given Raman spectroscopy data 
 It generates negative IRCA plots for each group and saves them as png files.
 }
 \examples{
-# Create sample Ramanome object
-wavenumbers <- seq(500, 3500, length.out=100)
-spectra <- matrix(rnorm(1000), nrow=10)
-metadata <- data.frame(
-  group = rep(c("Control", "Treatment"), each=5)
-)
-raman_obj <- new("Ramanome", 
-                 datasets=list(raw.data=spectra),
-                 wavenumber=wavenumbers,
-                 meta.data=metadata)
-
-# Create band annotations
-bands_ann <- data.frame(
-  Wave_num = c(1000, 1500, 2000),
-  Group = c("A", "B", "C")
-)
-
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+data_cleaned <- data_normalized[data_cleaned$index_good,]
+bands_ann <- data.frame(rbind(cbind(c(742,850,872,971,997,1098,1293,1328,1426,1576),'Nucleic acid'),cbind(c(824,883,1005,1033,1051,1237,1559,1651),'Protein'),cbind(c(1076,1119,1370,2834,2866,2912),'Lipids')))
+colnames(bands_ann) <- c('Wave_num', 'Group')
+Intraramanome.Analysis.Irca.Local(data_cleaned, bands_ann = bands_ann)
 }

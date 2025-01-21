@@ -16,10 +16,8 @@ The baseline corrected spectra with bubble method
 This function performs baseline pre-processing on the input object.
 }
 \examples{
-# Create a sample Ramanome object
-data <- matrix(rnorm(1000), nrow=10)
-wavenumbers <- seq(500, 3500, length.out=100)
-raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
-
-
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
 }

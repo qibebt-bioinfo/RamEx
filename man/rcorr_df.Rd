@@ -16,12 +16,3 @@ A list containing the correlation matrix, p-values, and the number of observatio
 This function calculates Pearson's and Spearman's correlation coefficients for a given data frame.
 The function uses the `rcorr` function from the Hmisc package to perform the correlation analysis.
 }
-\examples{
-# Create sample data frame
-df <- data.frame(
-  x = rnorm(100),
-  y = rnorm(100),
-  z = rnorm(100)
-)
-
-}

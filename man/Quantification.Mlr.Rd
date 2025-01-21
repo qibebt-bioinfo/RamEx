@@ -24,30 +24,14 @@ no multicollinearity among predictors and a linear
 relationship between predictors and response
 }
 \examples{
-# Create sample Ramanome training object with concentration data
-wavenumbers <- seq(500, 3500, length.out=100)
-train_spectra <- matrix(rnorm(1000), nrow=10)
-train_metadata <- data.frame(
-  group = rnorm(10, mean=50, sd=10) # Concentration values
-)
-train_obj <- new("Ramanome",
-                 datasets=list(raw.data=train_spectra),
-                 wavenumber=wavenumbers,
-                 meta.data=train_metadata)
-
-# Create sample test object
-test_spectra <- matrix(rnorm(500), nrow=5)
-test_metadata <- data.frame(
-  group = rnorm(5, mean=50, sd=10)
-)
-test_obj <- new("Ramanome",
-                datasets=list(raw.data=test_spectra),
-                wavenumber=wavenumbers,
-                meta.data=test_metadata)
-
-# Perform MLR prediction
-\dontrun{
-mlr_result <- Quantification.Mlr(train_obj, test_obj)
-print(mlr_result)
-}
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+data_cleaned <- data_normalized[data_cleaned$index_good,]
+data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+data_cleaned <- Feature.Reduction.Pca(data_cleaned,  draw=FALSE , save = FALSE)
+quan_mlr <- Quantification.Mlr(data_cleaned)
 }

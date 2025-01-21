@@ -20,15 +20,12 @@ The updated Ramanome object with normalized Raman data.
 This function applies normalization to the Raman data based on the ch method/max method/specific method/area method and updates the Raman object.
 }
 \examples{
-# Create a sample Ramanome object
-data <- matrix(rnorm(1000), nrow=10)
-wavenumbers <- seq(500, 3500, length.out=100)
-raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
-
-# Apply different normalization methods
-norm_area <- Preprocesssing.Normalize(raman_obj, method="area")
-norm_max <- Preprocesssing.Normalize(raman_obj, method="max") 
-norm_ch <- Preprocesssing.Normalize(raman_obj, method="ch")
-norm_specific <- Preprocesssing.Normalize(raman_obj, method="specific", wave=1500)
-
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized_ch <- Preprocesssing.Normalize(data_baseline, "ch")
+#data_normalized_specific <- Preprocesssing.Normalize(data_baseline, "specific")
+data_normalized_max <- Preprocesssing.Normalize(data_baseline, "max")
+data_normalized_area <- Preprocesssing.Normalize(data_baseline, "area")
 }

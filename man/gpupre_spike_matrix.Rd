@@ -17,8 +17,3 @@ A rammanome object
 \description{
 This function performs Pre spike function
 }
-\examples{
-# Create sample data
-data <- matrix(rnorm(1000), nrow=10)
-
-}

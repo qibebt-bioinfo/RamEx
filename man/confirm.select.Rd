@@ -24,16 +24,6 @@ provided, it uses `select.value` to retrieve the data at that wavelength. If a
 range of wavelengths is provided, it uses `select.band` to retrieve the sum of
 the data within that range.
 }
-\examples{
-# Create a sample Ramanome object
-wavenumbers <- seq(500, 3500, by = 10)
-spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
-raman_obj <- new("Ramanome",
-  datasets = list(raw = spectra),
-  wavenumber = wavenumbers
-)
-
-}
 \seealso{
 select.value for retrieving data at a single wavelength.
 

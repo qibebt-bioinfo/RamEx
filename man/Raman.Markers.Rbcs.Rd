@@ -42,8 +42,13 @@ A data frame containing the selected feature importances.
 This function performs random forest classification on Raman data and generates feature importances.
 }
 \examples{
-# Create sample Ramanome object
-set.seed(123)
-wavenumbers <- seq(500, 3500, length.out=100)
-spectra <- matrix(rnorm(2000), nrow=20)
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+data_cleaned <- data_normalized[data_cleaned$index_good,]
+data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, draw = FALSE)
 }

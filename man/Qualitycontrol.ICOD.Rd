@@ -33,9 +33,10 @@ It uses a combination of bubble filling, peak detection, and clustering to ident
 regions of the matrix that are significantly different from the rest.
 }
 \examples{
-# Create sample spectral data matrix
-set.seed(123)
-wavenumbers <- seq(500, 3500, length.out=100)
-spectra <- matrix(rnorm(1000), nrow=10)
-
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
 }

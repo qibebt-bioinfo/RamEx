@@ -21,13 +21,3 @@ A ggplot2 object containing a tile plot visualization of the confusion matrix wi
 \description{
 This function plots the prediction results using a tile plot.
 }
-\examples{
-# Create sample true and predicted labels
-true_labels <- factor(rep(c("A", "B", "C"), each = 20))
-pred_labels <- factor(c(
-  rep("A", 15), rep("B", 3), rep("C", 2),
-  rep("A", 4), rep("B", 12), rep("C", 4),
-  rep("A", 2), rep("B", 3), rep("C", 15)
-))
-
-}

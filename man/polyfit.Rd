@@ -26,20 +26,3 @@ This function performs polynomial fitting to correct the baseline of spectral da
 It iteratively fits a polynomial to the data, ensuring that the fitted values
 do not exceed the original data values.
 }
-\examples{
-# Create sample spectral data
-wavenumbers <- seq(400, 3200, by=10)
-n_spectra <- 5
-n_points <- length(wavenumbers)
-spectra <- matrix(0, nrow=n_spectra, ncol=n_points)
-
-# Add some peaks and baseline
-for(i in 1:n_spectra) {
-  # Add baseline drift
-  spectra[i,] <- 0.001 * wavenumbers + rnorm(n_points, 0, 0.1)
-  # Add peaks
-  spectra[i, which.min(abs(wavenumbers-1000))] <- spectra[i, which.min(abs(wavenumbers-1000))] + 2
-  spectra[i, which.min(abs(wavenumbers-1500))] <- spectra[i, which.min(abs(wavenumbers-1500))] + 1.5
-}
-
-}

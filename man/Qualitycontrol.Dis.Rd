@@ -23,8 +23,11 @@ root of the sum of the squared differences between each spectrum and the mean sp
 Spectra with a distance greater than a specified threshold are marked as outliers.
 }
 \examples{
-# Create sample spectral data
-set.seed(123)
-wavenumbers <- seq(500, 3500, length.out=100)
-spectra <- matrix(rnorm(3000), nrow=30)
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+qc_dis <- Qualitycontrol.Dis(data_normalized@datasets$normalized.data)
 }

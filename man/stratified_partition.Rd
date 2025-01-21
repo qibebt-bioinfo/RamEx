@@ -18,8 +18,3 @@ A vector of indices for the training set
 This function performs stratified sampling to split data indices into training and test sets
 while maintaining class proportions.
 }
-\examples{
-# Create example labels
-labels <- c(rep(1,10), rep(2,10), rep(3,10))
-
-}

@@ -20,8 +20,3 @@ This function generates a plot of the mean spectrum for each group in the datase
 contained within a Ramanome object. It uses the `mean.spec` function to calculate
 the mean spectrum and then saves the plot as a PNG file.
 }
-\examples{
-# Create a sample Ramanome object
-wavenumbers <- seq(500, 3500, by = 10)
-spectra <- matrix(rnorm(1000 * length(wavenumbers)), nrow = 1000)
-}

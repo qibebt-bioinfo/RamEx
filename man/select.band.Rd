@@ -17,13 +17,3 @@ A numeric vector containing the summed Feature.Reduction.Intensity values across
 \description{
 This function selects a range of Raman Feature.Reduction.Intensity values for a given wavenumber range from a Ramanome object.
 }
-\examples{
-# Create a sample Ramanome object
-wavenumbers <- seq(500, 3500, by = 10)
-spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
-raman_obj <- new("Ramanome",
-  datasets = list(raw = spectra),
-  wavenumber = wavenumbers
-)
-
-}

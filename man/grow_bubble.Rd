@@ -18,8 +18,3 @@ A list containing the bubble values and the relative touching point.
 This function generates a bubble chart representation of a spectrum by expanding a bubble
 until it touches the spectrum. The bubble can be aligned to the left, right, or centered.
 }
-\examples{
-# Create a sample spectrum with peaks
-x <- seq(0, 10, length.out=100)
-spectrum <- exp(-(x-5)^2) + 0.5*exp(-(x-3)^2) + 0.3*exp(-(x-7)^2)
-}

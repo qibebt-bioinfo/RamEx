@@ -26,11 +26,3 @@ None
 \description{
 This function saves the feature importance scores of random forest classification results to a file.
 }
-\examples{
-# Create sample results with importances
-result <- list(
-  importances = matrix(runif(50), 10, 5)
-)
-feature.ids <- paste0("Wave", 1:10)
-
-}

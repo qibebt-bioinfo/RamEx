@@ -20,9 +20,6 @@ The function also reports the number of spectra and the wavelength range after
 the transformation.
 }
 \examples{
-# Create a sample Ramanome object
-data <- matrix(rnorm(1000), nrow=10)
-wavenumbers <- seq(500, 3500, length.out=100)
-raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
-
+data(RamEx_data)
+data_smoothed_snv <- Preprocesssing.Smooth.Snv(RamEx_data)
 }

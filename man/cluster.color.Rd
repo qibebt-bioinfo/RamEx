@@ -21,12 +21,3 @@ A ggplot2 object containing:
 \description{
 This function generates a color-coded plot to visualize clusters in a dataset.
 }
-\examples{
-# Create sample data
-data <- data.frame(
-  UMAP1 = rnorm(100),
-  UMAP2 = rnorm(100),
-  group = factor(rep(c("Control", "Treatment"), each = 50)),
-  cluster = factor(rep(c("Cluster_1", "Cluster_2"), times = 50))
-)
-}

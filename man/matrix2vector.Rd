@@ -24,8 +24,3 @@ A matrix where each column is a vectorized block from the input image.
 This function converts a 2D image matrix into a vectorized form by sliding a kernel window
 over the image and extracting blocks. Each block is reshaped into a column vector.
 }
-\examples{
-# Create a sample image matrix
-img <- matrix(1:100, nrow=10)
-
-}

@@ -18,12 +18,3 @@ A numeric vector resulting from the convolution operation.
 This function performs a convolution operation on a numeric vector using a specified kernel.
 The convolution is performed using the filter type, which applies the kernel to the vector.
 }
-\examples{
-# Create a sample signal
-x <- seq(-5, 5, length.out=100)
-signal <- sin(x) + rnorm(length(x), 0, 0.1)
-
-# Define different kernels
-gaussian_kernel <- dnorm(seq(-2, 2, length.out=5))
-moving_avg_kernel <- rep(1/3, 3)
-}

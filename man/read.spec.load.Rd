@@ -35,19 +35,3 @@ filtering based on wavelength cutoffs, and optionally interpolates the data to
 a uniform wavelength scale. It returns a Ramanome object containing the processed
 data.
 }
-\examples{
-# Create a temporary directory for sample spectral files
-temp_dir <- tempdir()
-
-# Create sample spectral files without parallel processing
-groups <- c("Control", "Treatment")
-for(i in 1:4) {
-  for(g in groups) {
-    fname <- file.path(temp_dir, paste0(g, "_sample_", i, ".txt"))
-    wave <- seq(500, 3000, by = 10)
-    inten <- sin(wave/500) + rnorm(length(wave), 0, 0.1)
-    write.table(data.frame(wave, inten), fname,
-                sep = "\t", row.names = FALSE, col.names = FALSE)
-  }
-}
-}

@@ -22,7 +22,12 @@ a Ramanome object and plots the first two principal components. The function can
 also save the plot as a PNG file.
 }
 \examples{
-# Load example data
-data_file <- system.file("extdata", "data", package = "RamEx")
-RamEx_data <- read.spec.load(data_file, group.index = 2)
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+data_cleaned <- data_normalized[data_cleaned$index_good,]
+data.reduction.pca <- Feature.Reduction.Pca(data_cleaned, draw=TRUE, save = FALSE)
 }

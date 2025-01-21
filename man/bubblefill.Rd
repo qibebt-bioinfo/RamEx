@@ -20,7 +20,3 @@ This function applies a bubble-filling algorithm to a spectrum to correct the ba
 It uses the `bubbleloop` function to identify and adjust the baseline, and then
 identifies the peaks in the spectrum after baseline correction.
 }
-\examples{
-# Create a sample spectrum with baseline and peaks
-x <- seq(400, 3200, length.out=500)
-}

@@ -26,10 +26,13 @@ A list containing:
 This function performs classification using PC-LDA
 }
 \examples{
-# Load example data
-data_file <- system.file("extdata", "data", package = "RamEx")
-RamEx_data <- read.spec.load(data_file, group.index = 2)
-
-# Perform LDA classification with single dataset (auto split)
-Classification.Lda(RamEx_data)
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+data_cleaned <- data_normalized[data_cleaned$index_good,]
+data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+Classification.Lda(data_cleaned)
 }

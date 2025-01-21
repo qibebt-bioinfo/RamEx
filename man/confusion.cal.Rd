@@ -12,18 +12,9 @@ confusion.cal(pred_matrix)
 \value{
 A data frame containing the accuracy matrix with the following columns:
   \item{true_labels}{The true class labels}
-  \item{pred_labels}{The predicted class labels} 
+  \item{pred_labels}{The predicted class labels}
   \item{Freq}{The normalized frequencies/probabilities for each true-predicted label pair}
 }
 \description{
 This function calculates the accuracy of a prediction matrix.
-}
-\examples{
-# Create a sample prediction matrix
-pred_matrix <- data.frame(
-  true_labels = c("A", "A", "B", "B", "C", "C"),
-  pred_labels = c("A", "B", "B", "C", "C", "A"),
-  Freq = c(10, 5, 15, 3, 12, 4)
-)
-
 }

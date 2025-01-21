@@ -30,16 +30,11 @@ using the Minimum Covariance Determinant method. It modifies the output to inclu
 additional information such as the distance and center of the outliers.
 }
 \examples{
-# Create sample multivariate data
-set.seed(123)
-n <- 100
-p <- 5
-X <- matrix(rnorm(n*p), ncol=p)
-
-# Add some outliers
-X[1:5,] <- X[1:5,] + 10
-
-# Create index of initially good observations
-index_good <- rep(TRUE, n)
-
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#qc_mcd <- Qualitycontrol.Mcd(data_normalized@datasets$normalized.data)
 }

@@ -20,10 +20,3 @@ This function extracts a subset of spectral data based on a specified wavelength
 It filters the data to include only the rows where the wavelength (V1) is within the
 lower and upper bounds of the cutoff range.
 }
-\examples{
-# Create sample spectral data
-single_spec <- data.frame(
-  V1 = seq(400, 3600, by = 100),
-  V2 = rnorm(33)
-)
-}

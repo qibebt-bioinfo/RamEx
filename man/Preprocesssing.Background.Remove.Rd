@@ -19,14 +19,3 @@ The modified Ramanome object.
 \description{
 This function performs background subtraction on a Ramanome object by subtracting the background spectra from the dataset.
 }
-\examples{
-# Create a sample Ramanome object with background spectra
-data <- matrix(rnorm(1000), nrow=10)
-filenames <- c("group1_cell1", "group1_BG", "group2_cell1", "group2_BG")
-wavenumbers <- seq(500, 3500, length.out=100)
-meta <- data.frame(filenames=filenames, group=c("group1","group1","group2","group2"))
-raman_obj <- new("Ramanome", datasets=list(raw.data=data), 
-                 wavenumber=wavenumbers, meta.data=meta)
-
-
-}

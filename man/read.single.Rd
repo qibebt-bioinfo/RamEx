@@ -20,20 +20,3 @@ This function reads a spectral file from a specified path, checks if the path is
 and then uses spline interpolation to create a function that can be used to estimate
 Feature.Reduction.Intensity values at a specified set of wavelengths (xout).
 }
-\examples{
-# Create a temporary spectral data file
-temp_file <- tempfile(fileext = ".txt")
-wave <- seq(500, 3000, by = 10)
-inten <- sin(wave/500) + rnorm(length(wave), 0, 0.1)
-write.table(data.frame(wave, inten), temp_file, 
-            sep = "\t", row.names = FALSE, col.names = FALSE)
-
-# Define wavelengths for interpolation
-xout <- seq(600, 2900, by = 50)
-
-# Read and process the spectral file
-result <- read.single(temp_file, xout)
-
-# Clean up
-unlink(temp_file)
-}

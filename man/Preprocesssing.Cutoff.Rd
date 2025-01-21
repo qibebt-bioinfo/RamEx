@@ -20,12 +20,10 @@ The updated Ramanome object with the wavenumber range cut and the corresponding 
 This function cuts the wavenumber range of Raman data and updates the Raman object.
 }
 \examples{
-# Create a sample Ramanome object
-data <- matrix(rnorm(1000), nrow=10)
-wavenumbers <- seq(500, 3500, length.out=100)
-raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
-
-# Cut the wavenumber range from 1000 to 2000
-cut_obj <- Preprocesssing.Cutoff(raman_obj, from=1000, to=2000)
-
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+Preprocesssing.Cutoff(data_normalized,550, 1800)
 }

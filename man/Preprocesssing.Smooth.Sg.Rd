@@ -26,12 +26,6 @@ object to reduce noise. The filter is applied to the central portion of the data
 preserving the first and last few columns as specified by the `w` parameter.
 }
 \examples{
-# Create a sample Ramanome object with noisy data
-data <- matrix(rnorm(1000), nrow=10)
-wavenumbers <- seq(500, 3500, length.out=100)
-raman_obj <- new("Ramanome", datasets=list(raw.data=data), wavenumber=wavenumbers)
-
-# Apply Savitzky-Golay smoothing
-smoothed_obj <- Preprocesssing.Smooth.Sg(raman_obj, m=2, p=7, w=15)
-
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
 }

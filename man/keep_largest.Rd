@@ -17,10 +17,3 @@ A vector of the larger values
 \description{
 This function compares the baseline and bubble values and keeps the larger ones.
 }
-\examples{
-# Create sample baseline and bubble data
-x <- seq(0, 10, length.out=100)
-baseline <- sin(x) + 2
-bubble <- cos(x) + 2
-
-}

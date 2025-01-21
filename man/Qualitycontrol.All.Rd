@@ -19,8 +19,11 @@ This function applies multiple quality control methods to detect outliers in a d
 It uses Hotelling's T2, SNR, MCD, and distance methods to identify and mark outliers.
 }
 \examples{
-# Create sample spectral data
-set.seed(123)
-wavenumbers <- seq(500, 3500, length.out=100)
-spectra <- matrix(rnorm(5000), nrow=50)
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#qc_all <- Qualitycontrol.All(data_normalized@datasets$normalized.data)
 }

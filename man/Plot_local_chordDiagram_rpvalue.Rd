@@ -33,16 +33,3 @@ A chord diagram plot showing correlations between variables. The plot includes:
 \description{
 This function plots a local chord diagram based on a correlation matrix and p-value thresholds.
 }
-\examples{
-# Create sample data
-n <- 10
-data <- matrix(rnorm(n*100), ncol=n)
-colnames(data) <- paste0("W", 1:n)
-
-# Create band annotations
-bands_ann <- data.frame(
-  Wave_num = paste0("W", 1:n),
-  Group = rep(c("A", "B"), each=5)
-)
-
-}

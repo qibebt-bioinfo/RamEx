@@ -4,7 +4,13 @@
 \alias{Raman.Markers.Roc}
 \title{Find Markers Using ROC Analysis}
 \usage{
-Raman.Markers.Roc(matrix, group, threshold = 0.75)
+Raman.Markers.Roc(
+  matrix,
+  group,
+  threshold = 0.75,
+  paired = FALSE,
+  batch_size = 1000
+)
 }
 \arguments{
 \item{matrix}{A matrix of spectral data where each row represents a sample and each
@@ -12,8 +18,11 @@ column represents a wavelength.}
 
 \item{group}{A vector of group identifiers corresponding to each row in the matrix.}
 
-\item{threshold}{The minimum AUC threshold for considering a marker significant.
-Defaults to 0.75.}
+\item{threshold}{The minimum AUC threshold for considering a marker significant.Defaults to 0.75.}
+
+\item{paired}{Marker is paired or no. Default is FALSE}
+
+\item{batch_size}{Set the batch size. Default is 1,000}
 }
 \value{
 A list containing two data frames: 'markers_single' for single markers and
@@ -25,8 +34,13 @@ markers in a dataset that are associated with different groups. It calculates th
 Area Under the Curve (AUC) for single markers and paired markers.
 }
 \examples{
-# Create sample spectral data matrix
-set.seed(123)
-wavenumbers <- seq(500, 1500, by=100)
-spectra <- matrix(rnorm(200), nrow=20)
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+data_cleaned <- data_normalized[data_cleaned$index_good,]
+data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+ROC_markers <- Raman.Markers.Roc(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],data_cleaned@meta.data$group)
 }

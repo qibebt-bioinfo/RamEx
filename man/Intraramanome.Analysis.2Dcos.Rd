@@ -22,17 +22,13 @@ asynchronous (sequential changes) relationships, providing
 detailed insights into spectral changes
 }
 \examples{
-# Create sample Ramanome object with time-series data
-wavenumbers <- seq(500, 3500, length.out=50)
-time_points <- 10
-spectra <- matrix(rnorm(50*time_points), nrow=time_points)
-metadata <- data.frame(
-  time = 1:time_points,
-  group = rep("TimeSeries", time_points)
-)
-raman_obj <- new("Ramanome", 
-                 datasets=list(raw.data=spectra),
-                 wavenumber=wavenumbers,
-                 meta.data=metadata)
-
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+data_cleaned <- data_normalized[data_cleaned$index_good,]
+data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+#reslut_2dos <- Intraramanome.Analysis.2Dcos(data_cleaned)
 }

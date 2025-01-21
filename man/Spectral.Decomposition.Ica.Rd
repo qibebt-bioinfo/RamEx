@@ -19,9 +19,13 @@ This function applies the FastICA algorithm to the dataset retrieved from the Ra
 object using `get.nearest.dataset`. It returns the result of the ICA decomposition.
 }
 \examples{
-# Create sample spectral data with mixed sources
-wavenumbers <- seq(500, 3500, by = 10)
-n_samples <- 100
-n_waves <- length(wavenumbers)
-
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+data_cleaned <- data_normalized[data_cleaned$index_good,]
+data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+decom_ica <- Spectral.Decomposition.Ica(data_cleaned, 2)
 }

@@ -15,7 +15,3 @@ A vector containing the Mahalanobis distance for each observation.
 \description{
 This function calculates the Mahalanobis distance for every observation in the given data matrix.
 }
-\examples{
-# Create a sample data matrix
-data <- matrix(rnorm(100), nrow=20)
-}

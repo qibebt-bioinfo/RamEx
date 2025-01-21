@@ -23,12 +23,3 @@ None
 \description{
 This function saves the confusion matrix of random forest classification results to a file.
 }
-\examples{
-# Create sample results with confusion matrix
-result <- list(
-  confusion.matrix = matrix(c(45, 5, 8, 42), 2, 2,
-                           dimnames=list(c("Class1", "Class2"),
-                                        c("Class1", "Class2")))
-)
-
-}

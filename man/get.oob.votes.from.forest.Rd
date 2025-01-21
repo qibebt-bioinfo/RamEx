@@ -17,11 +17,3 @@ A matrix of class votes for each sample, with rows representing samples and colu
 \description{
 This function extracts the aggregated class votes for each sample using only the Out-of-Bag trees from a random forest model.
 }
-\examples{
-# Create sample data and fit random forest model
-set.seed(123)
-x <- matrix(rnorm(200), nrow=20)
-y <- factor(rep(c("A", "B"), each=10))
-rf_model <- randomForest::randomForest(x, y, keep.inbag=TRUE)
-
-}

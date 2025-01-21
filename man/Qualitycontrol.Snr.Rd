@@ -18,8 +18,11 @@ A vector indicating whether each spectrum passes the SNR test.
 This function calculates the SNR for a dataset by comparing the signal and noise levels.
 }
 \examples{
-# Create sample spectral data
-set.seed(123)
-wavenumbers <- seq(500, 3500, length.out=200)
-spectra <- matrix(rnorm(4000), nrow=20)
+data(RamEx_data)
+data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
+data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
+data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+qc_snr <- Qualitycontrol.Snr(data_normalized@datasets$normalized.data)
 }

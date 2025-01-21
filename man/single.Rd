@@ -18,13 +18,3 @@ A data frame containing columns 3 and 4 of the input data frame for the rows whe
 \description{
 This function extracts a single spectrum from Raman data based on a given x value.
 }
-\examples{
-# Create sample spectral data
-spec <- data.frame(
-  V1 = rep(1:3, each = 2),
-  V2 = rep(c("A", "B"), 3),
-  V3 = rnorm(6),
-  V4 = rnorm(6)
-)
-
-}
