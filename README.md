@@ -41,17 +41,22 @@ RamEx can be installed simply:
 
 1. Package loading: load the RamEx package:
 ```  
-library('RamEx'); 
+library('RamEx')
 ```  
 2. Data loading: load the data and generate a ramanome object:
 ```  
-data <- read_spec("the folder path of your specture") 
+data <- read_spec("the folder path of your specture")
+or you can use the Built-in data
+
+data(RamEx_data)
+data <- RamEx_data
+ 
 ```
 3. Preprocessing:
 ```  
 data_smoothed <- Preprocesssing.Smooth.Sg(data)
 data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
-data_normalized <- Preprocesssing.Normalize(data_baseline, "CH")
+data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
 ```
 4. Quality control:
 ```  
