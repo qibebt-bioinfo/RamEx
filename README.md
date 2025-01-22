@@ -46,8 +46,8 @@ library('RamEx')
 2. Data loading: load the data and generate a ramanome object:
 ```  
 data <- read_spec("the folder path of your specture")
-or you can use the Built-in data
 
+or you can use the Built-in data:
 data(RamEx_data)
 data <- RamEx_data
  
