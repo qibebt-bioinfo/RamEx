@@ -1,7 +1,7 @@
 <p align="center" style="margin-bottom: 0px !important;">
   <img src="https://ramex-1257170263.cos.ap-guangzhou.myqcloud.com/RamEx-pipeline.jpg" width="400" height="400">
 </p>
-<h1 align="center"> <img src="https://ramex-1257170263.cos.ap-guangzhou.myqcloud.com/RamEx-logo.jpg" alt="Logo" width="200"> </h1>
+<img src="https://ramex-1257170263.cos.ap-guangzhou.myqcloud.com/RamEx-logo.jpg" alt="Logo" width="200">
 <h1 align="center" style="margin-top: -10px; font-size: 20px">RamEx</h1>
 
 A ramanome represents a single-cell-resolution metabolic phenome that is information-rich, revealing functional heterogeneity among cells, and universally applicable to all cell types. Ramanome Explorer (RamEx) is a toolkit for comprehensive and efficient analysis and comparison of ramanomes. Results from the multidimensional analysis are visualized via intuitive graphics. Implemented via R, RamEx is fully extendable and supports cross-platform use.By providing simple-to-use modules for computational tasks that otherwise would require substantial programming experience and algorithmic skills, RamEx should greatly facilitate the computational mining of ramanomes.
