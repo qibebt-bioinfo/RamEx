@@ -106,7 +106,7 @@ Intraramanome.Analysis.Irca.Local(data_cleaned, bands_ann = bands_ann)
 ```
 - 2D-COS
 ```{r}
-#Intraramanome.Analysis.2Dcos(data_cleaned) 
+Intraramanome.Analysis.2Dcos(data_cleaned) 
 ```
 #### Phenotype analysis
 ```{r}
