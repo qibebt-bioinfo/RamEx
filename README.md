@@ -35,8 +35,8 @@ library('devtools')
 install_github("qibebt-bioinfo/RamEx")
 ```
 
-###Getting Started
-# Data Loading
+### Getting Started
+#### Data Loading
 Raman spectra are respectively tracked in single txt files, and their meta info is recorded in the file name.
 Here we assume there's only one factor of the dataset, which means RamEx do not contain multiple-factor analysis. If you have multiple factors but they are independent of each other, these factors will be treated as one factor.
 ```{r}
@@ -46,7 +46,7 @@ data(RamEx_data)
 data <- RamEx_data
 options(mc.cores = 2)
 ```
-# Pretreatment
+#### Pretreatment
 Spectral pretreatment will make the spectrum clearer, containing smoothing, baseline removal, normalization and truncation.
 Mean spectra will display their effects.
 Here the results of each step will be kept in the Ramanome for better debugging, and 'draw.mean' exhibit the final dataset.
@@ -59,7 +59,7 @@ data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
 Preprocesssing.Cutoff(data_normalized,550, 1800)
 mean.spec(data_normalized@datasets$baseline.data, data@meta.data$group) 
 ```
-# Quality control
+#### Quality control
 ```{r}
 data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
 data_cleaned <- data_normalized[data_cleaned$index_good,] 
@@ -71,7 +71,7 @@ hist(qc_dis$dis)
 qc_snr <- Qualitycontrol.Snr(data_normalized@datasets$normalized.data) 
 ```
 
-# Interested Bands
+#### Interested Bands
 Get single-cell intensitiy or intensity accumulationy within a wavenumber range, pls give a list containing multiple bands or band ranges. These feature selection results will be saved as 'interested.bands' in the given Ramanome object. Further, you can add some equations by yourself. 
 ```{r}
 data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
@@ -80,19 +80,19 @@ CDR <- data.frame(data_cleaned@meta.data,
                   data_cleaned@interested.bands$`2000~2250`/(data_cleaned@interested.bands$`2000~2250` + data_cleaned@interested.bands$`2750~3050`))
 ```
 
-# Reduction
+#### Reduction
 Nonlinear methods, such as UMAP and t-SNE. Linear methods like PCA, pCoA. The reduced sample matrix will be contained in the Ramanome onject as 'reductions'. Attention: RamEx uses PCA to reduce the dimensions of the high-dimensional spectrum, since UMAP and t-SNE are highly complex algorithms.
 ```{r}
 data_cleaned <- Feature.Reduction.Pca(data_cleaned, draw=TRUE, save = FALSE) %>% Feature.Reduction.Pcoa(., draw=TRUE, save = FALSE) %>% Feature.Reduction.Tsne(., draw=TRUE, save = FALSE) %>% Feature.Reduction.Umap(., draw=TRUE, save=FALSE) #
 ``` 
 
-# Markers analysis
+#### Markers analysis
 ```{r}
 ROC_markers <- Raman.Markers.Roc(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],data_cleaned@meta.data$group) 
 #cor_markers <- Raman.Markers.Correlations(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],as.numeric(data_cleaned@meta.data$group), min.cor = 0.6)
 RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, draw = FALSE) 
 ```
-# IRCA
+#### IRCA
 -Global IRCA
 ```{r}
 IRCA.interests <- Intraramanome.Analysis.Irca.Global(data_cleaned)
@@ -109,35 +109,35 @@ Intraramanome.Analysis.Irca.Local(data_cleaned, bands_ann = bands_ann)
 ```{r}
 #Intraramanome.Analysis.2Dcos(data_cleaned) 
 ```
-# Phenotype analysis
+#### Phenotype analysis
 ```{r}
 #clusters_louvain <- Phenotype.Analysis.Louvaincluster(object = data_cleaned, resolutions = c(0.8)) 
 clusters_kmneans <- Phenotype.Analysis.Kmeans(data_cleaned)
 clusters_hca <- Phenotype.Analysis.Hca(data_cleaned) 
 ```
 
-# Classifications
+#### Classifications
 ```{r}
 Classification.Gmm(data_cleaned) 
 Classification.Lda(data_cleaned)
 Classification.Rf(data_cleaned)
 Classification.Svm(data_cleaned)
 ```
-# Quantifications
+#### Quantifications
 ```{r}
 quan_pls <- Quantification.Pls(data_cleaned)
 quan_mlr <- Quantification.Mlr(data_cleaned)
 quan_glm <- Quantification.Glm(data_cleaned)
 ```
 
-# Spectral decomposition
+#### Spectral decomposition
 ```{r}
 decom_mcr <- Spectral.Decomposition.Mcrals(data_cleaned,2)
 decom_ica <- Spectral.Decomposition.Ica(data_cleaned, 2) 
 data_nmf <- data_cleaned
 data_nmf@datasets$normalized.data %<>% abs
 decom_nmf <- Spectral.Decomposition.Nmf(data_nmf)
-
+```
 ### Raw data formats
 
 It accommodates data from mainstream instrument manufactures such as Horiba, Renishaw, Thermo Fisher Scientific, WITec, and Bruker. This module efficiently manages single-point data collection, where each spectrum is stored in a separate txt file, as well as mapping data enriched with coordinate information. 
