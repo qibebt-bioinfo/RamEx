@@ -1,4 +1,4 @@
-![Logo](https://ramex-1257170263.cos.ap-guangzhou.myqcloud.com/RamEx-logo.jpg)
+![Logo](https://ramex-1257170263.cos.ap-guangzhou.myqcloud.com/RamEx-logo.jpg width="400" height="400")
 <p align="center" style="margin-bottom: 0px !important;">
   <img src="https://ramex-1257170263.cos.ap-guangzhou.myqcloud.com/RamEx-pipeline.jpg" width="400" height="400">
 </p>
