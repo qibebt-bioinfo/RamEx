@@ -44,7 +44,6 @@ library(RamEx)
 library(magrittr)
 data(RamEx_data)
 data <- RamEx_data
-options(mc.cores = 2)
 ```
 #### Pretreatment
 Spectral pretreatment will make the spectrum clearer, containing smoothing, baseline removal, normalization and truncation.
@@ -64,8 +63,8 @@ mean.spec(data_normalized@datasets$baseline.data, data@meta.data$group)
 data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
 data_cleaned <- data_normalized[data_cleaned$index_good,] 
 mean.spec(data_cleaned@datasets$normalized.data, data_cleaned@meta.data$group)
-#qc_icod <- Qualitycontrol.Mcd(data_normalized@datasets$normalized.data)
-#qc_t2 <- Qualitycontrol.T2(data_normalized@datasets$normalized.data) 
+qc_icod <- Qualitycontrol.Mcd(data_normalized@datasets$normalized.data)
+qc_t2 <- Qualitycontrol.T2(data_normalized@datasets$normalized.data) 
 qc_dis <- Qualitycontrol.Dis(data_normalized@datasets$normalized.data)
 hist(qc_dis$dis)
 qc_snr <- Qualitycontrol.Snr(data_normalized@datasets$normalized.data) 
@@ -89,7 +88,7 @@ data_cleaned <- Feature.Reduction.Pca(data_cleaned, draw=TRUE, save = FALSE) %>%
 #### Markers analysis
 ```{r}
 ROC_markers <- Raman.Markers.Roc(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],data_cleaned@meta.data$group) 
-#cor_markers <- Raman.Markers.Correlations(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],as.numeric(data_cleaned@meta.data$group), min.cor = 0.6)
+cor_markers <- Raman.Markers.Correlations(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],as.numeric(data_cleaned@meta.data$group), min.cor = 0.6)
 RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, draw = FALSE) 
 ```
 #### IRCA
@@ -111,7 +110,7 @@ Intraramanome.Analysis.Irca.Local(data_cleaned, bands_ann = bands_ann)
 ```
 #### Phenotype analysis
 ```{r}
-#clusters_louvain <- Phenotype.Analysis.Louvaincluster(object = data_cleaned, resolutions = c(0.8)) 
+clusters_louvain <- Phenotype.Analysis.Louvaincluster(object = data_cleaned, resolutions = c(0.8)) 
 clusters_kmneans <- Phenotype.Analysis.Kmeans(data_cleaned)
 clusters_hca <- Phenotype.Analysis.Hca(data_cleaned) 
 ```
