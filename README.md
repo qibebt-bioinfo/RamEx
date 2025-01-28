@@ -1,4 +1,4 @@
-![Logo] <img src="https://ramex-1257170263.cos.ap-guangzhou.myqcloud.com/RamEx-logo.jpg" width="40" height="40">
+<img src="https://ramex-1257170263.cos.ap-guangzhou.myqcloud.com/RamEx-logo.jpg" alt="Logo" width="200">
 <p align="center" style="margin-bottom: 0px !important;">
   <img src="https://ramex-1257170263.cos.ap-guangzhou.myqcloud.com/RamEx-pipeline.jpg" width="400" height="400">
 </p>
