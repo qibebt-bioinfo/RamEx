@@ -1,6 +1,6 @@
-
+![Logo](http://bioinfo.single-cell.cn/Released_Software/RamEx-logo.png)
 <p align="center" style="margin-bottom: 0px !important;">
-  <img src="http://bioinfo.single-cell.cn/Released_Software/fig1.png" width="400" height="400">
+  <img src="http://bioinfo.single-cell.cn/Released_Software/RamEx-pipeline.png" width="400" height="400">
 </p>
 <h1 align="center" style="margin-top: -10px; font-size: 20px">RamEx</h1>
 
