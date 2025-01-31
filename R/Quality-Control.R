@@ -690,6 +690,7 @@ Qualitycontrol.Dis <- function(x, min.dis=1){
 #' #qc_mcd <- Qualitycontrol.Mcd(data_normalized@datasets$normalized.data)
 
 Qualitycontrol.Mcd <- function(x,index_good,h = .5,alpha = .01, na.rm = TRUE){
+  x <- prcomp_irlba(x, n = 20, center = TRUE, scale. = TRUE)$x[,1:5]
   out <- outliers_mcdEst(x,index_good,h,alpha,na.rm)
   out$distance <- out$MaxDist
   out$center <- out$center
@@ -697,7 +698,7 @@ Qualitycontrol.Mcd <- function(x,index_good,h = .5,alpha = .01, na.rm = TRUE){
   out$nb <- c(total = length(out$outliers_pos))
 
   class(out) <- "Qualitycontrol.Mcd"
-  out
+  return(out)
 }
 
 #' Calculate the Signal-to-Noise Ratio (SNR) for a dataset
@@ -796,9 +797,9 @@ Qualitycontrol.All <- function(matrix, var_tol=0.5){
   cal_time$SNR <- as.numeric(difftime(end_time, start_time, units = "secs"))
   print('Start PC-MCD!')
   start_time <- Sys.time()
-  data.red <- prcomp_irlba(matrix, n = 20, center = TRUE, scale. = TRUE)$x[,1:5]
+  #data.red <- prcomp_irlba(matrix, n = 20, center = TRUE, scale. = TRUE)$x[,1:5]
   outliers_all$mcd <- rep('Good', nrow(outliers_all))
-  outliers_all$mcd[Qualitycontrol.Mcd(data.red,index_good=outliers_all$mcd=='Good', alpha = 0.001)$outliers_pos] <- 'Bad'
+  outliers_all$mcd[Qualitycontrol.Mcd(matrix,index_good=outliers_all$mcd=='Good', alpha = 0.001)$outliers_pos] <- 'Bad'
   end_time <- Sys.time()
   cal_time$mcd <- as.numeric(difftime(end_time, start_time, units = "secs"))
   print('Start Distance!')
