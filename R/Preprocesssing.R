@@ -331,17 +331,20 @@ Preprocesssing.Background.Remove <- function(object, cell.index, cal_mean = FALS
 matrix2vector <- function(image, kernel_height, kernel_width, device) {
   image_height <- nrow(image)
   image_width <- ncol(image)
-  output_height <- image_height - kernel_height + 1
-  output_width <- image_width - kernel_width + 1
+  padding_width <- floor(kernel_width/2 )
+  padding_height <- floor(kernel_height/2 )
+
+  image <- rbind(image[rep(1,padding_height),],image, image[rep(image_height,padding_height),])
+  image <- cbind(image[,rep(1,padding_width)],image, image[,rep(image_width, padding_width)])
   if(device == "CPU"){
-    cols <- matrix(0, nrow = kernel_height * kernel_width, ncol = output_height * output_width)
+    cols <- matrix(0, nrow = kernel_height * kernel_width, ncol = image_height * image_width)
   }
   if(device == "GPU"){
-    cols <- gpuMatrix(0, nrow = kernel_height * kernel_width, ncol = output_height * output_width)
+    cols <- gpuMatrix(0, nrow = kernel_height * kernel_width, ncol = image_height * image_width)
   }
   idx <- 1
-  for (i in 1:output_height) {
-    for (j in 1:output_width) {
+  for (i in 1:image_height) {
+    for (j in 1:image_width) {
 
       block <- image[(i):((i + kernel_height - 1)), (j):((j + kernel_width - 1))]
       cols[, idx] <- as.vector(block)
@@ -366,12 +369,6 @@ matrix2vector <- function(image, kernel_height, kernel_width, device) {
 
 
 gpupre_spike_matrix <- function(all_data, device = NULL) {
-  all_spc <- as.matrix(all_data[,-1])
-
-  if (nrow(all_spc) < 3 || ncol(all_spc) < 11) {
-    stop("all_spc must be at least 3 rows and 11 columns")
-  }
-
   kernel_ori <- matrix(c(-1,-1,-1, -1,-1,-1, -1,-1,-1, -1,-1,
                          -1,-1,-1, -1,-1,33, -1,-1,-1, -1,-1,
                          -1,-1,-1, -1,-1,-1, -1,-1,-1, -1,-1),nrow = 3, byrow = TRUE)
@@ -379,26 +376,20 @@ gpupre_spike_matrix <- function(all_data, device = NULL) {
   kernel_matrix <- as.vector(t(kernel_ori))
 
   if(device == "GPU"){
-    vector_result <- matrix2vector(all_spc, 3, 11, device)
+    vector_result <- matrix2vector(all_data, 3, 11, device)
     gpu_kernel_matrix <- as.gpuVector(kernel_matrix)
     conv_result <-  gpu_kernel_matrix %*% vector_result
   }
   if(device == "CPU"){
-    vector_result <- matrix2vector(all_spc, 3, 11, device)
+    vector_result <- matrix2vector(all_data, 3, 11, device)
     conv_result <-  kernel_matrix %*% vector_result
   }
 
-  all_spc_1 <- matrix(conv_result, nrow = nrow(all_spc) - 2, ncol = ncol(all_spc) - 10, byrow = TRUE)
+  all_spc_1 <- matrix(conv_result, nrow = nrow(all_data) , ncol = ncol(all_data) , byrow = TRUE)
 
-  max_values <- apply(all_spc, 1, max)
-  max_values <- max_values[1:nrow(all_spc_1)] 
-
-  slope_inds_2 <- which(all_spc_1 > 10 * max_values, arr.ind = TRUE)
-
-  slope_inds <- slope_inds_2
+  slope_inds <- which(all_spc_1 > 10 * apply(all_data, 1, max), arr.ind = TRUE)
 
   spc_new <- all_data
-  wavenumber <- as.numeric(as.character(colnames(spc_new[,-1])))
 
   for (ind in unique(slope_inds[,1])) {
     spike_pos <- slope_inds[which(slope_inds[,1] == ind), 2]
@@ -412,11 +403,11 @@ gpupre_spike_matrix <- function(all_data, device = NULL) {
 
     for (i in spike_pos) {
       if (i == 1) {
-        spc_new[ind, 2:4] <- colMeans(spc_new[inds_new, 2:4])
-      } else if (i >= length(wavenumber)) {
-        spc_new[ind, (i - 2):i] <- colMeans(spc_new[inds_new, (i - 2):i])
+        spc_new[ind, 1:3] <- colMeans(spc_new[inds_new, 1:3])
+      } else if (i >= ncol(all_data)) {
+        spc_new[ind, c(i - 2,i-1,i)] <- colMeans(spc_new[inds_new, c(i - 2,i-1,i)])
       } else {
-        spc_new[ind, i:(i + 2)] <- colMeans(spc_new[inds_new, i:(i + 2)])
+        spc_new[ind, c(i-1,i,i+1)] <- colMeans(spc_new[inds_new, c(i-1,i,i+1)])
       }
     }
   }
