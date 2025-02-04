@@ -376,9 +376,7 @@ gpupre_spike_matrix <- function(all_data, device = NULL) {
                          -1,-1,-1, -1,-1,33, -1,-1,-1, -1,-1,
                          -1,-1,-1, -1,-1,-1, -1,-1,-1, -1,-1),nrow = 3, byrow = TRUE)
 
-
   kernel_matrix <- as.vector(t(kernel_ori))
-
 
   if(device == "GPU"){
     vector_result <- matrix2vector(all_spc, 3, 11, device)
@@ -390,18 +388,17 @@ gpupre_spike_matrix <- function(all_data, device = NULL) {
     conv_result <-  kernel_matrix %*% vector_result
   }
 
-
   all_spc_1 <- matrix(conv_result, nrow = nrow(all_spc) - 2, ncol = ncol(all_spc) - 10, byrow = TRUE)
 
-  slope_inds_2 <- which(all_spc_1 > 10 * apply(all_spc, 1, max), arr.ind = TRUE)
-  #slope_inds_2 <- which(all_spc_1 > 10 * apply(all_spc, 1, max), arr.ind = TRUE)
+  max_values <- apply(all_spc, 1, max)
+  max_values <- max_values[1:nrow(all_spc_1)] 
+
+  slope_inds_2 <- which(all_spc_1 > 10 * max_values, arr.ind = TRUE)
 
   slope_inds <- slope_inds_2
 
   spc_new <- all_data
   wavenumber <- as.numeric(as.character(colnames(spc_new[,-1])))
-
-  #print(length(unique(slope_inds[,1])))
 
   for (ind in unique(slope_inds[,1])) {
     spike_pos <- slope_inds[which(slope_inds[,1] == ind), 2]
