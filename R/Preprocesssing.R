@@ -6,83 +6,146 @@
 #' @param order The order of the polynomial used in the baseline calculation (default: 1)
 #'
 #' @return The modified object with preprocessed baseline data
-#' @importFrom hyperSpec spc.fit.poly.below
-#' @importFrom hyperSpec spc.fit.poly
 #' @export Preprocesssing.Baseline.Polyfit
 #' @examples
 #' data(RamEx_data)
 #' data_smoothed <- Preprocesssing.Smooth.Sg(RamEx_data)
 #' data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
+
 Preprocesssing.Baseline.Polyfit <- function(object, order = 1) {
   wavenumber <- object@wavenumber
-  spc2hs <- new(
-    "hyperSpec",
-    spc = get.nearest.dataset(object),
-    wavelength = wavenumber
-  )
-
-  data_hyperSpec <- spc2hs
-  wave_max <- max(data_hyperSpec@wavelength)
-  wave_min <- min(data_hyperSpec@wavelength)
-  hyperspec <- data_hyperSpec
+  spc_data <- get.nearest.dataset(object)
+  
+  wave_max <- max(wavenumber)
+  wave_min <- min(wavenumber)
+  
   if (wave_max >= 3050 & wave_min <= 600) {
-    hyperspec_1 <- hyperspec[, , floor(wave_min) ~ 1790] -
-      spc.fit.poly.below(
-        hyperspec[, , floor(wave_min) ~ 1790],
-        hyperspec[, , floor(wave_min) ~ 1790],
-        poly.order = order
-      )
-    hyperspec_2 <- hyperspec[, , 1790 ~ floor(wave_max)] -
-      spc.fit.poly(
-        hyperspec[, , c(1790 ~ 2065, 2300 ~ 2633, 2783, floor(wave_max))],
-        hyperspec[, , 1790 ~ floor(wave_max)],
-        poly.order = 6
-      )
-    hyperspec_baseline <- cbind(hyperspec_1, hyperspec_2)
-    print(paste0("The Ramanome contains ", length(hyperspec_baseline), " spectra"))
-  }
-  else if (wave_max > 1750 & wave_min < 600) {
-    hyperspec_baseline <- hyperspec[, , 550 ~ 1750] -
-      spc.fit.poly.below(
-        hyperspec[, , 550 ~ 1750],
-        hyperspec[, , 550 ~ 1750],
-        poly.order = order
-      )
-    print(paste0("The Ramanome contains ", length(hyperspec_baseline), "spectra"))
-  }
-  else if (wave_max > 3050 &
-           wave_min < 1800 &
-           wave_min >
-           600) {
-    hyperspec_baseline <- hyperspec[, , 1800 ~ 3050] -
-      spc.fit.poly(
-        hyperspec[, , c(1800 ~ 2065, 2300 ~ 2633, 2783, 3050)],
-        hyperspec[, , 1800 ~ 3050],
-        poly.order = order
-      )
-    print(paste0("The Ramanome contains ", length(hyperspec_baseline), "spectra"))
-  }
-  else if (wave_max < 3050 & wave_min > 600) {
-    hyperspec_baseline <- hyperspec[, , floor(wave_min) ~ floor(wave_max)] -
-      spc.fit.poly(
-        hyperspec[, , c(floor(wave_min) ~ floor(wave_min) + 10, 1800~floor(wave_max))],
-        hyperspec[, ,floor(wave_min) ~ floor(wave_max) ],
-        poly.order = order
-      )}
-  else if (wave_max < 1750 & wave_min > 600) {
-    print("the spc is too small to baseline")
-  }
-  else {
-    print("something is wrong in your spc data")
-  }
+    idx_1 <- which(wavenumber >= floor(wave_min) & wavenumber <= 1790)
+    baseline1 <- spc.fit.poly.below(spc_data[, idx_1, drop = FALSE], spc_data[, idx_1, drop = FALSE], poly.order = order)
+    corrected1 <- spc_data[, idx_1, drop = FALSE] - baseline1
 
-  data_hyperSpec_baseline <- hyperspec_baseline
-
-  data <- data_hyperSpec_baseline$spc[, !duplicated(colnames(data_hyperSpec_baseline$spc))]
-  object@datasets$baseline.data <- data
-  object@wavenumber <- as.numeric(colnames(data))
-
+    idx_2 <- which(wavenumber >= 1790 & wavenumber <= wave_max)
+    support_idx <- which(wavenumber >= 1790 & wavenumber <= 2065 | 
+                           wavenumber >= 2300 & wavenumber <= 2633 | 
+                           wavenumber == wavenumber[which.min(abs(wavenumber - 2783))] | 
+                           wavenumber == wave_max)
+    baseline2 <- spc.fit.poly(spc_data[, support_idx, drop = FALSE], spc_data[, idx_2, drop = FALSE], poly.order = 6)
+    corrected2 <- spc_data[, idx_2, drop = FALSE] - baseline2
+    corrected <- cbind(corrected1, corrected2)
+    message(paste0("The Ramanome contains ", nrow(corrected), " spectra"))
+    
+  } else if (wave_max > 1750 & wave_min < 600) {
+    idx <- which(wavenumber >= 550 & wavenumber <= 1750)
+    fit <- spc = spc_data[, idx, drop = FALSE]
+    baseline <- spc.fit.poly.below(fit, fit, poly.order = order)
+    corrected <- fit - baseline
+    message(paste0("The Ramanome contains ", nrow(corrected), " spectra"))
+    
+  } else if (wave_max > 3050 & wave_min < 1800 & wave_min > 600) {
+    idx <- which(wavenumber >= 1800 & wavenumber <= 3050)
+    fit <- spc = spc_data[, idx, drop = FALSE]
+    baseline <- spc.fit.poly(fit, fit, poly.order = order)
+    corrected <- fit - baseline
+    message(paste0("The Ramanome contains ", nrow(corrected), " spectra"))
+    
+  } else if (wave_max < 3050 & wave_min > 600) {
+    idx <- which(wavenumber >= floor(wave_min) & wavenumber <= floor(wave_max))
+    fit <- spc_data[, idx, drop = FALSE]
+    baseline <- spc.fit.poly(fit, fit, poly.order = order)
+    corrected <- fit - baseline
+  } else if (wave_max < 1750 & wave_min > 600) {
+    stop("The spc is too small to baseline")
+  } else {
+    stop("Something is wrong in your spc data")
+  }
+  
+  corrected <- corrected[, !duplicated(colnames(corrected), fromLast = FALSE), drop = FALSE]
+  object@datasets$baseline.data <- corrected
+  object@wavenumber <- as.numeric(colnames(corrected))
+  
   return(object)
+}
+
+
+vanderMonde <- function(x, poly.order) {
+  sapply(0:poly.order, function(i) x^i)
+}
+
+spc.fit.poly <- function(fit.to, apply.to = NULL, poly.order = 1, offset.wl = !is.null(apply.to)) {
+  x <- as.numeric(colnames(fit.to))
+  if (offset.wl) {
+    minx <- min(x)
+    x_adj <- x - minx
+  } else {
+    minx <- 0
+    x_adj <- x
+  }
+  
+  vdm <- vanderMonde(x_adj, poly.order)
+  
+  p <- t(apply(fit.to, 1, function(y, vdm) {
+    valid <- !is.na(y)
+    if (sum(valid) < (poly.order + 1)) {
+      rep(NA, poly.order + 1)
+    } else {
+      qr.solve(vdm[valid, , drop = FALSE], y[valid])
+    }
+  }, vdm))
+  
+  if (is.null(apply.to)) {
+    colnames(p) <- paste0("(x-minx)^", 0:poly.order)
+    return(list(spc = p, wavelength = 0:poly.order, min.x = minx))
+  } else {
+    wl_new <- as.numeric(colnames(apply.to)) - minx
+    vdm_new <- vanderMonde(wl_new, poly.order)
+    baseline <- t(apply(p, 1, function(coefs) as.numeric(vdm_new %*% coefs)))
+    return(baseline)
+  }
+}
+
+spc.fit.poly.below <- function(fit.to, apply.to = fit.to, poly.order = 1,
+                                 npts.min = max(round(ncol(fit.to) * 0.05), 3 * (poly.order + 1)),
+                                 noise = 0, offset.wl = FALSE, max.iter = ncol(fit.to),
+                                 stop.on.increase = FALSE, debuglevel = 0) {
+  x <- as.numeric(colnames(fit.to))
+  if (offset.wl) {
+    minx <- min(x)
+    x <- x - minx
+  } else {
+    minx <- 0
+  }
+  vdm <- vanderMonde(x, poly.order)
+  n_spectra <- nrow(fit.to)
+  pcoef <- matrix(NA, nrow = n_spectra, ncol = poly.order + 1)
+  
+  for(i in 1:n_spectra) {
+    y <- fit.to[i, ]
+    valid <- !is.na(y)
+    use <- valid
+    use_old <- rep(FALSE, length(y))
+    iter <- 0
+    repeat {
+      iter <- iter + 1
+      if(sum(use) < (poly.order + 1)) {
+         warning("Spectrum ", i, ": not enough valid points for fitting.")
+         break
+      }
+      coef_i <- qr.solve(vdm[use, , drop = FALSE], y[use])
+      pcoef[i,] <- coef_i
+      bl <- as.vector(vdm %*% coef_i)
+      use_old <- use
+      use <- (y < (bl + noise)) & valid
+      if(sum(use, na.rm = TRUE) < npts.min || all(use == use_old)) break
+      if(stop.on.increase && sum(use, na.rm = TRUE) > sum(use_old, na.rm = TRUE)) break
+      if(iter >= max.iter) break
+    }
+  }
+  
+  wl <- as.numeric(colnames(apply.to)) - minx
+  vdm_new <- vanderMonde(wl, poly.order)
+  baseline <- t(apply(pcoef, 1, function(coefs) as.numeric(vdm_new %*% coefs)))
+  return(baseline)
+
 }
 
 
@@ -261,7 +324,6 @@ Preprocesssing.Smooth.Snv <- function(object) {
 #' @importFrom stringr str_extract
 #' @importFrom stringr str_split_i
 #' @importFrom stringr str_detect
-#' @importFrom hyperSpec aggregate
 #' @importFrom rlist list.map
 #' @export Preprocesssing.Background.Remove
 
@@ -275,7 +337,7 @@ Preprocesssing.Background.Remove <- function(object, cell.index, cal_mean = FALS
   if (cal_mean) {
     # Calculate mean background spectrum
     data <- get.nearest.dataset(object)
-    data.mean <- hyperSpec::aggregate(data, by = list(group, cell), mean)
+    data.mean <- aggregate(data, by = list(group, cell), mean)
     object@datasets$mean_data <- as.matrix(data.mean[, -c(1, 2)])
     object@meta.data <- data.frame(
       group = str_split_i(data.mean[, 1], pattern = '_', 1),
