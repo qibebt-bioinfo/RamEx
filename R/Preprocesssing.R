@@ -485,11 +485,11 @@ gpupre_spike_matrix <- function(all_data, device = NULL) {
 #' @param device Parallel device, default is null for CPU, can be set to "GPU"
 #' @return A rammanome object
 #'
-#' @export Preprocesssing.Background.Spike
+#' @export Preprocesssing.Spike
 #' @examples
 #' data(RamEx_data)
-#' data_spike <- Preprocesssing.Background.Spike(RamEx_data,"CPU")
-Preprocesssing.Background.Spike <- function(object, device){
+#' data_spike <- Preprocesssing.Spike(RamEx_data,"CPU")
+Preprocesssing.Spike <- function(object, device){
   data <- get.nearest.dataset(object)
   pre.data <- gpupre_spike_matrix(data, device)
   object@datasets$spike.data <- pre.data
