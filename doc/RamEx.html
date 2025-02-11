@@ -376,7 +376,7 @@ smoothing, baseline removal, normalization and truncation. Mean spectra
 will display their effects. Here the results of each step will be kept
 in the Ramanome for better debugging, and ‘draw.mean’ exhibit the final
 dataset.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>data_spike <span class="ot">&lt;-</span> <span class="fu">Preprocessing.Background.Spike</span>(data, <span class="st">&quot;CPU&quot;</span>) </span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>data_spike <span class="ot">&lt;-</span> <span class="fu">Preprocessing.Spike</span>(data, <span class="st">&quot;CPU&quot;</span>) </span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; Warning in all_spc_1 &gt; 10 * apply(all_spc, 1, max): longer object length is not</span></span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; a multiple of shorter object length</span></span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; Warning in all_spc_1 &gt; 10 * apply(all_spc, 1, max): longer object length is not</span></span>
