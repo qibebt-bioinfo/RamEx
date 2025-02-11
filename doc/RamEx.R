@@ -12,12 +12,12 @@ data <- RamEx_data
 options(mc.cores = 2)
 
 ## -----------------------------------------------------------------------------
-data_spike <- Preprocesssing.Background.Spike(data, "CPU") 
-data_smoothed <- Preprocesssing.Smooth.Sg(data) 
-data_baseline <- Preprocesssing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocesssing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocesssing.Normalize(data_baseline, "ch")
-Preprocesssing.Cutoff(data_normalized,550, 1800)
+data_spike <- Preprocessing.Background.Spike(data, "CPU") 
+data_smoothed <- Preprocessing.Smooth.Sg(data) 
+data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
+data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
+data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
+Preprocessing.Cutoff(data_normalized,550, 1800)
 mean.spec(data_normalized@datasets$baseline.data, data@meta.data$group) 
 
 ## -----------------------------------------------------------------------------
