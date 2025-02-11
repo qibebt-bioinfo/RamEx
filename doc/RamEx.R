@@ -12,7 +12,7 @@ data <- RamEx_data
 options(mc.cores = 2)
 
 ## -----------------------------------------------------------------------------
-data_spike <- Preprocessing.Background.Spike(data, "CPU") 
+data_spike <- Preprocessing.Spike(data, "CPU") 
 data_smoothed <- Preprocessing.Smooth.Sg(data) 
 data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
 data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
