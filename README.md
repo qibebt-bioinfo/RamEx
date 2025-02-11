@@ -182,6 +182,7 @@ RamEx also offers an online version. Please visit (http://ramex.single-cell.cn).
 - macOS:
   - macOS users can leverage Homebrew for a seamless installation experience also refer to the [POCL documentation](https://github.com/pocl/pocl).
 If you still face issues, please consider reaching out to the respective SDK support forums or the [OpenCL community](https://www.khronos.org/opencl/).
+
 <!--(it's recommended to use the latest version - RamEx 2.1)  -->
 
 <!--<img src="xxx"></br> 
@@ -193,7 +194,7 @@ If you still face issues, please consider reaching out to the respective SDK sup
 
 When using RamEx for xxxx  ---> 
 
-**Key papers**  
+### Key papers 
 **IRCA**   
 He Y., Huang S., Zhang P., Ji Y., Xu J., 2021. [Intra-Ramanome Correlation Analysis Unveils Metabolite Conversion Network from an Isogenic Population of Cells](https://doi.org/10.1128/mbio.01470-21). *mBio* 
 
