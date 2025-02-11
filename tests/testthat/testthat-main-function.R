@@ -12,7 +12,7 @@ test_that("data loading works correctly", {
 test_that("data smoothing works correctly", {
   data(RamEx_data)
   ramnome_obj <- RamEx_data
-  smoothed_obj <- Preprocesssing.Smooth.Sg(ramnome_obj)
+  smoothed_obj <- Preprocessing.Smooth.Sg(ramnome_obj)
   expect_true(inherits(smoothed_obj, "Ramanome"))
   expect_equal(nrow(smoothed_obj@datasets$smooth.data), 500)
 })
@@ -20,8 +20,8 @@ test_that("data smoothing works correctly", {
 test_that("baseline correction works correctly", {
   data(RamEx_data)
   ramnome_obj <- RamEx_data
-  ramnome_obj <- Preprocesssing.Smooth.Sg(ramnome_obj)
-  baseline_obj <- Preprocesssing.Baseline.Polyfit(ramnome_obj)
+  ramnome_obj <- Preprocessing.Smooth.Sg(ramnome_obj)
+  baseline_obj <- Preprocessing.Baseline.Polyfit(ramnome_obj)
   expect_true(inherits(baseline_obj, "Ramanome"))
   expect_equal(nrow(baseline_obj@datasets$baseline.data), 500)
 })
@@ -29,9 +29,9 @@ test_that("baseline correction works correctly", {
 test_that("data normalization works correctly", {
   data(RamEx_data)
   ramnome_obj <- RamEx_data
-  ramnome_obj <- Preprocesssing.Smooth.Sg(ramnome_obj)
-  baseline_obj <- Preprocesssing.Baseline.Polyfit(ramnome_obj)
-  normalized_obj <- Preprocesssing.Normalize(baseline_obj, "ch")
+  ramnome_obj <- Preprocessing.Smooth.Sg(ramnome_obj)
+  baseline_obj <- Preprocessing.Baseline.Polyfit(ramnome_obj)
+  normalized_obj <- Preprocessing.Normalize(baseline_obj, "ch")
   expect_true(inherits(normalized_obj, "Ramanome"))
   expect_equal(nrow(normalized_obj@datasets$normalized.data), 500)
 })
@@ -40,9 +40,9 @@ test_that("data normalization works correctly", {
 test_that("quality control works correctly", {
   data(RamEx_data)
   ramnome_obj <- RamEx_data
-  ramnome_obj <- Preprocesssing.Smooth.Sg(ramnome_obj)
-  baseline_obj <- Preprocesssing.Baseline.Polyfit(ramnome_obj)
-  normalized_obj <- Preprocesssing.Normalize(baseline_obj, "ch")
+  ramnome_obj <- Preprocessing.Smooth.Sg(ramnome_obj)
+  baseline_obj <- Preprocessing.Baseline.Polyfit(ramnome_obj)
+  normalized_obj <- Preprocessing.Normalize(baseline_obj, "ch")
   cleaned_obj <- Qualitycontrol.ICOD(normalized_obj@datasets$normalized.data, var_tol = 0.4)
   expect_true(is.list(cleaned_obj))
   expect_true(nrow(cleaned_obj$interations) <= 500)
@@ -51,9 +51,9 @@ test_that("quality control works correctly", {
 test_that("PCA reduction works correctly", {
   data(RamEx_data)
   ramnome_obj <- RamEx_data
-  ramnome_obj <- Preprocesssing.Smooth.Sg(ramnome_obj)
-  baseline_obj <- Preprocesssing.Baseline.Polyfit(ramnome_obj)
-  normalized_obj <- Preprocesssing.Normalize(baseline_obj, "ch")
+  ramnome_obj <- Preprocessing.Smooth.Sg(ramnome_obj)
+  baseline_obj <- Preprocessing.Baseline.Polyfit(ramnome_obj)
+  normalized_obj <- Preprocessing.Normalize(baseline_obj, "ch")
   cleaned_obj <- Qualitycontrol.ICOD(normalized_obj@datasets$normalized.data, var_tol = 0.4)
   cleaned_obj <- normalized_obj[cleaned_obj$index_good,]
   pca_obj <- Feature.Reduction.Pca(cleaned_obj, draw = FALSE, save = FALSE)
@@ -64,9 +64,9 @@ test_that("PCA reduction works correctly", {
 test_that("PCA plot generation works correctly", {
   data(RamEx_data)
   ramnome_obj <- RamEx_data
-  ramnome_obj <- Preprocesssing.Smooth.Sg(ramnome_obj)
-  baseline_obj <- Preprocesssing.Baseline.Polyfit(ramnome_obj)
-  normalized_obj <- Preprocesssing.Normalize(baseline_obj, "ch")
+  ramnome_obj <- Preprocessing.Smooth.Sg(ramnome_obj)
+  baseline_obj <- Preprocessing.Baseline.Polyfit(ramnome_obj)
+  normalized_obj <- Preprocessing.Normalize(baseline_obj, "ch")
   cleaned_obj <- Qualitycontrol.ICOD(normalized_obj@datasets$normalized.data, var_tol = 0.4)
   cleaned_obj <- normalized_obj[cleaned_obj$index_good,]
   pca_obj <- Feature.Reduction.Pca(cleaned_obj, draw = TRUE, save = FALSE)
@@ -76,9 +76,9 @@ test_that("PCA plot generation works correctly", {
 # test_that("clustering analysis works correctly", {
 #   data(RamEx_data)
 #   ramnome_obj <- RamEx_data
-#   ramnome_obj <- Preprocesssing.Smooth.Sg(ramnome_obj)
-#   baseline_obj <- Preprocesssing.Baseline.Polyfit(ramnome_obj)
-#   normalized_obj <- Preprocesssing.Normalize(baseline_obj, "ch")
+#   ramnome_obj <- Preprocessing.Smooth.Sg(ramnome_obj)
+#   baseline_obj <- Preprocessing.Baseline.Polyfit(ramnome_obj)
+#   normalized_obj <- Preprocessing.Normalize(baseline_obj, "ch")
 #   cleaned_obj <- Qualitycontrol.ICOD(normalized_obj@datasets$normalized.data, var_tol = 0.4)
 #   cleaned_obj <- normalized_obj[cleaned_obj$index_good,]
 #   pca_obj <- Feature.Reduction.Pca(cleaned_obj, draw = FALSE, save = FALSE)
@@ -89,9 +89,9 @@ test_that("PCA plot generation works correctly", {
 test_that("t-SNE reduction works correctly", {
   data(RamEx_data)
   ramnome_obj <- RamEx_data
-  ramnome_obj <- Preprocesssing.Smooth.Sg(ramnome_obj)
-  baseline_obj <- Preprocesssing.Baseline.Polyfit(ramnome_obj)
-  normalized_obj <- Preprocesssing.Normalize(baseline_obj, "ch")
+  ramnome_obj <- Preprocessing.Smooth.Sg(ramnome_obj)
+  baseline_obj <- Preprocessing.Baseline.Polyfit(ramnome_obj)
+  normalized_obj <- Preprocessing.Normalize(baseline_obj, "ch")
   cleaned_obj <- Qualitycontrol.ICOD(normalized_obj@datasets$normalized.data, var_tol = 0.4)
   cleaned_obj <- normalized_obj[cleaned_obj$index_good,]
   pca_obj <- Feature.Reduction.Pca(cleaned_obj, draw = FALSE, save = FALSE)
@@ -103,9 +103,9 @@ test_that("t-SNE reduction works correctly", {
 test_that("UMAP reduction works correctly", {
   data(RamEx_data)
   ramnome_obj <- RamEx_data
-  ramnome_obj <- Preprocesssing.Smooth.Sg(ramnome_obj)
-  baseline_obj <- Preprocesssing.Baseline.Polyfit(ramnome_obj)
-  normalized_obj <- Preprocesssing.Normalize(baseline_obj, "ch")
+  ramnome_obj <- Preprocessing.Smooth.Sg(ramnome_obj)
+  baseline_obj <- Preprocessing.Baseline.Polyfit(ramnome_obj)
+  normalized_obj <- Preprocessing.Normalize(baseline_obj, "ch")
   cleaned_obj <- Qualitycontrol.ICOD(normalized_obj@datasets$normalized.data, var_tol = 0.4)
   cleaned_obj <- normalized_obj[cleaned_obj$index_good,]
   pca_obj <- Feature.Reduction.Pca(cleaned_obj, draw = FALSE, save = FALSE)
@@ -118,9 +118,9 @@ test_that("UMAP reduction works correctly", {
 test_that("UMAP plot generation works correctly", {
   data(RamEx_data)
   ramnome_obj <- RamEx_data
-  ramnome_obj <- Preprocesssing.Smooth.Sg(ramnome_obj)
-  baseline_obj <- Preprocesssing.Baseline.Polyfit(ramnome_obj)
-  normalized_obj <- Preprocesssing.Normalize(baseline_obj, "ch")
+  ramnome_obj <- Preprocessing.Smooth.Sg(ramnome_obj)
+  baseline_obj <- Preprocessing.Baseline.Polyfit(ramnome_obj)
+  normalized_obj <- Preprocessing.Normalize(baseline_obj, "ch")
   cleaned_obj <- Qualitycontrol.ICOD(normalized_obj@datasets$normalized.data, var_tol = 0.4)
   cleaned_obj <- normalized_obj[cleaned_obj$index_good,]
   pca_obj <- Feature.Reduction.Pca(cleaned_obj, draw = FALSE, save = FALSE)
