@@ -376,17 +376,17 @@ smoothing, baseline removal, normalization and truncation. Mean spectra
 will display their effects. Here the results of each step will be kept
 in the Ramanome for better debugging, and ‘draw.mean’ exhibit the final
 dataset.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>data_spike <span class="ot">&lt;-</span> <span class="fu">Preprocesssing.Background.Spike</span>(data, <span class="st">&quot;CPU&quot;</span>) </span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>data_spike <span class="ot">&lt;-</span> <span class="fu">Preprocessing.Background.Spike</span>(data, <span class="st">&quot;CPU&quot;</span>) </span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; Warning in all_spc_1 &gt; 10 * apply(all_spc, 1, max): longer object length is not</span></span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; a multiple of shorter object length</span></span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; Warning in all_spc_1 &gt; 10 * apply(all_spc, 1, max): longer object length is not</span></span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; a multiple of shorter object length</span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>data_smoothed <span class="ot">&lt;-</span> <span class="fu">Preprocesssing.Smooth.Sg</span>(data) </span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>data_baseline <span class="ot">&lt;-</span> <span class="fu">Preprocesssing.Baseline.Polyfit</span>(data_smoothed)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>data_smoothed <span class="ot">&lt;-</span> <span class="fu">Preprocessing.Smooth.Sg</span>(data) </span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>data_baseline <span class="ot">&lt;-</span> <span class="fu">Preprocessing.Baseline.Polyfit</span>(data_smoothed)</span>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;The Ramanome contains 500 spectra&quot;</span></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>data_baseline_bubble <span class="ot">&lt;-</span> <span class="fu">Preprocesssing.Baseline.Bubble</span>(data_smoothed)</span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>data_normalized <span class="ot">&lt;-</span> <span class="fu">Preprocesssing.Normalize</span>(data_baseline, <span class="st">&quot;ch&quot;</span>)</span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="fu">Preprocesssing.Cutoff</span>(data_normalized,<span class="dv">550</span>, <span class="dv">1800</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>data_baseline_bubble <span class="ot">&lt;-</span> <span class="fu">Preprocessing.Baseline.Bubble</span>(data_smoothed)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>data_normalized <span class="ot">&lt;-</span> <span class="fu">Preprocessing.Normalize</span>(data_baseline, <span class="st">&quot;ch&quot;</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="fu">Preprocessing.Cutoff</span>(data_normalized,<span class="dv">550</span>, <span class="dv">1800</span>)</span>
 <span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; Ramanome Object </span></span>
 <span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; 574 Raman features across 500 samples within 5 groups</span></span>
 <span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="fu">mean.spec</span>(data_normalized<span class="sc">@</span>datasets<span class="sc">$</span>baseline.data, data<span class="sc">@</span>meta.data<span class="sc">$</span>group) </span>
