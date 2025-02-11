@@ -50,7 +50,7 @@ Spectral pretreatment will make the spectrum clearer, containing smoothing, base
 Mean spectra will display their effects.
 Here the results of each step will be kept in the Ramanome for better debugging, and 'draw.mean' exhibit the final dataset.
 ```{r}
-data_spike <- Preprocessing.Background.Spike(data, "CPU") 
+data_spike <- Preprocessing.Spike(data, "CPU") 
 data_smoothed <- Preprocessing.Smooth.Sg(data) 
 data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
 data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
