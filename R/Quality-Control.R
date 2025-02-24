@@ -585,7 +585,6 @@ Qualitycontrol.ICOD <- function(matrix, var_tol=0.5, max_iterations=100, kernel 
 #' @return A data frame containing two columns: 'out' indicating whether each spectrum is an outlier,
 #' and 'dis' containing the corresponding Hotelling's T2 distance values.
 #' @export Qualitycontrol.T2
-#' @importFrom parallel makeCluster parApply
 #' @importFrom disprofas get_hotellings
 #' @examples
 #' data(RamEx_data)
@@ -596,27 +595,26 @@ Qualitycontrol.ICOD <- function(matrix, var_tol=0.5, max_iterations=100, kernel 
 #' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
 #' #qc_t2 <- Qualitycontrol.T2(data_normalized@datasets$normalized.data)
 Qualitycontrol.T2 <- function(x){
+  out_na <- which(is.na(rowSums(x)))
   pred_outliers <- rep(TRUE, nrow(x))
+  if(length(out_na)!=0)pred_outliers[out_na,] <- FALSE
   n_out <- 0
   temp_outliers <- pred_outliers
-  cl <- makeCluster(getOption("cl.cores", detectCores() ))
   i <- 1
   while(TRUE){
-    mean_spec <- as.matrix(parApply(cl, x[temp_outliers,],2, median))
+    print(i)
+    mean_spec <- as.matrix(apply(x[temp_outliers,],2, median))
     temp_outliers <- pred_outliers
-    hotel_p <- parApply(cl,as.matrix(x),1,function(x,spec=mean_spec){
-      return(disprofas::get_hotellings(as.matrix(x), spec, 0.05)$Parameters['p.FALSE'])
+    hotel_p <- apply(as.matrix(x),1,function(x,spec=mean_spec){
+      return(disprofas::get_hotellings(as.matrix(x), spec, 0.05)$Parameters['p.F'])
     })
     temp_outliers[hotel_p < 0.05] <- FALSE
-    if(n_out==length(temp_outliers[!temp_outliers]))
-      break
-    if(i > 30)
-      break
+    if(n_out==length(temp_outliers[!temp_outliers]))break
+    if(i > 30)break
     i <- i +1
     n_out <- length(pred_outliers[!temp_outliers])
-    print(n_out)
   }
-  return(data.frame(out=temp_outliers, dis=hotel_p))
+  return(data.frame(quality=temp_outliers, p.F=hotel_p))
 }
 
 #' Detect outliers in a dataset based on distance from the mean spectrum
