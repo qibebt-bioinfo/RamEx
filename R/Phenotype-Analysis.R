@@ -154,13 +154,10 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,npc=10, thresh
 #' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
 #' clusters_kmneans <- Phenotype.Analysis.Kmeans(data_cleaned)
 
-Phenotype.Analysis.Kmeans <- function(object) {
+Phenotype.Analysis.Kmeans <- function(object, k) {
   data_x <- get.nearest.dataset(object)
-  cl <- kmeans(data_x, 2)
-  plot(data_x, col = cl$cluster)
-  print(cl$cluster)
-  points(cl$centers, col = 1:2, pch = 8, cex = 2)
-  return(cl)
+  cl <- kmeans(data_x, k)
+  return(list(clusters = cl$cluster, centers = cl$centers))
 }
 
 
