@@ -744,7 +744,7 @@ Qualitycontrol.Snr <- function(data, level = "medium")
   index_good <- apply(abs(data[,band_noise]),1,function(x) {return((sd(x)<QC2)&(mean(x)<QC1))}) &
     SNR > QC3 &     !duplicated(data)
   index_good[is.na(index_good)] <- 'FALSE'
-  return(index_good)
+  return(data.frame(quality=index_good, SNR=SNR))
 }
 
 #' Detect outliers in a dataset using various quality control methods
