@@ -577,24 +577,21 @@ Raman.Markers.Rbcs <- function(
 #' #cor_markers <- Raman.Markers.Correlations(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],as.numeric(data_cleaned@meta.data$group), min.cor = 0.6)
 Raman.Markers.Correlations <- function(X, y,min.cor=0.8) {
   X <- as.data.frame(X)
-
+  waves <- colnames(X)
 
   correlations <- sapply(X, function(col) cor(col, y, use = "complete.obs"))
 
-  high_cor_elements <- names(which(correlations > min.cor))
+  cat('Finding singular markers ... \n')
+  high_cor_elements <- which(abs(correlations) > min.cor)
 
-
-  combinations_two <- expand.grid(col1 = colnames(X), col2 = colnames(X)) %>%
-    filter(col1 != col2)
-
-  combinations_three <- t(combn(colnames(X), 3))
+  combinations_two <- expand.grid(col1 = waves, col2 = waves) %>% dplyr::filter(col1 != col2)
 
   numCores <- detectCores() - 1
   cl <- makeCluster(numCores)
   clusterExport(cl, varlist = c("X", "y"), envir = environment())
 
 
-  print('=========== 2 ============')
+  cat('Finding paired markers ... \n')
   combination_correlations_two <- do.call(rbind, parLapply(cl, 1:nrow(combinations_two), function(i) {
     row <- combinations_two[i, ]
     col1 <- row$col1
@@ -606,31 +603,12 @@ Raman.Markers.Correlations <- function(X, y,min.cor=0.8) {
       NULL
     }
   }))
-
-
-  print('=========== 3 ============')
-  combination_correlations_three <- do.call(rbind, parLapply(cl, 1:nrow(combinations_three), function(i) {
-    row <- combinations_three[i, ]
-    col1 <- row[1]
-    col2 <- row[2]
-    col3 <- row[3]
-    comb_value <- (X[[col1]] - X[[col2]]) / X[[col3]]
-    cor_comb <- try(cor(comb_value, y, use = "complete.obs"), silent = TRUE)
-    if (!inherits(cor_comb, "try-error") && abs(cor_comb) > min.cor) {
-      data.frame(col1, col2, col3, cor_comb)
-    } else {
-      NULL
-    }
-  }))
-
   # 停止并行计算
   stopCluster(cl)
 
   list(
-    high_cor_elements = high_cor_elements,
-    correlations = correlations,
-    combination_correlations_two = combination_correlations_two,
-    combination_correlations_three = combination_correlations_three
+    correlations_singular = if(length(high_cor_elements) == 0) NA else data.frame(wave=waves[high_cor_elements], corrlations = correlations[high_cor_elements]),
+    combination_correlations_two = if(length(combination_correlations_two) == 0) NA else combination_correlations_two
   )
 }
 
@@ -682,7 +660,7 @@ Raman.Markers.Roc <- function(matrix, group, threshold = 0.75, paired = FALSE, b
   group <- as.factor(group)
   u_group <- levels(group)
 
-  cat('Finding single markers ... \n')
+  cat('Finding singular markers ... \n')
   raman_markers <- data.frame(calculateAUCParallel(matrix, group))
   names(raman_markers) <- u_group
   raman_markers$wave <- wave
@@ -696,7 +674,7 @@ Raman.Markers.Roc <- function(matrix, group, threshold = 0.75, paired = FALSE, b
     raman_markers$col1 <- wave[raman_markers$col1]
     raman_markers$col2 <- wave[raman_markers$col2]
     raman_markers$group <- u_group[raman_markers$group]
-    markers_all$markers_paired = subset(raman_markers, AUC > threshold)
+    markers_all$markers_paired <- subset(raman_markers, AUC > threshold)
   }
 
   return(markers_all)
