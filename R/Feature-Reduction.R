@@ -203,11 +203,9 @@ Feature.Reduction.Umap <- function(object, draw = TRUE, save=FALSE) {
   print(plot)
   }
 
-if (draw) {
-
+if (save) {
   ggsave(paste("Reduction.umap.png"), plot, width = 8, height = 6)
 }
-
 return(object)
 }
 
@@ -253,7 +251,7 @@ Feature.Reduction.Pcoa <- function(object, draw = TRUE, save=FALSE) {
   names(data.red) <- c('PC 1', 'PC 2')
 
   object@reductions <- append(object@reductions, list(data.red))
-  object@reductions$PCA <- data.red
+  object@reductions$PCoA <- data.red
   if (draw){
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
@@ -276,7 +274,7 @@ Feature.Reduction.Pcoa <- function(object, draw = TRUE, save=FALSE) {
     print(plot)
   }
 
-  if (FALSE) {
+  if (save) {
     ggsave(paste("Reduction.pcoa.png"), plot, width = 8, height = 6)
   }
 

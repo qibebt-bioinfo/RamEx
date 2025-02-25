@@ -365,7 +365,7 @@ matrix2vector <- function(image, kernel_height, kernel_width, device) {
 #' @return A rammanome object
 
 
-gpupre_spike_matrix <- function(all_data, device = NULL) {
+gpupre_spike_matrix <- function(all_data, device = "CPU") {
   all_spc <- as.matrix(all_data[,-1])
 
   if (nrow(all_spc) < 3 || ncol(all_spc) < 11) {
