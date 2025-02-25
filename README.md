@@ -1,10 +1,10 @@
 <p align="center">
-  
+  <a href="https://github.com/qibebt-bioinfo/RamEx">
     <img src="https://ramex-1257170263.cos.ap-guangzhou.myqcloud.com/RamEx-logo.jpg" alt="RamEx logo"  width="300">
-
+  </a>
 </p>
 
-## *RamEx*: A ramanome represents a single-cell-resolution metabolic phenome that is information-rich, revealing functional heterogeneity among cells, and universally applicable to all cell types. Ramanome Explorer (RamEx) is a toolkit for comprehensive and efficient analysis and comparison of ramanomes. Results from the multidimensional analysis are visualized via intuitive graphics. Implemented via R, RamEx is fully extendable and supports cross-platform use.By providing simple-to-use modules for computational tasks that otherwise would require substantial programming experience and algorithmic skills, RamEx should greatly facilitate the computational mining of ramanomes..
+## *RamEx*: An R package for high-throughput microbial ramanome analyses with accurate quality assessment
 
 ## Key features
 
