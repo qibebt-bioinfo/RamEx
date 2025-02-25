@@ -361,7 +361,7 @@ matrix2vector <- function(image, kernel_height, kernel_width, device) {
 #' This function performs Pre spike function
 #'
 #' @param all_data The rammannome class
-#' @param device Parallel device, default is null for CPU, can be set to "GPU"
+#' @param device Parallel device, default is "CPU", can be set to "GPU"
 #' @return A rammanome object
 
 
@@ -394,14 +394,11 @@ gpupre_spike_matrix <- function(all_data, device = "CPU") {
   all_spc_1 <- matrix(conv_result, nrow = nrow(all_spc) - 2, ncol = ncol(all_spc) - 10, byrow = TRUE)
 
   slope_inds_2 <- which(all_spc_1 > 10 * apply(all_spc, 1, max), arr.ind = TRUE)
-  #slope_inds_2 <- which(all_spc_1 > 10 * apply(all_spc, 1, max), arr.ind = TRUE)
 
   slope_inds <- slope_inds_2
 
   spc_new <- all_data
   wavenumber <- as.numeric(as.character(colnames(spc_new[,-1])))
-
-  #print(length(unique(slope_inds[,1])))
 
   for (ind in unique(slope_inds[,1])) {
     spike_pos <- slope_inds[which(slope_inds[,1] == ind), 2]

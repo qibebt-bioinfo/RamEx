@@ -696,7 +696,7 @@ Raman.Markers.Roc <- function(matrix, group, threshold = 0.75, paired = FALSE, b
     raman_markers$col1 <- wave[raman_markers$col1]
     raman_markers$col2 <- wave[raman_markers$col2]
     raman_markers$group <- u_group[raman_markers$group]
-
+    markers_all$markers_paired = subset(raman_markers, AUC > threshold)
   }
 
   return(markers_all)
