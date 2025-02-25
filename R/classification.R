@@ -76,6 +76,7 @@ pred.test <- confusion.plot(label_val, data_pre$class)
 if(save){ggsave('Classification_PC-LDA_Test.png', pred.test, width = length(unique(label_val)) + 1, height = length(unique(label_train)))}
 if(show){print(pred.train)
   print(pred.test)}
+if (is.null(test)) return(list(model=model.lda)) else return(list(model=model.lda, pred_test = data_pre))
 }
 
 
@@ -125,10 +126,12 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
   if(save){ggsave('Classification_SVM_Train.png', pred.train, width = length(unique(label_train)) + 1, height = length(unique(label_train)))}
 
   cat('Test accuracy of SVM: ')
-  pred.test <- confusion.plot(label_val, predict(model.svm, data_val))
+  data_pre <- predict(model.svm, data_val)
+  pred.test <- confusion.plot(label_val, data_pre)
   if(save){ggsave('Classification_SVM_Test.png', pred.test, width = length(unique(label_val)) + 1, height = length(unique(label_train)))}
   if(show){print(pred.train)
     print(pred.test)}
+  if (is.null(test)) return(list(model=model.svm)) else return(list(model=model.svm, pred_test = data_pre))
   }
 
 
@@ -157,15 +160,16 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 #' data_cleaned <- data_normalized[data_cleaned$index_good,]
 #' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
 #' Classification.Rf(data_cleaned)
-  Classification.Rf <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42) {
-    if (is.null(test)) {
-      data_set <- get.nearest.dataset(train)
-      labels <- train@meta.data$group
-      index <- stratified_partition(labels, p = 0.7)
-      data_train <- data_set[index,]
-      label_train <- labels[index]
-      data_val <- data_set[-index,]
-      label_val <- labels[-index]
+Classification.Rf <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42) {
+  set.seed(seed)
+  if (is.null(test)) {
+    data_set <- get.nearest.dataset(train)
+    labels <- train@meta.data$group
+    index <- stratified_partition(labels, p = 0.7)
+    data_train <- data_set[index,]
+    label_train <- labels[index]
+    data_val <- data_set[-index,]
+    label_val <- labels[-index]
     } else {
       data_train <- get.nearest.dataset(train)
       label_train <- train@meta.data$group
@@ -183,6 +187,7 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
     if(save){ggsave('Classification_RF_Test.png', pred.test, width = length(unique(label_val)) + 1, height = length(unique(label_train)))}
     if(show){print(pred.train)
       print(pred.test)}
+    if (is.null(test)) return(list(model=model.rf)) else return(list(model=model.rf, pred_test = data_pre))
     }
 
 #' Gaussian Mixture Model (GMM)
@@ -207,26 +212,23 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 #' data_cleaned <- data_normalized[data_cleaned$index_good,]
 #' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
 #' Classification.Gmm(data_cleaned)
-    Classification.Gmm <- function(train, test = NULL) {
-      if (is.null(test)) {
-        data_set <- get.nearest.dataset(train)
-        labels <- train@meta.data$group
-        index <- stratified_partition(labels, p = 0.7)
-        data_train <- data_set[index,]
-        label_train <- as.numeric(labels[index])
-        data_val <- data_set[-index,]
-        label_val <- labels[-index]
-      } else {
-        data_train <- get.nearest.dataset(train)
-        label_train <- train@meta.data$group
-        data_val <- get.nearest.dataset(test)
-        label_val <- test@meta.data$group
-      }
-      data.pca <- prcomp(data_train, scale = TRUE, retx = TRUE)
-      data_train_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
-      gmm_model <- Mclust(data_train_20)
-      data_test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
-      data_pre <- predict(gmm_model, data_test_20)
-      print(data_pre$classification)
-      return(gmm_model)
-    }
+Classification.Gmm <- function(train, test = NULL) {
+  if (is.null(test)) {
+    data_set <- get.nearest.dataset(train)
+    labels <- train@meta.data$group
+    index <- stratified_partition(labels, p = 0.7)
+    data_train <- data_set[index,]
+    label_train <- as.numeric(labels[index])
+    data_val <- data_set[-index,]
+    label_val <- labels[-index]
+    } else {
+      data_train <- get.nearest.dataset(train)
+      label_train <- train@meta.data$group
+      data_val <- get.nearest.dataset(test)
+      label_val <- test@meta.data$group}
+  data.pca <- prcomp(data_train, scale = TRUE, retx = TRUE)
+  data_train_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
+  gmm_model <- Mclust(data_train_20)
+  data_test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
+  data_pre <- predict(gmm_model, data_test_20)
+  if (is.null(test)) return(list(model=gmm_model)) else return(list(model=gmm_model, pred_test = data_pre$classification))}
