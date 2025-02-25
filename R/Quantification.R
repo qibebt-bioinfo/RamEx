@@ -36,13 +36,6 @@ Quantification.Pls <- function(train, test = NULL) {
     data_val <- as.data.frame(data_val)
     data_val <- as.matrix(data_val)
     label_val <- labels[-index]
-    #features <- names(data_train)
-    #formula <- as.formula(paste("label_train ~", paste(features, collapse = " + ")))
-
-    #data_train$label_train <- label_train
-
-
-
   } else {
     data_train <- train@datasets$normalized.data
     label_train <- train@meta.data$group
@@ -50,11 +43,6 @@ Quantification.Pls <- function(train, test = NULL) {
     label_train <- as.numeric(label_train)
     data_train <- as.data.frame(data_train)
     data_train <- as.matrix(data_train)
-    #new_colnames <- c("PC1", "PC2")
-    #colnames(data_train) <- new_colnames
-    #features <- names(data_train)
-    #formula <- as.formula(paste("label_train ~", paste(features, collapse = " + ")))
-    #data_train$label_train <- label_train
     data_val <- test@datasets$normalized.data
     data_val <- as.data.frame(data_val)
     data_val <- as.matrix(data_val)
@@ -63,9 +51,8 @@ Quantification.Pls <- function(train, test = NULL) {
     label_val <- as.numeric(label_val)
   }
   pls_model <- plsr(label_train ~ data_train, ncomp = 8, scale = TRUE, validation = "none")
-  summary(pls_model)
   pre_result <- predict(pls_model, data_val, ncomp = 8)
-  return(pre_result)
+  if (is.null(test)) return(list(model=pls_model)) else return(list(model=pls_model, pred_test = pre_result))
 }
 
 #' Multiple linear regression (MLR)
@@ -91,43 +78,31 @@ Quantification.Pls <- function(train, test = NULL) {
 #' quan_mlr <- Quantification.Mlr(data_cleaned)
 Quantification.Mlr <- function(train, test = NULL) {
   if (is.null(test)) {
-    data_set <- train@reductions$PCA
-    new_colnames <- c("PC1", "PC2")
-    colnames(data_set) <- new_colnames
+    data_set <- get.nearest.dataset(train)
     labels <- train@meta.data$group
-    labels <- str_extract(labels, "\\d+")
-    labels <- as.numeric(labels)
     index <- stratified_partition(labels, p = 0.7)
     data_train <- data_set[index,]
-    data_train <- as.data.frame(data_train)
-    features <- names(data_train)
-    formula <- as.formula(paste("label_train ~", paste(features, collapse = " + ")))
     label_train <- labels[index]
-    data_train$label_train <- label_train
     data_val <- data_set[-index,]
     label_val <- labels[-index]
   } else {
-    data_train <- train@reductions$PCA
+    data_train <- get.nearest.dataset(train)
     label_train <- train@meta.data$group
-    label_train <- str_extract(label_train, "\\d+")
-    label_train <- as.numeric(label_train)
-    data_train <- as.data.frame(data_train)
-    new_colnames <- c("PC1", "PC2")
-    colnames(data_train) <- new_colnames
-    features <- names(data_train)
-    formula <- as.formula(paste("label_train ~", paste(features, collapse = " + ")))
-    data_train$label_train <- label_train
-    data_val <- test@reductions$PCA
-    data_val <- as.data.frame(data_val)
-    colnames(data_val) <- new_colnames
+    data_val <- get.nearest.dataset(test)
     label_val <- test@meta.data$group
-    label_val <- str_extract(label_val, "\\d+")
-    label_val <- as.numeric(label_val)
   }
-  mlr_model <- lm(formula, data = data_train)
-  summary(mlr_model)
-  pre_result <- predict(mlr_model, data_val)
-  return(pre_result)
+  label_train <- str_extract(label_train, "\\d+")
+  label_train <- as.numeric(label_train)
+  label_val <- str_extract(label_val, "\\d+")
+  label_val <- as.numeric(label_val)
+
+  data.pca <- prcomp(data_train, scale = TRUE, retx = TRUE)
+  data_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
+  test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
+
+  mlr_model <- lm(label_train~ ., data = data_20)
+  pre_result <- predict(mlr_model, test_20)
+  if (is.null(test)) return(list(model=mlr_model)) else return(list(model=mlr_model, pred_test = pre_result))
 }
 
 #' Generalized linear model (GLM)
@@ -155,41 +130,29 @@ Quantification.Mlr <- function(train, test = NULL) {
 #' quan_glm <- Quantification.Glm(data_cleaned)
 Quantification.Glm <- function(train, test = NULL) {
   if (is.null(test)) {
-    data_set <- train@reductions$PCA
-    new_colnames <- c("PC1", "PC2")
-    colnames(data_set) <- new_colnames
+    data_set <- get.nearest.dataset(train)
     labels <- train@meta.data$group
-    labels <- str_extract(labels, "\\d+")
-    labels <- as.numeric(labels)
     index <- stratified_partition(labels, p = 0.7)
     data_train <- data_set[index,]
-    data_train <- as.data.frame(data_train)
-    features <- names(data_train)
-    formula <- as.formula(paste("label_train ~", paste(features, collapse = " + ")))
     label_train <- labels[index]
-    data_train$label_train <- label_train
     data_val <- data_set[-index,]
     label_val <- labels[-index]
   } else {
-    data_train <- train@reductions$PCA
+    data_train <- get.nearest.dataset(train)
     label_train <- train@meta.data$group
-    label_train <- str_extract(label_train, "\\d+")
-    label_train <- as.numeric(label_train)
-    data_train <- as.data.frame(data_train)
-    new_colnames <- c("PC1", "PC2")
-    colnames(data_train) <- new_colnames
-    features <- names(data_train)
-    formula <- as.formula(paste("label_train ~", paste(features, collapse = " + ")))
-    data_train$label_train <- label_train
-    data_val <- test@reductions$PCA
-    data_val <- as.data.frame(data_val)
-    colnames(data_val) <- new_colnames
+    data_val <- get.nearest.dataset(test)
     label_val <- test@meta.data$group
-    label_val <- str_extract(label_val, "\\d+")
-    label_val <- as.numeric(label_val)
   }
-  glm_model <- glm(formula, data_train, family = gaussian())
-  summary(glm_model)
-  pre_result <- predict(glm_model, as.data.frame(data_val),  type = "response")
-  return(pre_result)
+  label_train <- str_extract(label_train, "\\d+")
+  label_train <- as.numeric(label_train)
+  label_val <- str_extract(label_val, "\\d+")
+  label_val <- as.numeric(label_val)
+
+  data.pca <- prcomp(data_train, scale = TRUE, retx = TRUE)
+  data_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
+  test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
+
+  glm_model <- glm(label_train~ ., data_20, family = gaussian())
+  pre_result <- predict(glm_model, test_20,  type = "response")
+  if (is.null(test)) return(list(model=glm_model)) else return(list(model=glm_model, pred_test = pre_result))
 }
