@@ -524,50 +524,38 @@ Qualitycontrol.ICOD <- function(matrix, var_tol=0.5, max_iterations=100, kernel 
   resolution <- (max(as.numeric(colnames(matrix))) - min(as.numeric(colnames(matrix))))/ncol(matrix)
   group <- rep(1, nrow(matrix))
   group[is.na(rowSums(matrix))] <- 0
-  time_gap <- c()
-  time_cluster <- c()
   interations <- group
   # cl <- makeCluster(getOption("cl.cores", detectCores() ))
   index_matrix <- group == 1
   for (inter in 1:max_iterations){
-    print(inter)
     new_group <- as.numeric(group)
     index_good <- group == 1
     start_time <- Sys.time()
     peaks <- bubblefill(colMeans(matrix[index_good,]),min_bubble_widths = floor(100/resolution))$peaks
-    # peaks <- 1:5
-    # peaks <- phenofit::findpeaks(colMeans(matrix[index_good,]), nups = 3, minpeakdistance = 0)$X$pos
     q <- apply(matrix[index_good,peaks],2,quantile)
     IQR <- q[4,]-q[2,]
     gap <- 1.5
     top_range <- q[4,] + IQR * gap
     bottom_range <- q[2,] - IQR * gap
     group_matrix <- t(t(matrix[index_matrix,peaks]) > bottom_range & t(matrix[index_matrix,peaks]) < top_range)
-    end_time <- Sys.time()
-    time_gap <- c(time_gap, end_time - start_time)
     if(min(group_matrix)==1){
       return(list(time_gap=time_gap,time_cluster=time_cluster,index_good=index_good,interations=as.matrix(interations)))
     } else if(max(group_matrix)==0){
       stop('The gap level is too small, please change a larger one!')
     }
-    start_time <- Sys.time()
     group_matrix <- t(apply(!group_matrix, 1, convolve_custom, kernel = kernel))
     kmeans_group <- kmeans(group_matrix, 2, 1)$cluster
     asso_group <- names(which.max(table(kmeans_group[index_matrix[index_good]])))
     new_group[index_matrix][kmeans_group!=asso_group] <- 0
-    end_time <- Sys.time()
-    time_cluster <- c(time_cluster, end_time - start_time)
     interations <- cbind(interations, new_group)
     if(all.equal(group, new_group) == TRUE ){
-      print(max(rowSums(group_matrix[group[index_matrix]!=0,] > 1.1)))
-      print(length(peaks))
       if(max(rowSums(group_matrix[group[index_matrix]!=0,] > 1.1)) < ceiling(length(peaks)*var_tol))
         break
       else
         index_matrix <- group==1
     } else group <- new_group
   }
-  return(list(time_gap=time_gap,time_cluster=time_cluster,index_good=index_good,interations=as.matrix(interations)))
+  return(data.frame(quality=index_good))
 }
 
 
@@ -691,7 +679,7 @@ Qualitycontrol.Mcd <- function(x,h = .5,alpha = .01, na.rm = TRUE){
   out <- outliers_mcdEst(x,pred_outliers,h,alpha,na.rm)
   dis[pred_outliers] <- out$dist_from_center
   pred_outliers[pred_outliers][out$outliers_pos] <- FALSE
-  return(data.frame(quality=pred_outliers,Distance = dis))
+  return(data.frame(quality=pred_outliers, Distance = dis))
 }
 #' Calculate the Signal-to-Noise Ratio (SNR) for a dataset
 #'
