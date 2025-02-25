@@ -242,17 +242,12 @@ outliers_mcdEst <- function(x,index_good,
 
   #Creating covariance matrix for Minimum Covariance Determinant
   # by default, use the "best" method = exhaustive method
-  print(nrow(data))
   # output <- fastMCD(data, h=0)
   output <- covFastMCD(data[index_good,], alpha = 0.6, m=10, l=1, delta = 0.05)
-  print('FastMCD finished!')
-  # output <- cov.mcd(data,cor = FALSE,quantile.used = nrow(data)*h)
 
   cutoff <- (qchisq(p = 1-alpha, df = ncol(data)))
-  # cor = FALSE to avoid useless output(correlation matrix)
 
   #Distances from centroid for each matrix
-  cat('Calculating the mahalanobis distance \n')
   dist <- mahalanobis(data,output$center,output$cov, tol=-1) # distance
 
   #Detecting outliers
@@ -657,7 +652,7 @@ Qualitycontrol.Dis <- function(x, min.dis=1){
     if(all(dis_matrix[pred_outliers]<min.dis))
       break
   }
-  return(data.frame(out=pred_outliers, dis=dis_matrix))
+  return(data.frame(quality=pred_outliers, distance=dis_matrix))
 }
 
 #' Detect outliers using the Minimum Covariance Determinant (MCD) method
@@ -687,18 +682,17 @@ Qualitycontrol.Dis <- function(x, min.dis=1){
 #' data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
 #' #qc_mcd <- Qualitycontrol.Mcd(data_normalized@datasets$normalized.data)
 
-Qualitycontrol.Mcd <- function(x,index_good,h = .5,alpha = .01, na.rm = TRUE){
-  x <- prcomp_irlba(x, n = 20, center = TRUE, scale. = TRUE)$x[,1:5]
-  out <- outliers_mcdEst(x,index_good,h,alpha,na.rm)
-  out$distance <- out$MaxDist
-  out$center <- out$center
-  out$call <- match.call()
-  out$nb <- c(total = length(out$outliers_pos))
-
-  class(out) <- "Qualitycontrol.Mcd"
-  return(out)
+Qualitycontrol.Mcd <- function(x,h = .5,alpha = .01, na.rm = TRUE){
+  pred_outliers <- rep(TRUE, nrow(x))
+  out_na <- which(is.na(rowSums(x)))
+  dis <- rep(NA, nrow(x))
+  if(length(out_na)!=0)pred_outliers[out_na,] <- FALSE
+  x <- prcomp_irlba(x[pred_outliers,], n = 20, center = TRUE, scale. = TRUE)$x[,1:5]
+  out <- outliers_mcdEst(x,pred_outliers,h,alpha,na.rm)
+  dis[pred_outliers] <- out$dist_from_center
+  pred_outliers[pred_outliers][out$outliers_pos] <- FALSE
+  return(data.frame(quality=pred_outliers,Distance = dis))
 }
-
 #' Calculate the Signal-to-Noise Ratio (SNR) for a dataset
 #'
 #' This function calculates the SNR for a dataset by comparing the signal and noise levels.
