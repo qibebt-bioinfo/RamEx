@@ -641,6 +641,8 @@ Qualitycontrol.T2 <- function(x){
 #' qc_dis <- Qualitycontrol.Dis(data_normalized@datasets$normalized.data)
 Qualitycontrol.Dis <- function(x, min.dis=1){
   pred_outliers <- rep(TRUE, nrow(x))
+  out_na <- which(is.na(rowSums(x)))
+  if(length(out_na)!=0)pred_outliers[out_na,] <- FALSE
   n_out <- length(pred_outliers[!pred_outliers])
   mean_spec <- colMeans(x[pred_outliers,])
   dis_matrix <- apply(x, 1, function(row) sqrt(sum((row - mean_spec)^2)))
@@ -651,12 +653,10 @@ Qualitycontrol.Dis <- function(x, min.dis=1){
     dis_matrix <- apply(x, 1, function(row) sqrt(sum((row - mean_spec)^2)))
     if(n_out==length(pred_outliers[!pred_outliers]))  {temp.dis <- temp.dis*0.95;pred_outliers[dis_matrix>max(temp.dis, min.dis)] <- FALSE}
     else{temp.dis <- quantile(dis_matrix, probs = 0.9)}
-    print(temp.dis)
     n_out <- length(pred_outliers[!pred_outliers])
     if(all(dis_matrix[pred_outliers]<min.dis))
       break
   }
-
   return(data.frame(out=pred_outliers, dis=dis_matrix))
 }
 
