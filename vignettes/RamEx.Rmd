@@ -22,9 +22,8 @@ By providing simple-to-use modules for computational tasks that otherwise would 
 More complete information about how to use RamEx can be found in the [github](https://github.com/qibebt-bioinfo/RamEx), but here you'll find a brief overview of the function and examples to mining of ramanomes:
 
 ##Installaiton
-
-
-
+library(devtools)
+install_github("qibebt-bioinfo/RamEx")
 ##Getting Started
 # Data Loading
 Raman spectra are respectively tracked in single txt files, and their meta info is recorded in the file name.
@@ -33,7 +32,6 @@ Here we assume there's only one factor of the dataset, which means RamEx do not 
 library(RamEx)
 library(magrittr)
 data(RamEx_data)
-data <- RamEx_data
 options(mc.cores = 2)
 ```
 # Pretreatment
