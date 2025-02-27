@@ -45,31 +45,24 @@ Here we assume there's only one factor of the dataset, which means RamEx do not 
 library(RamEx)
 library(magrittr)
 data(RamEx_data)
-data <- RamEx_data
 ```
 #### Pretreatment
 Spectral pretreatment will make the spectrum clearer, containing smoothing, baseline removal, normalization and truncation.
 Mean spectra will display their effects.
 Here the results of each step will be kept in the Ramanome for better debugging, and 'draw.mean' exhibit the final dataset.
 ```{r}
-data_spike <- Preprocessing.Spike(data, "CPU") 
-data_smoothed <- Preprocessing.Smooth.Sg(data) 
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-Preprocessing.Cutoff(data_normalized,550, 1800)
-mean.spec(data_normalized@datasets$baseline.data, data@meta.data$group) 
+RamEx_data %<>%  Preprocessing.Smooth.Sg %>% Preprocessing.Baseline.Polyfit %>% Preprocessing.Normalize(.,'ch') 
+mean.spec(RamEx_data@datasets$normalized.data, RamEx_data@meta.data$group)  
 ```
 #### Quality control
 ```{r}
-data_cleaned <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[data_cleaned$index_good,] 
-mean.spec(data_cleaned@datasets$normalized.data, data_cleaned@meta.data$group)
-qc_icod <- Qualitycontrol.Mcd(data_normalized@datasets$normalized.data)
-qc_t2 <- Qualitycontrol.T2(data_normalized@datasets$normalized.data) 
-qc_dis <- Qualitycontrol.Dis(data_normalized@datasets$normalized.data)
-hist(qc_dis$dis)
-qc_snr <- Qualitycontrol.Snr(data_normalized@datasets$normalized.data) 
+qc_icod <- Qualitycontrol.ICOD(RamEx_data@datasets$normalized.data,var_tol = 0.5)
+data_cleaned <- RamEx_data[qc_icod$quality,] 
+mean.spec(data_cleaned@datasets$normalized.data, data_cleaned@meta.data$group,0.3)
+qc_mcd <- Qualitycontrol.Mcd(RamEx_data@datasets$normalized.data) 
+qc_t2 <- Qualitycontrol.T2(RamEx_data@datasets$normalized.data) 
+qc_dis <- Qualitycontrol.Dis(RamEx_data@datasets$normalized.data) 
+qc_snr <- Qualitycontrol.Snr(RamEx_data@datasets$normalized.data, 'easy')
 ```
 
 #### Interested Bands
@@ -84,17 +77,17 @@ CDR <- data.frame(data_cleaned@meta.data,
 #### Reduction
 Nonlinear methods, such as UMAP and t-SNE. Linear methods like PCA, pCoA. The reduced sample matrix will be contained in the Ramanome onject as 'reductions'. Attention: RamEx uses PCA to reduce the dimensions of the high-dimensional spectrum, since UMAP and t-SNE are highly complex algorithms.
 ```{r}
-data_cleaned <- Feature.Reduction.Pca(data_cleaned, draw=TRUE, save = FALSE) %>% Feature.Reduction.Pcoa(., draw=TRUE, save = FALSE) %>% Feature.Reduction.Tsne(., draw=TRUE, save = FALSE) %>% Feature.Reduction.Umap(., draw=TRUE, save=FALSE) #
+data.reduction <- Feature.Reduction.Pca(data_cleaned, draw=T, save = F) %>% Feature.Reduction.Pcoa(., draw=T, save = F) %>% Feature.Reduction.Tsne(., draw=T, save = F) %>% Feature.Reduction.Umap(., draw=T, save=F) 
 ``` 
 
 #### Markers analysis
 ```{r}
-ROC_markers <- Raman.Markers.Roc(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],data_cleaned@meta.data$group) 
-cor_markers <- Raman.Markers.Correlations(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],as.numeric(data_cleaned@meta.data$group), min.cor = 0.6)
-RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, draw = FALSE) 
+ROC_markers <- Raman.Markers.Roc(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],data_cleaned@meta.data$group, paired  = TRUE, threshold = 0.8) 
+cor_markers <- Raman.Markers.Correlations(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],as.numeric(data_cleaned@meta.data$group), min.cor = 0.8) 
+RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, draw = F) 
 ```
 #### IRCA
--Global IRCA
+-Global IRCA. This module maybe consumed for a longer period of time due to the image drawing
 ```{r}
 IRCA.interests <- Intraramanome.Analysis.Irca.Global(data_cleaned)
 ```
@@ -108,36 +101,37 @@ Intraramanome.Analysis.Irca.Local(data_cleaned, bands_ann = bands_ann)
 ```
 - 2D-COS
 ```{r}
-Intraramanome.Analysis.2Dcos(data_cleaned) 
+data_cos <- Intraramanome.Analysis.2Dcos(data_cleaned) 
 ```
 #### Phenotype analysis
 ```{r}
 clusters_louvain <- Phenotype.Analysis.Louvaincluster(object = data_cleaned, resolutions = c(0.8)) 
-clusters_kmneans <- Phenotype.Analysis.Kmeans(data_cleaned)
-clusters_hca <- Phenotype.Analysis.Hca(data_cleaned) 
+clusters_kmneans <- Phenotype.Analysis.Kmeans(data_cleaned,5)
+clusters_hca <- Phenotype.Analysis.Hca(data_cleaned)
 ```
 
 #### Classifications
+-PC-LDA
+-SVM
+-Random Forest
 ```{r}
-Classification.Gmm(data_cleaned) 
-Classification.Lda(data_cleaned)
-Classification.Rf(data_cleaned)
-Classification.Svm(data_cleaned)
+model.gmm <- Classification.Gmm(data_cleaned)
+model.lda <- Classification.Lda(data_cleaned)
+model.rf <- Classification.Rf(data_cleaned)
+model.svm <- Classification.Svm(data_cleaned)
 ```
 #### Quantifications
 ```{r}
-quan_pls <- Quantification.Pls(data_cleaned)
-quan_mlr <- Quantification.Mlr(data_cleaned)
-quan_glm <- Quantification.Glm(data_cleaned)
+quan_pls <- Quantification.Pls(data_cleaned) 
+quan_mlr <- Quantification.Mlr(data_cleaned) 
+quan_glm <- Quantification.Glm(data_cleaned) 
 ```
 
 #### Spectral decomposition
 ```{r}
 decom_mcr <- Spectral.Decomposition.Mcrals(data_cleaned,2)
 decom_ica <- Spectral.Decomposition.Ica(data_cleaned, 2) 
-data_nmf <- data_cleaned
-data_nmf@datasets$normalized.data %<>% abs
-decom_nmf <- Spectral.Decomposition.Nmf(data_nmf)
+decom_nmf <- Spectral.Decomposition.Nmf(data_cleaned) 
 ```
 ### Raw data formats
 
