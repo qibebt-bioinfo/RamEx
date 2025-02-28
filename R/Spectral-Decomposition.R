@@ -94,6 +94,7 @@ Spectral.Decomposition.Nmf <- function(object) {
   dataset[dataset<0] <- 0
   dataset <- dataset[rowSums(dataset) > 0, ]
   dataset <- dataset[, colSums(dataset) > 0]
-  res <- nmf(dataset, 2, method="ns", seed=123456)
+  set.seed(123456)
+  res <- nmf(dataset, 2, method="ns")
   return(res)
 }
