@@ -28,8 +28,10 @@ stratified_partition <- function(labels, p = 0.7) {
 #' @param save Wether user want to save the confusion matrix plot of the results (default path : getwd())
 #' @param seed The random seed
 #' @return A list containing:
-#'   \item{LDA model}{The LDA model}
-#'   \item{pred.test}{The prediction for test data if test is provided}
+#' \describe{
+#'   \item{model}{The LDA model}
+#'   \item{pred_test}{The prediction for test data if test is provided}
+#' }
 #' @importFrom MASS lda
 #' @importFrom ggplot2 ggsave
 #' @export Classification.Lda
@@ -84,8 +86,10 @@ Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 #' @param save Wether user want to save the confusion matrix plot of the results (default path : getwd())
 #' @param seed The random seed
 #' @return A list containing:
+#' \describe{
 #'   \item{model}{The SVM model}
 #'   \item{pred_test}{The prediction for test data if test is provided}
+#' }
 #' @importFrom e1071 svm
 #' @importFrom ggplot2 ggsave
 #' @export Classification.Svm
@@ -135,8 +139,10 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 #' @param save Wether user want to save the confusion matrix plot of the results (default path : getwd())
 #' @param seed The random seed
 #' @return A list containing:
-#'   \item{RF model}{The RF model}
-#'   \item{pred.test}{The prediction for test data if test is provided}
+#' \describe{ 
+#'   \item{model}{The RF model}
+#'   \item{pred_test}{The prediction for test data if test is provided}
+#' }
 #' @importFrom ggplot2 ggsave
 #' @importFrom randomForest randomForest
 #' @export Classification.Rf
