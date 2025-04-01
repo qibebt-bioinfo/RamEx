@@ -27,6 +27,7 @@ stratified_partition <- function(labels, p = 0.7) {
 #' @param show Whether user want to show the confusion matrix plot of the results
 #' @param save Wether user want to save the confusion matrix plot of the results (default path : getwd())
 #' @param seed The random seed
+#' 
 #' @return A list containing:
 #' \describe{
 #'   \item{model}{The LDA model}
@@ -35,6 +36,7 @@ stratified_partition <- function(labels, p = 0.7) {
 #' @importFrom MASS lda
 #' @importFrom ggplot2 ggsave
 #' @export Classification.Lda
+#' 
 #' @examples
 #' data(RamEx_data)
 #' Classification.Lda(RamEx_data)
@@ -85,6 +87,7 @@ Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 #' @param show Whether user want to show the confusion matrix plot of the results
 #' @param save Wether user want to save the confusion matrix plot of the results (default path : getwd())
 #' @param seed The random seed
+#' 
 #' @return A list containing:
 #' \describe{
 #'   \item{model}{The SVM model}
@@ -93,6 +96,7 @@ Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 #' @importFrom e1071 svm
 #' @importFrom ggplot2 ggsave
 #' @export Classification.Svm
+#' 
 #' @examples
 #' data(RamEx_data)
 #' Classification.Svm(RamEx_data)
@@ -138,6 +142,7 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 #' @param show Whether user want to show the confusion matrix plot of the results
 #' @param save Wether user want to save the confusion matrix plot of the results (default path : getwd())
 #' @param seed The random seed
+#' 
 #' @return A list containing:
 #' \describe{ 
 #'   \item{model}{The RF model}
@@ -146,6 +151,7 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 #' @importFrom ggplot2 ggsave
 #' @importFrom randomForest randomForest
 #' @export Classification.Rf
+#' 
 #' @examples
 #' data(RamEx_data)
 #' Classification.Rf(RamEx_data)
@@ -186,20 +192,20 @@ Classification.Rf <- function(train, test = NULL, ntree = 100, mtry = 2, show=TR
 #'  to each class
 #'
 #' @param train The training data object
-#' @param test The test data object (optional)
-#' @return The GMM model.
+#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (70% for training and 30% for testing of the input 'train').
+#' 
+#' @return A list containing:
+#' \describe{ 
+#'   \item{model}{The GMM model}
+#'   \item{pred_test}{The prediction for test data if test is provided}
+#' }
 #' @export Classification.Gmm
 #' @importFrom mclust Mclust
 #' @importFrom mclust mclustBIC
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.5)
-#' data_cleaned <- RamEx_data[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' Classification.Gmm(data_cleaned)
+#' Classification.Gmm(RamEx_data)
+#' 
 Classification.Gmm <- function(train, test = NULL) {
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
