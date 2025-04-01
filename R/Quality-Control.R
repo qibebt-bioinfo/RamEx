@@ -160,22 +160,19 @@ bubbleloop <- function(spectrum, baseline, min_bubble_widths) {
 #'   If a vector, it should be of the same length as the spectrum, specifying the minimum width for each point.
 #' @return A list containing the corrected spectrum (raman), the peak locations (peaks), and the band boundaries (bands).
 #' @importFrom prospectr savitzkyGolay
+
 bubblefill <- function(spectrum, min_bubble_widths = 50) {
   if(is.null(names(spectrum))) xaxis <- as.numeric(colnames(spectrum)) else xaxis <- as.numeric(names(spectrum))
   spectrum_ <- spectrum
-  # smin <- min(spectrum_)
-  # spectrum_ <- spectrum_ - smin
-  # scale <- max(spectrum_) / length(spectrum)
-  # spectrum_ <- spectrum_ / scale
+
   baseline <- rep(0, length(spectrum))
   baseline <- bubbleloop(spectrum_, baseline, min_bubble_widths)
-  # baseline$baseline <- baseline$baseline * scale + poly_fit + smin
+
   if (!is.numeric(min_bubble_widths)) {
     filter_width <- max(pmin(min_bubble_widths))
   } else {
     filter_width <- max(min_bubble_widths)
   }
-  # baseline <- prospectr::savitzkyGolay(baseline, m = 0, p = 3, w = round(2 * (filter_width %/% 4) + 3), delta.wav = 0)
   raman <- spectrum - baseline$baseline
   bands <- list2DF(baseline$bounds)
   bands <- bands[,which(bands[2,]-bands[1,] < min_bubble_widths)]
@@ -195,7 +192,7 @@ bubblefill <- function(spectrum, min_bubble_widths = 50) {
 #' @param kernel A numeric vector representing the convolution kernel.
 #' @return A numeric vector resulting from the convolution operation.
 #' @importFrom stats convolve
-
+#' @noRd
 
 convolve_custom <- function(vec, kernel) {
   result <- convolve(as.numeric(vec), rev(kernel), type = "filter")
@@ -223,7 +220,7 @@ convolve_custom <- function(vec, kernel) {
 #'   - dist_from_center: The distances of each observation from the centroid.
 #' @importFrom stats qchisq
 #' @importFrom stats mahalanobis
-
+#' @noRd
 
 outliers_mcdEst <- function(x,index_good,
                             h = .75, # fraction of data we wanna keep
@@ -292,6 +289,7 @@ outliers_mcdEst <- function(x,index_good,
 #' @importFrom stats mahalanobis
 #' @importFrom robustbase h.alpha.n
 #' @importFrom robustbase .MCDcnp2
+#' @noRd
 covFastMCD <- function(x, alpha, m, l, delta) {
   # Convert input to data frame
   x <- data.frame(as.matrix(x, nrow = nrow(x), ncol = ncol(x)))
@@ -501,31 +499,26 @@ covFastMCD <- function(x, alpha, m, l, delta) {
 #' It uses a combination of bubble filling, peak detection, and clustering to identify
 #' regions of the matrix that are significantly different from the rest.
 #'
-#' @param matrix A numeric matrix containing the data to be analyzed.
-#' @param var_tol A numeric value specifying the tolerance for variation in peak detection.
+#' @param object Ramanome Object
+#' @param var_tol A numeric value specifying the tolerance for variation of peaks in outliets detection.
 #' Defaults to 0.5.
 #' @param max_iterations The maximum number of iterations to perform in the clustering process.
 #' Defaults to 100.
 #' @param kernel A numeric vector specifying the kernel to use in the convolution step.
 #' Defaults to c(1,1,1).
-#' @return A list containing the time gaps, time clusters, index of good data points,
-#' and the iterations matrix.
+#' @return A data frame with quality defined by ICOD method.
 #' @export Qualitycontrol.ICOD
 #' @importFrom stats kmeans
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+#' qc_icod <- Qualitycontrol.ICOD(RamEx_data)
 
-Qualitycontrol.ICOD <- function(matrix, var_tol=0.5, max_iterations=100, kernel = c(1,1,1)){
+Qualitycontrol.ICOD <- function(object, var_tol=0.5, max_iterations=100, kernel = c(1,1,1)){
+  matrix <- get.nearest.dataset(object)
   resolution <- (max(as.numeric(colnames(matrix))) - min(as.numeric(colnames(matrix))))/ncol(matrix)
   group <- rep(1, nrow(matrix))
   group[is.na(rowSums(matrix))] <- 0
   interations <- group
-  # cl <- makeCluster(getOption("cl.cores", detectCores() ))
   index_matrix <- group == 1
   for (inter in 1:max_iterations){
     new_group <- as.numeric(group)
@@ -559,45 +552,83 @@ Qualitycontrol.ICOD <- function(matrix, var_tol=0.5, max_iterations=100, kernel 
 }
 
 
-#' Detect outliers in a dataset using Hotelling's T2 method
-#'
-#' This function identifies outliers in a dataset by applying Hotelling's T2 statistical method.
-#' It uses parallel processing to speed up the computation.
-#'
-#' @param x A matrix of spectral data where each row represents a single spectrum.
-#' @return A data frame containing two columns: 'out' indicating whether each spectrum is an outlier,
-#' and 'dis' containing the corresponding Hotelling's T2 distance values.
-#' @export Qualitycontrol.T2
-#' @importFrom disprofas get_hotellings
-#' @examples
-#' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' #qc_t2 <- Qualitycontrol.T2(data_normalized@datasets$normalized.data)
-Qualitycontrol.T2 <- function(x){
-  out_na <- which(is.na(rowSums(x)))
-  pred_outliers <- rep(TRUE, nrow(x))
-  if(length(out_na)!=0)pred_outliers[out_na,] <- FALSE
-  n_out <- 0
-  temp_outliers <- pred_outliers
-  i <- 1
-  while(TRUE){
-    print(i)
-    mean_spec <- as.matrix(apply(x[temp_outliers,],2, median))
+#' Calculate Hotelling's T2 statistic efficiently
+#' 
+#' @param m1 A numeric vector or matrix representing the sample data
+#' @param m2 A numeric vector or matrix representing the reference data
+#' @param signif Significance level (between 0 and 1)
+#' @return A numeric value representing the p-value from F-test
+#' @noRd
+calculate_hotellings_t2 <- function(m1, m2, signif = 0.05) {
+    # Ensure inputs are matrices
+    if (!is.matrix(m1)) m1 <- matrix(m1, nrow = 1)
+    if (!is.matrix(m2)) m2 <- matrix(m2, nrow = 1)
+    
+    n_tp <- ncol(m1)  # number of variables
+    n_b1 <- nrow(m1)  # sample size of first group
+    n_b2 <- nrow(m2)  # sample size of second group
+    
+    # Calculate mean difference directly
+    mean_diff <- colMeans(m2) - colMeans(m1)
+    
+    # Calculate pooled covariance matrix more efficiently
+    if (n_b1 == 1 && n_b2 == 1) {
+        # For single spectra comparison, use simplified calculation
+        ff_obs <- sum(mean_diff^2) / n_tp
+        df1 <- n_tp
+        df2 <- 1
+    } else {
+        # For multiple spectra, calculate proper pooled covariance
+        m_vc <- ((n_b1 - 1) * var(m1) + (n_b2 - 1) * var(m2)) / (n_b1 + n_b2 - 2)
+        
+        # Calculate Hotelling's T2 statistic
+        try_result <- try({
+            dm <- sqrt(t(mean_diff) %*% solve(m_vc) %*% mean_diff)
+            k <- (n_b2 * n_b1) / (n_b2 + n_b1)
+            df1 <- n_tp
+            df2 <- n_b1 + n_b2 - n_tp - 1
+            kk <- k * df2 / ((n_b2 + n_b1 - 2) * df1)
+            ff_obs <- kk * dm^2
+        }, silent = TRUE)
+        
+        if (inherits(try_result, "try-error")) {
+            return(0)  # Return 0 p-value if calculation fails
+        }
+    }
+    
+    # Calculate p-value
+    p_ff <- 1 - stats::pf(ff_obs, df1 = df1, df2 = df2)
+    
+    return(p_ff)
+}
+
+#' Detect outliers using Hotelling's T2 method
+#' 
+#' @param object Ramanome Object
+#' @param signif Significance level (between 0 and 1), defaults to 0.05
+#' @return A data frame with quality defined by Hotelling's T2 method and their corresponding p-value 
+#' @export
+Qualitycontrol.T2 <- function(object, signif = 0.05){
+    x <- get.nearest.dataset(object)
+    out_na <- which(is.na(rowSums(x)))
+    pred_outliers <- rep(TRUE, nrow(x))
+    if(length(out_na)!=0)pred_outliers[out_na,] <- FALSE
+    n_out <- 0
     temp_outliers <- pred_outliers
-    hotel_p <- apply(as.matrix(x),1,function(x,spec=mean_spec){
-      return(disprofas::get_hotellings(as.matrix(x), spec, 0.05)$Parameters['p.F'])
-    })
-    temp_outliers[hotel_p < 0.05] <- FALSE
-    if(n_out==length(temp_outliers[!temp_outliers]))break
-    if(i > 30)break
-    i <- i +1
-    n_out <- length(pred_outliers[!temp_outliers])
-  }
-  return(data.frame(quality=temp_outliers, p.F=hotel_p))
+    i <- 1
+    while(TRUE){
+        mean_spec <- as.matrix(apply(x[temp_outliers,],2, median))
+        temp_outliers <- pred_outliers
+        hotel_p <- apply(as.matrix(x),1,function(x,spec=mean_spec){
+            return(calculate_hotellings_t2(as.matrix(x), spec, signif))
+        })
+        temp_outliers[hotel_p < 0.05] <- FALSE
+        if(n_out==length(temp_outliers[!temp_outliers]))break
+        if(i > 30)break
+        i <- i +1
+        n_out <- length(pred_outliers[!temp_outliers])
+    }
+    return(data.frame(quality=temp_outliers, p.F=hotel_p))
 }
 
 #' Detect outliers in a dataset based on distance from the mean spectrum
@@ -607,8 +638,8 @@ Qualitycontrol.T2 <- function(x){
 #' root of the sum of the squared differences between each spectrum and the mean spectrum.
 #' Spectra with a distance greater than a specified threshold are marked as outliers.
 #'
-#' @param x A matrix of spectral data where each row represents a single spectrum.
-#' @param min.dis The minimum distance threshold for marking a spectrum as an outlier.
+#' @param object Ramanome Object
+#' @param min.dis The minimum euclidean distance threshold for marking a spectrum as an outlier.
 #'                 Defaults to 1.
 #' @return A data frame containing two columns: 'out' indicating whether each spectrum is an
 #'         outlier, and 'dis' containing the corresponding distance values.
@@ -616,13 +647,9 @@ Qualitycontrol.T2 <- function(x){
 #' @importFrom stats quantile
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' qc_dis <- Qualitycontrol.Dis(data_normalized@datasets$normalized.data)
-Qualitycontrol.Dis <- function(x, min.dis=1){
+#' qc_dis <- Qualitycontrol.Dis(RamEx_data)
+Qualitycontrol.Dis <- function(object, min.dis=1){
+  x <- get.nearest.dataset(object)
   pred_outliers <- rep(TRUE, nrow(x))
   out_na <- which(is.na(rowSums(x)))
   if(length(out_na)!=0)pred_outliers[out_na,] <- FALSE
@@ -649,27 +676,20 @@ Qualitycontrol.Dis <- function(x, min.dis=1){
 #' using the Minimum Covariance Determinant method. It modifies the output to include
 #' additional information such as the distance and center of the outliers.
 #'
-#' @param x The input dataset.
+#' @param object Ramanome Object
 #' @param h The fraction of the data to use for computing the MCD.
 #' @param alpha The significance level for the MCD.
 #' @param na.rm A logical value indicating whether to remove NA values.
-#' @return An object of class "Qualitycontrol.Mcd" containing the following components:
-#'   - distance: The maximum distance threshold for outliers.
-#'   - center: The center of the outliers.
-#'   - outliers_pos: The positions of the outliers.
-#'   - nb: A named number giving the total number of outliers detected.
+#' @return A data frame with quality defined by MCD method and their mahalanobis distance from the center.
 #' @export Qualitycontrol.Mcd
 #' @importFrom stats qchisq
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' #qc_mcd <- Qualitycontrol.Mcd(data_normalized@datasets$normalized.data)
+#' qc_mcd <- Qualitycontrol.Mcd(RamEx_data)
 
-Qualitycontrol.Mcd <- function(x,h = .5,alpha = .01, na.rm = TRUE){
+
+Qualitycontrol.Mcd <- function(object,h = .5,alpha = .01, na.rm = TRUE){
+  x <- get.nearest.dataset(object)
   pred_outliers <- rep(TRUE, nrow(x))
   out_na <- which(is.na(rowSums(x)))
   dis <- rep(NA, nrow(x))
@@ -680,27 +700,25 @@ Qualitycontrol.Mcd <- function(x,h = .5,alpha = .01, na.rm = TRUE){
   pred_outliers[pred_outliers][out$outliers_pos] <- FALSE
   return(data.frame(quality=pred_outliers, Distance = dis))
 }
+
 #' Calculate the Signal-to-Noise Ratio (SNR) for a dataset
 #'
 #' This function calculates the SNR for a dataset by comparing the signal and noise levels.
-#'
-#' @param data A matrix of spectral data where each row represents a single spectrum.
+#' The signal is defined as the maximum intensity in the range of 600-3050 cm-1, and the noise is defined as the mean intensity in the range of 1800-1900 cm-1.
+#' The SNR is calculated as the ratio of the mean of signal and the standard deviation of noise.
+#' 
+#' @param object Ramanome Object
 #' @param level The level of strictness for the SNR calculation. Defaults to "medium".
-#' @return A vector indicating whether each spectrum passes the SNR test.
+#' @return A data frame with quality defined by SNR method and their SNR values.
 #' @export Qualitycontrol.Snr
 #' @importFrom stats sd
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' qc_snr <- Qualitycontrol.Snr(data_normalized@datasets$normalized.data)
+#' qc_snr <- Qualitycontrol.Snr(RamEx_data)
 
-Qualitycontrol.Snr <- function(data, level = "medium")
+Qualitycontrol.Snr <- function(object, level = "medium")
 {
-  data <- as.matrix(data)
+  data <- get.nearest.dataset(object)
   waves <- as.numeric(colnames(data))
   band_noise <- c(which((waves > 1800) & (waves < 1900)))
   band_signal <- c(which(waves > 600 & waves < 3050))
