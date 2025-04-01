@@ -32,7 +32,7 @@
 ### Installation
 
 RamEx will be installed from GitHub:.
-```
+```{r}
 library('devtools')
 install_github("qibebt-bioinfo/RamEx")
 ```
@@ -56,13 +56,13 @@ mean.spec(RamEx_data@datasets$normalized.data, RamEx_data@meta.data$group)
 ```
 #### Quality control
 ```{r}
-qc_icod <- Qualitycontrol.ICOD(RamEx_data@datasets$normalized.data,var_tol = 0.5)
+qc_icod <- Qualitycontrol.ICOD(RamEx_data,var_tol = 0.5)
 data_cleaned <- RamEx_data[qc_icod$quality,] 
 mean.spec(data_cleaned@datasets$normalized.data, data_cleaned@meta.data$group,0.3)
-qc_mcd <- Qualitycontrol.Mcd(RamEx_data@datasets$normalized.data) 
-qc_t2 <- Qualitycontrol.T2(RamEx_data@datasets$normalized.data) 
-qc_dis <- Qualitycontrol.Dis(RamEx_data@datasets$normalized.data) 
-qc_snr <- Qualitycontrol.Snr(RamEx_data@datasets$normalized.data, 'easy')
+qc_mcd <- Qualitycontrol.Mcd(RamEx_data) 
+qc_t2 <- Qualitycontrol.T2(RamEx_data) 
+qc_dis <- Qualitycontrol.Dis(RamEx_data) 
+qc_snr <- Qualitycontrol.Snr(RamEx_data, 'easy')
 ```
 
 #### Interested Bands
