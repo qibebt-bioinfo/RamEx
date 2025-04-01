@@ -31,8 +31,10 @@ Classification.Rf(
 }
 \value{
 A list containing:
-  \item{RF model}{The RF model}
-  \item{pred.test}{The prediction for test data if test is provided}
+\describe{ 
+  \item{model}{The RF model}
+  \item{pred_test}{The prediction for test data if test is provided}
+}
 }
 \description{
 This function performs classification using RF

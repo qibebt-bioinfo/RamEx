@@ -19,8 +19,10 @@ Classification.Lda(train, test = NULL, show = TRUE, save = FALSE, seed = 42)
 }
 \value{
 A list containing:
-  \item{LDA model}{The LDA model}
-  \item{pred.test}{The prediction for test data if test is provided}
+\describe{
+  \item{model}{The LDA model}
+  \item{pred_test}{The prediction for test data if test is provided}
+}
 }
 \description{
 This function performs classification using PC-LDA

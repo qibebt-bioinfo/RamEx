@@ -9,10 +9,14 @@ Classification.Gmm(train, test = NULL)
 \arguments{
 \item{train}{The training data object}
 
-\item{test}{The test data object (optional)}
+\item{test}{The test data object (optional). If not provided, the function will perform a stratified cross-validation (70% for training and 30% for testing of the input 'train').}
 }
 \value{
-The GMM model.
+A list containing:
+\describe{ 
+  \item{model}{The GMM model}
+  \item{pred_test}{The prediction for test data if test is provided}
+}
 }
 \description{
 A probabilistic model that assumes data is generated from
@@ -21,11 +25,6 @@ a mixture of Gaussian distributions and assigns probabilities
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.5)
-data_cleaned <- RamEx_data[qc_icod$quality,]
-data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-Classification.Gmm(data_cleaned)
+Classification.Gmm(RamEx_data)
+
 }
