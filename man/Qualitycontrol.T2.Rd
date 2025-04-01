@@ -2,27 +2,18 @@
 % Please edit documentation in R/Quality-Control.R
 \name{Qualitycontrol.T2}
 \alias{Qualitycontrol.T2}
-\title{Detect outliers in a dataset using Hotelling's T2 method}
+\title{Detect outliers using Hotelling's T2 method}
 \usage{
-Qualitycontrol.T2(x)
+Qualitycontrol.T2(object, signif = 0.05)
 }
 \arguments{
-\item{x}{A matrix of spectral data where each row represents a single spectrum.}
+\item{object}{Ramanome Object}
+
+\item{signif}{Significance level (between 0 and 1), defaults to 0.05}
 }
 \value{
-A data frame containing two columns: 'out' indicating whether each spectrum is an outlier,
-and 'dis' containing the corresponding Hotelling's T2 distance values.
+A data frame with quality defined by Hotelling's T2 method and their corresponding p-value
 }
 \description{
-This function identifies outliers in a dataset by applying Hotelling's T2 statistical method.
-It uses parallel processing to speed up the computation.
-}
-\examples{
-data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#qc_t2 <- Qualitycontrol.T2(data_normalized@datasets$normalized.data)
+Detect outliers using Hotelling's T2 method
 }

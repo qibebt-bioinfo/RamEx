@@ -4,25 +4,22 @@
 \alias{Qualitycontrol.Snr}
 \title{Calculate the Signal-to-Noise Ratio (SNR) for a dataset}
 \usage{
-Qualitycontrol.Snr(data, level = "medium")
+Qualitycontrol.Snr(object, level = "medium")
 }
 \arguments{
-\item{data}{A matrix of spectral data where each row represents a single spectrum.}
+\item{object}{Ramanome Object}
 
 \item{level}{The level of strictness for the SNR calculation. Defaults to "medium".}
 }
 \value{
-A vector indicating whether each spectrum passes the SNR test.
+A data frame with quality defined by SNR method and their SNR values.
 }
 \description{
 This function calculates the SNR for a dataset by comparing the signal and noise levels.
+The signal is defined as the maximum intensity in the range of 600-3050 cm-1, and the noise is defined as the mean intensity in the range of 1800-1900 cm-1.
+The SNR is calculated as the ratio of the mean of signal and the standard deviation of noise.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-qc_snr <- Qualitycontrol.Snr(data_normalized@datasets$normalized.data)
+qc_snr <- Qualitycontrol.Snr(RamEx_data)
 }

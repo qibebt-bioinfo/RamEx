@@ -4,12 +4,12 @@
 \alias{Qualitycontrol.Dis}
 \title{Detect outliers in a dataset based on distance from the mean spectrum}
 \usage{
-Qualitycontrol.Dis(x, min.dis = 1)
+Qualitycontrol.Dis(object, min.dis = 1)
 }
 \arguments{
-\item{x}{A matrix of spectral data where each row represents a single spectrum.}
+\item{object}{Ramanome Object}
 
-\item{min.dis}{The minimum distance threshold for marking a spectrum as an outlier.
+\item{min.dis}{The minimum euclidean distance threshold for marking a spectrum as an outlier.
 Defaults to 1.}
 }
 \value{
@@ -24,10 +24,5 @@ Spectra with a distance greater than a specified threshold are marked as outlier
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-qc_dis <- Qualitycontrol.Dis(data_normalized@datasets$normalized.data)
+qc_dis <- Qualitycontrol.Dis(RamEx_data)
 }

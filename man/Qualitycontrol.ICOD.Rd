@@ -5,16 +5,16 @@
 \title{Quality Control by Identifying Jumps in a Matrix}
 \usage{
 Qualitycontrol.ICOD(
-  matrix,
+  object,
   var_tol = 0.5,
   max_iterations = 100,
   kernel = c(1, 1, 1)
 )
 }
 \arguments{
-\item{matrix}{A numeric matrix containing the data to be analyzed.}
+\item{object}{Ramanome Object}
 
-\item{var_tol}{A numeric value specifying the tolerance for variation in peak detection.
+\item{var_tol}{A numeric value specifying the tolerance for variation of peaks in outliets detection.
 Defaults to 0.5.}
 
 \item{max_iterations}{The maximum number of iterations to perform in the clustering process.
@@ -24,8 +24,7 @@ Defaults to 100.}
 Defaults to c(1,1,1).}
 }
 \value{
-A list containing the time gaps, time clusters, index of good data points,
-and the iterations matrix.
+A data frame with quality defined by ICOD method.
 }
 \description{
 This function performs quality control on a matrix by identifying jumps or outliers.
@@ -34,9 +33,5 @@ regions of the matrix that are significantly different from the rest.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
+qc_icod <- Qualitycontrol.ICOD(RamEx_data)
 }

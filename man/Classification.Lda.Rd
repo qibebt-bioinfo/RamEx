@@ -2,37 +2,30 @@
 % Please edit documentation in R/classification.R
 \name{Classification.Lda}
 \alias{Classification.Lda}
-\title{Perform classification use LDA model}
+\title{Perform classification use linear discriminant analysis LDA model}
 \usage{
 Classification.Lda(train, test = NULL, show = TRUE, save = FALSE, seed = 42)
 }
 \arguments{
 \item{train}{The training data object}
 
-\item{test}{The test data object (optional)}
+\item{test}{The test data object (optional). If not provided, the function will perform a stratified cross-validation (70% for training and 30% for testing of the input 'train').}
 
-\item{show}{Whether user want to show the results}
+\item{show}{Whether user want to show the confusion matrix plot of the results}
 
-\item{save}{Wether user want to save the results}
+\item{save}{Wether user want to save the confusion matrix plot of the results (default path : getwd())}
 
 \item{seed}{The random seed}
 }
 \value{
 A list containing:
-  \item{pred.train}{The confusion matrix plot for training data}
-  \item{pred.test}{The confusion matrix plot for test data}
+  \item{LDA model}{The LDA model}
+  \item{pred.test}{The prediction for test data if test is provided}
 }
 \description{
 This function performs classification using PC-LDA
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- RamEx_data[qc_icod$quality,]
-data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-Classification.Lda(data_cleaned)
+Classification.Lda(RamEx_data)
 }

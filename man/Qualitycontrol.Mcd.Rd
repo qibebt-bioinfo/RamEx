@@ -4,10 +4,10 @@
 \alias{Qualitycontrol.Mcd}
 \title{Detect outliers using the Minimum Covariance Determinant (MCD) method}
 \usage{
-Qualitycontrol.Mcd(x, h = 0.5, alpha = 0.01, na.rm = TRUE)
+Qualitycontrol.Mcd(object, h = 0.5, alpha = 0.01, na.rm = TRUE)
 }
 \arguments{
-\item{x}{The input dataset.}
+\item{object}{Ramanome Object}
 
 \item{h}{The fraction of the data to use for computing the MCD.}
 
@@ -16,11 +16,7 @@ Qualitycontrol.Mcd(x, h = 0.5, alpha = 0.01, na.rm = TRUE)
 \item{na.rm}{A logical value indicating whether to remove NA values.}
 }
 \value{
-An object of class "Qualitycontrol.Mcd" containing the following components:
-  - distance: The maximum distance threshold for outliers.
-  - center: The center of the outliers.
-  - outliers_pos: The positions of the outliers.
-  - nb: A named number giving the total number of outliers detected.
+A data frame with quality defined by MCD method and their mahalanobis distance from the center.
 }
 \description{
 This function extends the outliers_mcdEst function to detect outliers in a dataset
@@ -29,10 +25,5 @@ additional information such as the distance and center of the outliers.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#qc_mcd <- Qualitycontrol.Mcd(data_normalized@datasets$normalized.data)
+qc_mcd <- Qualitycontrol.Mcd(RamEx_data)
 }
