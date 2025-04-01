@@ -27,6 +27,7 @@ stratified_partition <- function(labels, p = 0.7) {
 #' @param show Whether user want to show the confusion matrix plot of the results
 #' @param save Wether user want to save the confusion matrix plot of the results (default path : getwd())
 #' @param seed The random seed
+#' @param n_pc The number of principal components to use
 #' 
 #' @return A list containing:
 #' \describe{
@@ -40,7 +41,7 @@ stratified_partition <- function(labels, p = 0.7) {
 #' @examples
 #' data(RamEx_data)
 #' Classification.Lda(RamEx_data)
-Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42) {
+Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42, n_pc = 20) {
   set.seed(seed)
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
@@ -58,23 +59,32 @@ Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
   }
   
   data.pca <- prcomp(data_train, scale = TRUE, retx = TRUE)
-  data_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
+  data_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:n_pc] %>% as.data.frame
   
   model.lda <- lda(label_train ~ ., data = data_20)
   data_pre <- predict(model.lda, data_20)
   cat('Training accuracy of PC-LDA: ')
   pred.train <- confusion.plot(label_train, data_pre$class)
-  if(save){ggsave('Classification_PC-LDA_Train.png', pred.train, width = length(unique(label_train)) + 1, height = length(unique(label_train)))}
+  if(save){
+    cat('Saving plot to the current working directory: ', getwd(), '\n')
+    ggsave('Classification_PC-LDA_Train.png', pred.train, width = length(unique(label_train)) + 1, height = length(unique(label_train)))}
   
-  test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
+  test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:n_pc] %>% as.data.frame
   
   data_pre <- predict(model.lda, test_20)
+  pca_params <- list(
+    center = data.pca$center,
+    scale = data.pca$scale,
+    rotation = data.pca$rotation[, 1:n_pc]
+  )
   cat('Test accuracy of PC-LDA: ')
   pred.test <- confusion.plot(label_val, data_pre$class)
-  if(save){ggsave('Classification_PC-LDA_Test.png', pred.test, width = length(unique(label_val)) + 1, height = length(unique(label_train)))}
+  if(save){
+    cat('Saving plot to the current working directory: ', getwd(), '\n')
+    ggsave('Classification_PC-LDA_Test.png', pred.test, width = length(unique(label_val)) + 1, height = length(unique(label_train)))}
   if(show){print(pred.train)
     print(pred.test)}
-  if (is.null(test)) return(list(model=model.lda)) else return(list(model=model.lda, pred_test = data_pre))
+  if (is.null(test)) return(list(model=model.lda, pca_params = pca_params)) else return(list(model=model.lda, pred_test = data_pre, pca_params = pca_params))
 }
 
 
@@ -124,7 +134,9 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
   cat('Test accuracy of SVM: ')
   data_pre <- predict(model.svm, data_val)
   pred.test <- confusion.plot(label_val, data_pre)
-  if(save){ggsave('Classification_SVM_Test.png', pred.test, width = length(unique(label_val)) + 1, height = length(unique(label_train)))}
+  if(save){
+    cat('Saving plot to the current working directory: ', getwd(), '\n')
+    ggsave('Classification_SVM_Test.png', pred.test, width = length(unique(label_val)) + 1, height = length(unique(label_train)))}
   if(show){print(pred.train)
     print(pred.test)}
   if (is.null(test)) return(list(model=model.svm)) else return(list(model=model.svm, pred_test = data_pre))
@@ -179,7 +191,9 @@ Classification.Rf <- function(train, test = NULL, ntree = 100, mtry = 2, show=TR
   data_pre <- predict(model.rf, data_val)
   cat('Test accuracy of Random forest: ')
   pred.test <- confusion.plot(label_val, data_pre)
-  if(save){ggsave('Classification_RF_Test.png', pred.test, width = length(unique(label_val)) + 1, height = length(unique(label_train)))}
+  if(save){
+    cat('Saving plot to the current working directory: ', getwd(), '\n')
+    ggsave('Classification_RF_Test.png', pred.test, width = length(unique(label_val)) + 1, height = length(unique(label_train)))}
   if(show){print(pred.train)
     print(pred.test)}
   if (is.null(test)) return(list(model=model.rf)) else return(list(model=model.rf, pred_test = data_pre))
@@ -193,6 +207,7 @@ Classification.Rf <- function(train, test = NULL, ntree = 100, mtry = 2, show=TR
 #'
 #' @param train The training data object
 #' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).
+#' @param n_pc The number of principal components to use
 #' 
 #' @return A list containing:
 #' \describe{ 
@@ -207,7 +222,8 @@ Classification.Rf <- function(train, test = NULL, ntree = 100, mtry = 2, show=TR
 #' data(RamEx_data)
 #' Classification.Gmm(RamEx_data)
 #' 
-Classification.Gmm <- function(train, test = NULL) {
+Classification.Gmm <- function(train, test = NULL, n_pc = 20, show=TRUE, save=FALSE, seed=42) {
+  set.seed(seed)
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
     labels <- train@meta.data$group
@@ -222,8 +238,98 @@ Classification.Gmm <- function(train, test = NULL) {
     data_val <- get.nearest.dataset(test)
     label_val <- test@meta.data$group}
   data.pca <- prcomp(data_train, scale = TRUE, retx = TRUE)
-  data_train_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
+  data_train_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:n_pc] %>% as.data.frame
   gmm_model <- Mclust(data_train_20)
-  data_test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
+  data_test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:n_pc] %>% as.data.frame
   data_pre <- predict(gmm_model, data_test_20)
-  if (is.null(test)) return(list(model=gmm_model)) else return(list(model=gmm_model, pred_test = data_pre$classification))}
+  pca_params <- list(
+    center = data.pca$center,
+    scale = data.pca$scale,
+    rotation = data.pca$rotation[, 1:n_pc]
+  )
+  pred.test <- confusion.plot(label_val, data_pre$class)
+  if(save){
+    cat('Saving plot to the current working directory: ', getwd(), '\n')
+    ggsave('Classification_GMM_Test.png', pred.test, width = length(unique(label_val)) + 1, height = length(unique(label_train)))}
+  if(show){print(pred.train)
+    print(pred.test)}
+
+  if (is.null(test)) return(list(model=gmm_model, pca_params = pca_params)) else return(list(model=gmm_model, pred_test = data_pre$classification, pca_params = pca_params))}
+
+
+#' Predict using a trained classification model
+#'
+#' This function uses a saved classification model to predict labels for new data.
+#'
+#' @param model The saved classification model (from Classification.Lda, Classification.Svm, Classification.Rf, or Classification.Gmm)
+#' @param new_data The new Ramanome object to predict
+#' @param show Whether to show the confusion matrix plot of the results
+#' @param save Whether to save the confusion matrix plot of the results (default path: getwd())
+#'
+#' @return A list containing:
+#' \describe{
+#'   \item{predictions}{The predicted labels for the new data}
+#'   \item{probabilities}{The prediction probabilities for each class (if available)}
+#' }
+#'
+#' @export 
+#'
+#' @examples
+#' data(RamEx_data)
+#' # Train a model
+#' model <- Classification.Rf(RamEx_data)
+#' # Use the model to predict new data
+#' predictions <- predict_classification(model, RamEx_data)
+predict_classification <- function(model, new_data, show = TRUE, save = FALSE) {
+  # Get the new data
+  new_data_matrix <- get.nearest.dataset(new_data)
+  
+  # Determine model type and make predictions
+  if (inherits(model$model, "lda")) {
+    # For LDA model
+    new_data_20 <- scale(new_data_matrix, center = model$pca_params$center, scale = model$pca_params$scale) %*% model$pca_params$rotation %>% as.data.frame
+    pred <- predict(model$model, new_data_20)
+    predictions <- pred$class
+    probabilities <- pred$posterior
+    
+  } else if (inherits(model, "svm")) {
+    # For SVM model
+    pred <- predict(model$model, new_data_matrix, probability = TRUE)
+    predictions <- pred
+    probabilities <- attr(pred, "probabilities")
+    
+  } else if (inherits(model, "randomForest")) {
+    # For Random Forest model
+    pred <- predict(model, new_data_matrix, type = "response")
+    predictions <- pred
+    probabilities <- predict(model, new_data_matrix, type = "prob")
+    
+  } else if (inherits(model, "Mclust")) {
+    # For GMM model
+    new_data_20 <- scale(new_data_matrix, center = model$pca_params$center, scale = model$pca_params$scale) %*% model$pca_params$rotation %>% as.data.frame
+    pred <- predict(model, new_data_20)
+    predictions <- pred$classification
+    probabilities <- pred$z
+    
+  } else {
+    stop("Unsupported model type")
+  }
+  
+  # If true labels are available, show confusion matrix
+  if (!is.null(new_data@meta.data$group)) {
+    true_labels <- new_data@meta.data$group
+    if (show) {
+      pred.plot <- confusion.plot(true_labels, predictions)
+      print(pred.plot)
+    }
+    if (save) {
+      pred.plot <- confusion.plot(true_labels, predictions)
+      cat('Saving plot to the current working directory: ', getwd(), '\n')
+      ggsave('Classification_Prediction.png', pred.plot, 
+             width = length(unique(true_labels)) + 1, 
+             height = length(unique(true_labels)))
+    }
+  }
+  
+  return(list(predictions = predictions, probabilities = probabilities))
+}

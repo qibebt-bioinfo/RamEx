@@ -4,7 +4,14 @@
 \alias{Classification.Lda}
 \title{Perform classification use linear discriminant analysis LDA model}
 \usage{
-Classification.Lda(train, test = NULL, show = TRUE, save = FALSE, seed = 42)
+Classification.Lda(
+  train,
+  test = NULL,
+  show = TRUE,
+  save = FALSE,
+  seed = 42,
+  n_pc = 20
+)
 }
 \arguments{
 \item{train}{The training data object}
@@ -16,6 +23,8 @@ Classification.Lda(train, test = NULL, show = TRUE, save = FALSE, seed = 42)
 \item{save}{Wether user want to save the confusion matrix plot of the results (default path : getwd())}
 
 \item{seed}{The random seed}
+
+\item{n_pc}{The number of principal components to use}
 }
 \value{
 A list containing:

@@ -4,12 +4,21 @@
 \alias{Classification.Gmm}
 \title{Gaussian Mixture Model (GMM)}
 \usage{
-Classification.Gmm(train, test = NULL)
+Classification.Gmm(
+  train,
+  test = NULL,
+  n_pc = 20,
+  show = TRUE,
+  save = FALSE,
+  seed = 42
+)
 }
 \arguments{
 \item{train}{The training data object}
 
 \item{test}{The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).}
+
+\item{n_pc}{The number of principal components to use}
 }
 \value{
 A list containing:
