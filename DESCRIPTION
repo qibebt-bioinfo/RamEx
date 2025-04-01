@@ -15,7 +15,7 @@ Depends: R (>= 3.5.0)
 Imports:
    MASS, RColorBrewer, Rcpp, RcppParallel, circlize, pls, mclust, MLmetrics, Matrix, NMF, parallel, Rtsne, cowplot, data.table, dbscan, disprofas, doParallel, dplyr, e1071, fastICA, foreach, ggforce, ggplot2, ggthemes, grDevices, graphics, hyperSpec, ica, igraph, mdatools, methods, pheatmap, irlba, prospectr, purrr, randomForest, rlist, scales, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, proxy, reshape2, ggtext, RcppAnnoy, ade4, magrittr, corr2D, robustbase
 Suggests:
-    testthat,knitr,gpuR, Biobase
+    testthat,knitr,gpuR
 LinkingTo:
     Rcpp, RcppParallel
 biocViews: Visualization, Clustering, Software
