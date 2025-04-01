@@ -19,8 +19,8 @@ Classification.Svm(train, test = NULL, show = TRUE, save = FALSE, seed = 42)
 }
 \value{
 A list containing:
-  \item{SVM model}{The SVM model}
-  \item{pred.test}{The prediction for test data if test is provided}
+  \item{model}{The SVM model}
+  \item{pred_test}{The prediction for test data if test is provided}
 }
 \description{
 This function performs classification using SVM

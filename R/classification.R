@@ -84,8 +84,8 @@ Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 #' @param save Wether user want to save the confusion matrix plot of the results (default path : getwd())
 #' @param seed The random seed
 #' @return A list containing:
-#'   \item{SVM model}{The SVM model}
-#'   \item{pred.test}{The prediction for test data if test is provided}
+#'   \item{model}{The SVM model}
+#'   \item{pred_test}{The prediction for test data if test is provided}
 #' @importFrom e1071 svm
 #' @importFrom ggplot2 ggsave
 #' @export Classification.Svm
