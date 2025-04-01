@@ -12,6 +12,8 @@ Feature.Reduction.Pca(object, draw = TRUE, save = FALSE)
 \item{draw}{A logical value indicating whether to draw the PCA plot. Defaults to TRUE.}
 
 \item{save}{A logical value indicating whether to save the plot as a file. Defaults to FALSE.}
+
+\item{seed}{A numeric value indicating the seed for the random number generator. Defaults to 42.}
 }
 \value{
 The updated Ramanome object with the PCA results appended to the `reductions` slot.

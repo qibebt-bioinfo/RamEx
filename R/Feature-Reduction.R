@@ -7,17 +7,16 @@
 #' @param object A Ramanome object containing the dataset and metadata.
 #' @param draw A logical value indicating whether to draw the PCA plot. Defaults to TRUE.
 #' @param save A logical value indicating whether to save the plot as a file. Defaults to FALSE.
+#' @param seed A numeric value indicating the seed for the random number generator. Defaults to 42.
+#' 
 #' @return The updated Ramanome object with the PCA results appended to the `reductions` slot.
 #' @export Feature.Reduction.Pca
 #' @importFrom stats prcomp
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
-#' @importFrom ggplot2 theme_bw
 #' @importFrom ggplot2 labs
 #' @importFrom ggplot2 ggsave
-#' @importFrom dplyr %>%
-#' @importFrom ggthemes theme_tufte
-#' @import ggtext
+
 #' @examples
 #' data(RamEx_data)
 #' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
@@ -39,21 +38,8 @@ Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE) {
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
       geom_point() +
-      theme_bw() +
       labs(x = names[1], y = names[2]) +
-      theme(
-        panel.grid = element_blank(),
-        panel.grid.minor = element_blank(),
-        legend.title = element_blank(),
-        legend.text = element_markdown(size = 15),
-        legend.background = element_blank(),
-        text = element_text(color = "black"),
-        axis.text.x = element_text(size = 15, angle = 0),
-        axis.text.y = element_text(size = 15),
-        axis.ticks = element_line(linewidth = 1),
-        axis.ticks.length = unit(0.4, "lines"),
-        axis.title = element_text(size = 15)
-      )
+      theme_classic()
     print(plot)
   }
   
@@ -80,11 +66,9 @@ Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE) {
 #' @importFrom Rtsne Rtsne
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
-#' @importFrom ggplot2 theme_bw
 #' @importFrom ggplot2 labs
-#' @importFrom ggplot2 theme
 #' @importFrom ggplot2 ggsave
-#' @import ggtext
+
 #' @examples
 #' data(RamEx_data)
 #' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
@@ -94,7 +78,8 @@ Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE) {
 #' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
 #' data_cleaned <- data_normalized[qc_icod$quality,]
 #' data.reduction.tsne <- Feature.Reduction.Tsne(data_cleaned, draw=TRUE, save = FALSE)
-Feature.Reduction.Tsne <- function(object, draw = TRUE, save=FALSE) {
+Feature.Reduction.Tsne <- function(object, draw = TRUE, save=FALSE, seed=42) {
+  set.seed(seed)
   dataset <- get.nearest.dataset(object)
   
   data.red <- data.frame(Rtsne::Rtsne(
@@ -113,21 +98,8 @@ Feature.Reduction.Tsne <- function(object, draw = TRUE, save=FALSE) {
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
       geom_point() +
-      theme_bw() +
       labs(x = names[1], y = names[2]) +
-      theme(
-        panel.grid = element_blank(),
-        panel.grid.minor = element_blank(),
-        legend.title = element_blank(),
-        legend.text = element_markdown(size = 15),
-        legend.background = element_blank(),
-        text = element_text(color = "black"),
-        axis.text.x = element_text(size = 15, angle = 0),
-        axis.text.y = element_text(size = 15),
-        axis.ticks = element_line(linewidth = 1),
-        axis.ticks.length = unit(0.4, "lines"),
-        axis.title = element_text(size = 15)
-      )
+      theme_classic()
     print(plot)
   }
   
@@ -155,13 +127,9 @@ Feature.Reduction.Tsne <- function(object, draw = TRUE, save=FALSE) {
 #' @importFrom parallel detectCores
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
-#' @importFrom ggplot2 theme_bw
 #' @importFrom ggplot2 labs
-#' @importFrom ggthemes theme_tufte
-#' @importFrom ggplot2 scale_fill_manual
-#' @importFrom ggplot2 scale_color_manual
 #' @importFrom ggplot2 ggsave
-#' @import ggtext
+
 #' @examples
 #' data(RamEx_data)
 #' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
@@ -172,7 +140,8 @@ Feature.Reduction.Tsne <- function(object, draw = TRUE, save=FALSE) {
 #' data_cleaned <- data_normalized[qc_icod$quality,]
 #' data.reduction.umap <- Feature.Reduction.Umap(data_cleaned, draw=TRUE, save = FALSE)
 #'
-Feature.Reduction.Umap <- function(object, draw = TRUE, save=FALSE) {
+Feature.Reduction.Umap <- function(object, draw = TRUE, save=FALSE, seed=42) {
+  set.seed(seed)
   dataset <- get.nearest.dataset(object)
   data.red.pca <- data.frame(prcomp_irlba(dataset, n = 20, center = TRUE, scale. = TRUE)$x[, 1:20])
   data.red <- data.frame(uwot::umap(data.red.pca, scale = FALSE,  n_threads = detectCores(),n_neighbors = 30, a=0.9922, b=1.112, metric = 'cosine',seed=123))
@@ -185,21 +154,8 @@ Feature.Reduction.Umap <- function(object, draw = TRUE, save=FALSE) {
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
       geom_point() +
-      theme_bw() +
       labs(x = names[1], y = names[2]) +
-      theme(
-        panel.grid = element_blank(),
-        panel.grid.minor = element_blank(),
-        legend.title = element_blank(),
-        legend.text = element_markdown(size = 15),
-        legend.background = element_blank(),
-        text = element_text(color = "black"),
-        axis.text.x = element_text(size = 15, angle = 0),
-        axis.text.y = element_text(size = 15),
-        axis.ticks = element_line(linewidth = 1),
-        axis.ticks.length = unit(0.4, "lines"),
-        axis.title = element_text(size = 15)
-      )
+      theme_classic()
     print(plot)
   }
   
@@ -224,16 +180,12 @@ Feature.Reduction.Umap <- function(object, draw = TRUE, save=FALSE) {
 #' @return The updated Ramanome object with the PCoA results appended to the `reductions` slot.
 #' @export Feature.Reduction.Pcoa
 #' @importFrom vegan vegdist
-#' @import ggtext
 #' @importFrom stats aov
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
-#' @importFrom ggplot2 theme_bw
 #' @importFrom ggplot2 labs
-#' @importFrom ggthemes theme_tufte
 #' @importFrom ggplot2 ggsave
 #' @importFrom ade4 dudi.pco
-#' @import ggtext
 #' @examples
 #' data(RamEx_data)
 #' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
@@ -256,21 +208,8 @@ Feature.Reduction.Pcoa <- function(object, draw = TRUE, save=FALSE) {
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
       geom_point() +
-      theme_bw() +
       labs(x = names[1], y = names[2]) +
-      theme(
-        panel.grid = element_blank(),
-        panel.grid.minor = element_blank(),
-        legend.title = element_blank(),
-        legend.text = element_markdown(size = 15),
-        legend.background = element_blank(),
-        text = element_text(color = "black"),
-        axis.text.x = element_text(size = 15, angle = 0),
-        axis.text.y = element_text(size = 15),
-        axis.ticks = element_line(linewidth = 1),
-        axis.ticks.length = unit(0.4, "lines"),
-        axis.title = element_text(size = 15)
-      )
+      theme_classic()
     print(plot)
   }
   

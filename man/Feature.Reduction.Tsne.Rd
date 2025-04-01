@@ -4,7 +4,7 @@
 \alias{Feature.Reduction.Tsne}
 \title{Perform t-SNE Dimensionality Reduction and Plotting}
 \usage{
-Feature.Reduction.Tsne(object, draw = TRUE, save = FALSE)
+Feature.Reduction.Tsne(object, draw = TRUE, save = FALSE, seed = 42)
 }
 \arguments{
 \item{object}{A Ramanome object containing the dataset and metadata.}

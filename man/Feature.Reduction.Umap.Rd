@@ -4,7 +4,7 @@
 \alias{Feature.Reduction.Umap}
 \title{Perform UMAP Dimensionality Reduction}
 \usage{
-Feature.Reduction.Umap(object, draw = TRUE, save = FALSE)
+Feature.Reduction.Umap(object, draw = TRUE, save = FALSE, seed = 42)
 }
 \arguments{
 \item{object}{A Ramanome object containing the dataset.}
