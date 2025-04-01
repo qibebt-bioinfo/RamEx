@@ -18,32 +18,26 @@ stratified_partition <- function(labels, p = 0.7) {
 }
 
 
-#' Perform classification use LDA model
+#' Perform classification use linear discriminant analysis LDA model
 #'
 #' This function performs classification using PC-LDA
 #'
 #' @param train The training data object
-#' @param test The test data object (optional)
-#' @param show Whether user want to show the results
-#' @param save Wether user want to save the results
+#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (70% for training and 30% for testing of the input 'train').
+#' @param show Whether user want to show the confusion matrix plot of the results
+#' @param save Wether user want to save the confusion matrix plot of the results (default path : getwd())
 #' @param seed The random seed
 #' @return A list containing:
-#'   \item{pred.train}{The confusion matrix plot for training data}
-#'   \item{pred.test}{The confusion matrix plot for test data}
+#'   \item{LDA model}{The LDA model}
+#'   \item{pred.test}{The prediction for test data if test is provided}
 #' @importFrom MASS lda
 #' @importFrom ggplot2 ggsave
 #' @export Classification.Lda
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- RamEx_data[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' Classification.Lda(data_cleaned)
+#' Classification.Lda(RamEx_data)
 Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42) {
+  set.seed(seed)
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
     labels <- train@meta.data$group
@@ -80,32 +74,26 @@ Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 }
 
 
-#' Perform classification use svm model
+#' Perform classification use support vector machine (SVM) model
 #'
-#' This function performs classification using svm
+#' This function performs classification using SVM
 #'
 #' @param train The training data object
-#' @param test The test data object (optional)
-#' @param show Whether user want to show the results
-#' @param save Wether user want to save the results
+#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (70% for training and 30% for testing of the input 'train').
+#' @param show Whether user want to show the confusion matrix plot of the results
+#' @param save Wether user want to save the confusion matrix plot of the results (default path : getwd())
 #' @param seed The random seed
 #' @return A list containing:
-#'   \item{pred.train}{The confusion matrix plot for training data}
-#'   \item{pred.test}{The confusion matrix plot for test data}
+#'   \item{SVM model}{The SVM model}
+#'   \item{pred.test}{The prediction for test data if test is provided}
 #' @importFrom e1071 svm
 #' @importFrom ggplot2 ggsave
 #' @export Classification.Svm
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- RamEx_data[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' Classification.Svm(data_cleaned)
+#' Classification.Svm(RamEx_data)
 Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42) {
+  set.seed(seed)
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
     labels <- train@meta.data$group
@@ -135,32 +123,27 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 }
 
 
-#' Perform classification use RandomForest model
+#' Perform classification use RandomForest (RF) model
 #'
 #' This function performs classification using RF
 #'
 #' @param train The training data object
-#' @param test The test data object (optional)
-#' @param show Whether user want to show the results
-#' @param save Wether user want to save the results
+#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (70% for training and 30% for testing of the input 'train').
+#' @param ntree The number of trees in the forest
+#' @param mtry The number of variables randomly sampled as candidates for splitting at each node
+#' @param show Whether user want to show the confusion matrix plot of the results
+#' @param save Wether user want to save the confusion matrix plot of the results (default path : getwd())
 #' @param seed The random seed
 #' @return A list containing:
-#'   \item{pred.train}{The confusion matrix plot for training data}
-#'   \item{pred.test}{The confusion matrix plot for test data}
+#'   \item{RF model}{The RF model}
+#'   \item{pred.test}{The prediction for test data if test is provided}
 #' @importFrom ggplot2 ggsave
 #' @importFrom randomForest randomForest
 #' @export Classification.Rf
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- RamEx_data[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' Classification.Rf(data_cleaned)
-Classification.Rf <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42) {
+#' Classification.Rf(RamEx_data)
+Classification.Rf <- function(train, test = NULL, ntree = 100, mtry = 2, show=TRUE, save=FALSE, seed=42) {
   set.seed(seed)
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
@@ -176,7 +159,7 @@ Classification.Rf <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42
     data_val <- get.nearest.dataset(test)
     label_val <- test@meta.data$group
   }
-  model.rf <- randomForest(data_train, as.factor(label_train), ntree = 100, mtry = 2, replace = TRUE)
+  model.rf <- randomForest(data_train, as.factor(label_train), ntree = ntree, mtry = mtry, replace = TRUE)
   cat('Training accuracy of Random forest: ')
   pred.train <- confusion.plot(label_train, predict(model.rf, data_train))
   if(save){ggsave('Classification_RF_Train.png', pred.train, width = length(unique(label_train)) + 1, height = length(unique(label_train)))}
