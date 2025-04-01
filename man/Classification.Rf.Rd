@@ -17,7 +17,7 @@ Classification.Rf(
 \arguments{
 \item{train}{The training data object}
 
-\item{test}{The test data object (optional). If not provided, the function will perform a stratified cross-validation (70% for training and 30% for testing of the input 'train').}
+\item{test}{The test data object (optional). If not provided, the function will perform a stratified cross-validation (70%% for training and 30%% for testing of the input 'train').}
 
 \item{ntree}{The number of trees in the forest}
 
