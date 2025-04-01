@@ -23,7 +23,7 @@ stratified_partition <- function(labels, p = 0.7) {
 #' This function performs classification using PC-LDA
 #'
 #' @param train The training data object
-#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (70%% for training and 30%% for testing of the input 'train').
+#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).
 #' @param show Whether user want to show the confusion matrix plot of the results
 #' @param save Wether user want to save the confusion matrix plot of the results (default path : getwd())
 #' @param seed The random seed
@@ -83,7 +83,7 @@ Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 #' This function performs classification using SVM
 #'
 #' @param train The training data object
-#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (70%% for training and 30%% for testing of the input 'train').
+#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).
 #' @param show Whether user want to show the confusion matrix plot of the results
 #' @param save Wether user want to save the confusion matrix plot of the results (default path : getwd())
 #' @param seed The random seed
@@ -136,7 +136,7 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 #' This function performs classification using RF
 #'
 #' @param train The training data object
-#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (70%% for training and 30%% for testing of the input 'train').
+#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).
 #' @param ntree The number of trees in the forest
 #' @param mtry The number of variables randomly sampled as candidates for splitting at each node
 #' @param show Whether user want to show the confusion matrix plot of the results
@@ -192,7 +192,7 @@ Classification.Rf <- function(train, test = NULL, ntree = 100, mtry = 2, show=TR
 #'  to each class
 #'
 #' @param train The training data object
-#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (70%% for training and 30%% for testing of the input 'train').
+#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).
 #' 
 #' @return A list containing:
 #' \describe{ 

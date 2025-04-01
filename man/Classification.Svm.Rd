@@ -9,7 +9,7 @@ Classification.Svm(train, test = NULL, show = TRUE, save = FALSE, seed = 42)
 \arguments{
 \item{train}{The training data object}
 
-\item{test}{The test data object (optional). If not provided, the function will perform a stratified cross-validation (70%% for training and 30%% for testing of the input 'train').}
+\item{test}{The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).}
 
 \item{show}{Whether user want to show the confusion matrix plot of the results}
 
