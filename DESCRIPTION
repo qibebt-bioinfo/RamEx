@@ -1,11 +1,11 @@
 Package: RamEx
 Type: Package
-Title: Ramanome Explorer, a R package for comprehensive and efficient analysis and comparison of ramanomes.
+Title: Provide comprehensive and efficient analysis and comparison of ramanomes.
 Version: 0.99.0
 Authors@R: 
     c(
         person("Yanmei", "Zhang", email = "zhangyanmei@qibebt.ac.cn", role = c("aut", "cre")),
-        person("Gongchao", "Jing", email = "jinggc@qibebt.ac.cn", role = c("aut", "cre"))
+        person("Gongchao", "Jing", role = c("aut"), comment = "Co-Author")
     )
 Description: By providing simple-to-use modules for computational tasks that otherwise would require substantial programming experience and algorithmic skills, RamEx should greatly facilitate the computational mining of ramanomes.More complete information about how to use RamEx can be found in the [github](https://github.com/qibebt-bioinfo/RamEx), but here you'll find a brief overview of the function and examples to mining of ramanomes:
 License: GPL
