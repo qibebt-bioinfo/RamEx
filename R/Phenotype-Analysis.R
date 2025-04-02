@@ -21,6 +21,7 @@
 #' @importFrom parallel makeCluster
 #' @importFrom parallel detectCores
 #' @importFrom RcppAnnoy AnnoyEuclidean
+#' importForm data.table rbindlist
 #' @examples
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
@@ -74,7 +75,7 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,n_pc=10, thres
   
   stopCluster(cl)
   
-  similarities <- do.call(rbind, similarities_list)
+  similarities <- rbindlist(similarities_list)
   rows <- unlist(similarities$rows)
   cols <- unlist(similarities$cols)
   sims <- unlist(similarities$sim)
