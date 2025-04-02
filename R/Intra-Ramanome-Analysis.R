@@ -5,6 +5,7 @@
 #' @param data The input data matrix.
 #'
 #' @return A vector containing the Mahalanobis distance for each observation.
+#' @noRd 
 
 
 mahalDistForEvery <- function(data) {
@@ -29,6 +30,7 @@ mahalDistForEvery <- function(data) {
 #' @param data A numeric matrix or data frame.
 #' @param p Threshold probability (default is 0.1).
 #' @return A vector containing the indices of the detected outliers.
+#' @noRd 
 
 outliers_maha_chisquare <- function(data, p = 0.1) {
   del <- which(colMeans(data) < 0.02 | colMeans(data) == 1)
@@ -56,6 +58,7 @@ outliers_maha_chisquare <- function(data, p = 0.1) {
 #' @importFrom proxy as.matrix
 #' @param df A data frame.
 #' @return A list containing the correlation matrix, p-values, and the number of observations used for each correlation.
+#' @noRd 
 
 rcorr_df <- function(df) {
   df_mat <- as.matrix(df)
@@ -72,6 +75,7 @@ rcorr_df <- function(df) {
 #' @param duplicate A logical value indicating whether to include duplicate pairs. (default is TRUE)
 #' @importFrom reshape2 melt
 #' @return A data frame containing the vectorized distance matrix.
+#' @noRd 
 
 vectorize_dm <- function(dm, group = NULL, duplicate = TRUE) {
   if (ncol(dm) != nrow(dm))
@@ -138,7 +142,7 @@ vectorize_dm <- function(dm, group = NULL, duplicate = TRUE) {
 #' @param group A vector specifying the sample categories. (default is NULL)
 #' @param duplicate A logical value indicating whether to include duplicate pairs. (default is TRUE)
 #' @return A data frame containing the vectorized correlation coefficients and p-values.
-
+#' @noRd 
 vectorize_dm_rcorr <- function(dm, group = NULL, duplicate = TRUE) {
   dm_r <- data.matrix(dm$r)
   dm_pvalue <- data.matrix(dm$P)
@@ -167,6 +171,7 @@ vectorize_dm_rcorr <- function(dm, group = NULL, duplicate = TRUE) {
 #' @importFrom stringr str_replace_all
 #' @import circlize
 #' @import circlize
+#' @noRd 
 
 Plot_global_chordDiagram_rpvalue <- function(
     Corr_mat,
@@ -346,6 +351,7 @@ Plot_global_chordDiagram_rpvalue <- function(
 #' @import circlize
 #' @importFrom graphics par
 #' @importFrom graphics plot
+#' @noRd 
 
 Plot_local_chordDiagram_rpvalue <- function(
     x,
@@ -488,12 +494,13 @@ Plot_local_chordDiagram_rpvalue <- function(
 #' It generates a chord diagram that represents the significant correlations between variables.
 #'
 #' @param dataset The input dataset for analysis
-#' @param group The group information for the dataset
+#' @param save Logical value to indicate whether to save the Global IRCA plot. Default is FALSE.
+#' @param threshold The threshold value for correlation. Default is 0.6.
 #'
 #' @return A dataframe containing the significant correlations between variables
 #' @importFrom Hmisc rcorr
 
-Intraramanome.Analysis.Irca.Global.draw <- function(dataset, group) {
+Intraramanome.Analysis.Irca.Global.draw <- function(dataset, group, threshold = 0.6) {
   outliers <- outliers_maha_chisquare(dataset)
   if (length(outliers) != 0) {
     dataset <- dataset[-outliers,]
@@ -502,13 +509,11 @@ Intraramanome.Analysis.Irca.Global.draw <- function(dataset, group) {
   corr_matrix <- cor_list[[1]]
   corr_matrix[cor_list[[3]] > 0.05] <- 0
   rownames(corr_matrix) <- colnames(corr_matrix)
-  Plot_global_chordDiagram_rpvalue(
-    corr_matrix,
-    Neg_Edge = TRUE,
-    Threshold = 0.6
-  )
+  
+  cat('It may take a while to save the plot, please be patient.\n')
+  Plot_global_chordDiagram_rpvalue(corr_matrix,Neg_Edge = TRUE,Threshold = threshold)
   corr_matrix[!upper.tri(corr_matrix, diag = TRUE)] <- 0
-  locs <- which(corr_matrix < -0.6, arr.ind = TRUE)
+  locs <- which(corr_matrix < -threshold, arr.ind = TRUE)
   waves <- round(as.numeric(colnames(corr_matrix)), 0)
   interests <- data.frame(
     wave1 = waves[locs[, 1]],
@@ -519,7 +524,7 @@ Intraramanome.Analysis.Irca.Global.draw <- function(dataset, group) {
   return(interests)
 }
 
-Intraramanome.Analysis.Irca.Global.cal <- function(dataset, group, threshold=0.6) {
+Intraramanome.Analysis.Irca.Global.cal <- function(dataset, group, threshold = 0.6) {
   outliers <- outliers_maha_chisquare(dataset)
   if (length(outliers) != 0) {
     dataset <- dataset[-outliers,]
@@ -528,8 +533,9 @@ Intraramanome.Analysis.Irca.Global.cal <- function(dataset, group, threshold=0.6
   corr_matrix <- cor_list[[1]]
   corr_matrix[cor_list[[3]] > 0.05] <- 0
   rownames(corr_matrix) <- colnames(corr_matrix)
+
   corr_matrix[!upper.tri(corr_matrix, diag = TRUE)] <- 0
-  locs <- which(corr_matrix < -0.6, arr.ind = TRUE)
+  locs <- which(corr_matrix < -threshold, arr.ind = TRUE)
   waves <- round(as.numeric(colnames(corr_matrix)), 0)
   interests <- data.frame(
     wave1 = waves[locs[, 1]],
@@ -575,39 +581,51 @@ Intraramanome.Analysis.Irca.Local.draw <- function(dataset, bands_ann) {
   )
 }
 
-#' Perform global IRCA analysis
+#' Perform global IRCA analysis and save the results
 #'
-#' This function performs global IRCA analysis on the given Raman spectroscopy data object.
+#' Performs global IRCA analysis on the given Raman spectroscopy data object.
 #' It generates negative IRCA plots for each group and saves them as jpeg files.
 #'
 #' @param object The Raman spectroscopy data object.
+#' @param threshold The threshold value for correlation. Default is 0.6.
+#' @param show Logical value to indicate whether to show the IRCA plots. Default is TRUE.
+#' @param save Logical value to indicate whether to save the IRCA plots. Default is FALSE.
 #'
 #' @return A matrix containing the global IRCA interests.
+#' 
+#' @details
+#' More details about the IRCA analysis can be found in the reference below.
+#' He Y., Huang S., Zhang P., Ji Y., Xu J., 2021. Intra-Ramanome Correlation Analysis Unveils Metabolite Conversion Network from an Isogenic Population of Cells. mBio
 #'
 #' @export Intraramanome.Analysis.Irca.Global
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' IRCA.interests <- Intraramanome.Analysis.Irca.Global(data_cleaned)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' IRCA.interests <- Intraramanome.Analysis.Irca.Global(data_processed)
 
-Intraramanome.Analysis.Irca.Global <- function(object) {
+Intraramanome.Analysis.Irca.Global <- function(object, threshold = 0.6, show = TRUE, save = FALSE) {
   dataset <- get.nearest.dataset(object)
   waves <- object@wavenumber
   IRCA.interests <- lapply(unique(object@meta.data$group), function(x) {
     temp_data <- dataset[object@meta.data$group == x,]
-    jpeg(
-      filename = paste0('IRCA_global_negative_', x, '.jpeg'),
-      width = 800,
-      height = 800,
-      quality = 100,
-      res = 200
-    )
-    interests <- Intraramanome.Analysis.Irca.Global.draw(temp_data, x)
-    dev.off()
+    if (save) {
+      jpeg(
+        filename = paste0('IRCA_global_negative_', x, '.jpeg'),
+        width = 800,
+        height = 800,
+        quality = 100,
+        res = 200
+      )
+      cat('Saving global IRCA to the current working directory: ', getwd(), '\n')
+      interests <- Intraramanome.Analysis.Irca.Global.draw(temp_data, x, threshold)
+      dev.off()
+    } 
+    if (show) {
+      interests <- Intraramanome.Analysis.Irca.Global.draw(temp_data, x, threshold)
+    }
+    if (!save & !show) {
+      interests <- Intraramanome.Analysis.Irca.Global.cal(temp_data, x, threshold)
+    }
     return(interests)
   })
   IRCA.interests <- do.call(rbind, rlist::list.map(IRCA.interests, .))
@@ -620,24 +638,22 @@ Intraramanome.Analysis.Irca.Global <- function(object) {
 #' It generates negative IRCA plots for each group and saves them as png files.
 #'
 #' @importFrom Cairo Cairo
-#' @param object The Raman spectroscopy data object.
-#' @param bands_ann The band annotation data.
+#' @param object A Ramanome object.
+#' @param bands_ann The band annotation data recording the band numbers and their corresponding groups.
+#' @param show Logical value to indicate whether to show the IRCA plots. Default is TRUE.
+#' @param save Logical value to indicate whether to save the IRCA plots. Default is FALSE
+#' .
 #' @return No return value, called for side effects. The function generates and saves PNG files
 #'         containing negative IRCA plots for each group in the dataset.
 #' @export Intraramanome.Analysis.Irca.Local
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' bands_ann <- data.frame(rbind(cbind(c(742,850,872,971,997,1098,1293,1328,1426,1576),'Nucleic acid'),cbind(c(824,883,1005,1033,1051,1237,1559,1651),'Protein'),cbind(c(1076,1119,1370,2834,2866,2912),'Lipids')))
 #' colnames(bands_ann) <- c('Wave_num', 'Group')
-#' Intraramanome.Analysis.Irca.Local(data_cleaned, bands_ann = bands_ann)
+#' Intraramanome.Analysis.Irca.Local(data_processed, bands_ann = bands_ann)
 
-Intraramanome.Analysis.Irca.Local <- function(object, bands_ann) {
+Intraramanome.Analysis.Irca.Local <- function(object, bands_ann, show = TRUE, save = FALSE) {
   dataset <- get.nearest.dataset(object)
   waves <- round(object@wavenumber, 0)
   locs <- unlist(lapply(as.numeric(bands_ann$Wave_num), function(x)which.min(abs(object@wavenumber - x))))
@@ -645,42 +661,41 @@ Intraramanome.Analysis.Irca.Local <- function(object, bands_ann) {
   dataset <- dataset[, waves %in% bands_ann$Wave_num]
   lapply(unique(object@meta.data$group), function(x) {
     temp_data <- dataset[object@meta.data$group == x,]
-    Cairo(
-      file = paste0('IRCA_local_negative_', x, '.png'),
-      units = "in",
-      dpi = 300,
-      width = 3,
-      height = 3,
+    if (save) {
+      cat('Saving local IRCA to the current working directory: ', getwd(), '\n')
+      Cairo(
+        file = paste0('IRCA_local_negative_', x, '.png'),
+        units = "in",
+        dpi = 300,
+        width = 3,
+        height = 3,
       type = 'png'
     )
-    Intraramanome.Analysis.Irca.Local.draw(temp_data, bands_ann)
-    grDevices::dev.off()
+      Intraramanome.Analysis.Irca.Local.draw(temp_data, bands_ann)
+      grDevices::dev.off()
+    }
+    if (show) {
+      Intraramanome.Analysis.Irca.Local.draw(temp_data, bands_ann)
+    }
+
   })
 }
 
 
 #' 2D Correlation Spectroscopy Analysis (2D-COS)
-#' Captures both synchronous (simultaneous changes) and
-#' asynchronous (sequential changes) relationships, providing
-#' detailed insights into spectral changes
+#' Captures both synchronous (simultaneous changes) and asynchronous (sequential changes) relationships, providing detailed insights into spectral changes
 #'
-#' @param object A Ramanome object containing the dataset.
+#' @param object A Ramanome object.
 #' @return synchronous and asynchronous correlation spectra result
 #' @export Intraramanome.Analysis.2Dcos
 #' @import corr2D
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' #reslut_2dos <- Intraramanome.Analysis.2Dcos(data_cleaned)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' corr_2d <- Intraramanome.Analysis.2Dcos(data_processed)
 Intraramanome.Analysis.2Dcos <- function(object) {
-  data <- object@datasets$normalized.data
-  twod<-corr2d(data)
+  data <- get.nearest.dataset(object)
+  twod <- corr2d(data)
   plot_corr2d(twod, Legend = FALSE)
   return(twod)
 }
