@@ -3,7 +3,7 @@
 #' Performs Principal Component Analysis (PCA) based on the last spectral matrix in the 'datasets' slot
 #'
 #' @param object A Ramanome object containing the dataset and metadata.
-#' @param draw A logical value indicating whether to draw the PCA plot. Defaults to TRUE.
+#' @param show A logical value indicating whether to draw the PCA plot. Defaults to TRUE.
 #' @param save A logical value indicating whether to save the plot as a file. Defaults to FALSE.
 #' @param n_pc The number of principal components to save. Defaults to 2.
 #' 
@@ -18,15 +18,15 @@
 #' @examples
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
-#' data.reduction.pca <- Feature.Reduction.Pca(data_processed, draw=TRUE, save = FALSE)
+#' data.reduction.pca <- Feature.Reduction.Pca(data_processed, show=TRUE, save = FALSE)
 
-Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE, n_pc = 2) {
+Feature.Reduction.Pca <- function(object, show = TRUE, save=FALSE, n_pc = 2) {
   dataset <- get.nearest.dataset(object)
-  data.red <- data.frame(prcomp_irlba(dataset, n = n_pc, center = TRUE, scale. = TRUE)$x)
+  data.red <- data.frame(prcomp_irlba(dataset, n = n_pc, center = TRUE, scale. = TRUE)$x[,1:n_pc])
   names(data.red) <- paste0('PC ', 1:n_pc)
   
   object@reductions$PCA <- data.red
-  if (draw){
+  if (show){
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
       geom_point(alpha = 0.5) +
@@ -59,7 +59,7 @@ Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE, n_pc = 2) {
 #' @param perplexity Controls the balance between local and global structure in the t-SNE algorithm. Typical values range from 5 to 50, with higher values preserving more global structure.
 #' @param theta A speed-up parameter for approximate computation (Barnes-Hut algorithm). It ranges from 0 to 1, where smaller values yield more precise results but at higher computational cost (default is 0.5)
 #' @param max_iter Controls the balance between local and global structure in the t-SNE algorithm. Typical values range from 5 to 50, with higher values preserving more global structure.
-#' @param draw A logical value indicating whether to draw the plot. Defaults to TRUE.
+#' @param show A logical value indicating whether to draw the plot. Defaults to TRUE.
 #' @param save A logical value indicating whether to save the plot as a PNG file. Defaults to FALSE.
 #' @param seed A numeric value indicating the seed for the random number generator. Defaults to 42.
 #' 
@@ -74,11 +74,12 @@ Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE, n_pc = 2) {
 #' @examples
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
-#' data.reduction.tsne <- Feature.Reduction.Tsne(data_processed, draw=TRUE, save = FALSE)
-Feature.Reduction.Tsne <- function(object, PCA=20, perplexity=5, theta=0.5, max_iter=1000,draw = TRUE, save=FALSE, seed=42) {
+#' data.reduction.tsne <- Feature.Reduction.Tsne(data_processed, show=TRUE, save = FALSE)
+Feature.Reduction.Tsne <- function(object, PCA=20, perplexity=5, theta=0.5, max_iter=1000,show = TRUE, save=FALSE, seed=42) {
   set.seed(seed)
   if (!is.null(PCA)) {
-    if (is.null(object@reductions$PCA)) {object <- Feature.Reduction.Pca(object, PCA)} 
+    if (is.null(object@reductions$PCA)) {object <- Feature.Reduction.Pca(object, n_pc =PCA, show = FALSE)} 
+    if (ncol(object@reductions$PCA) < PCA) {object <- Feature.Reduction.Pca(object, n_pc =PCA, show = FALSE)}
     dataset <- object@reductions$PCA}
   else {
     dataset <- get.nearest.dataset(object)
@@ -95,7 +96,7 @@ Feature.Reduction.Tsne <- function(object, PCA=20, perplexity=5, theta=0.5, max_
   colnames(data.red) <- c("tSNE 1", "tSNE 2")
   object@reductions$tSNE <- data.red
   
-  if (draw){
+  if (show){
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
       geom_point(alpha = 0.5) +
@@ -131,7 +132,7 @@ Feature.Reduction.Tsne <- function(object, PCA=20, perplexity=5, theta=0.5, max_
 #' @param n_neighbors Controls the balance between local and global structure in UMAP. Higher values capture more global structure, while lower values focus on local details (typical range: 5–50).
 #' @param min.dist Determines the minimum distance between points in the embedding. Lower values (e.g., 0.1) produce tighter clusters, while higher values (e.g., 0.5) allow more spread.
 #' @param spread Scales the effective scale of points in the embedding. Works with min.dist to control cluster density—higher values spread points apart, while lower values compress them.
-#' @param draw A logical value indicating whether to draw the plot. Defaults to TRUE.
+#' @param show A logical value indicating whether to draw the plot. Defaults to TRUE.
 #' @param save A logical value indicating whether to save the plot as a PNG file. Defaults to FALSE.
 #' @param seed A numeric value indicating the seed for the random number generator. Defaults to 42.
 #' 
@@ -149,12 +150,13 @@ Feature.Reduction.Tsne <- function(object, PCA=20, perplexity=5, theta=0.5, max_
 #' @examples
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
-#' data.reduction.umap <- Feature.Reduction.Umap(data_processed, draw=TRUE, save = FALSE)
+#' data.reduction.umap <- Feature.Reduction.Umap(data_processed, show=TRUE, save = FALSE)
 #'
-Feature.Reduction.Umap <- function(object, PCA=20, n_neighbors=30, min.dist=0.01,spread=1, draw = TRUE, save=FALSE, seed=42) {
+Feature.Reduction.Umap <- function(object, PCA=20, n_neighbors=30, min.dist=0.01,spread=1, show = TRUE, save=FALSE, seed=42) {
   set.seed(seed)
   if (!is.null(PCA)) {
-    if (is.null(object@reductions$PCA)) {object <- Feature.Reduction.Pca(object, PCA)} 
+    if (is.null(object@reductions$PCA) ) {object <- Feature.Reduction.Pca(object, n_pc =PCA, show = FALSE)} 
+    if (ncol(object@reductions$PCA) < PCA) {object <- Feature.Reduction.Pca(object, n_pc =PCA, show = FALSE)}
     dataset <- object@reductions$PCA}
   else {
     dataset <- get.nearest.dataset(object)
@@ -166,7 +168,7 @@ Feature.Reduction.Umap <- function(object, PCA=20, n_neighbors=30, min.dist=0.01
   
   object@reductions$UMAP <- data.red
   
-  if(draw){
+  if(show){
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
       geom_point(alpha = 0.5) +
@@ -199,7 +201,7 @@ Feature.Reduction.Umap <- function(object, PCA=20, n_neighbors=30, min.dist=0.01
 #' The plot can also be saved as a PNG file if specified.
 #'
 #' @param object A Ramanome object containing the dataset and metadata.
-#' @param draw A logical value indicating whether to draw the PCoA plot. Defaults to TRUE.
+#' @param show A logical value indicating whether to draw the PCoA plot. Defaults to TRUE.
 #' @param save A logical value indicating whether to save the plot as a PNG file. Defaults to FALSE.
 #' @return The updated Ramanome object with the PCoA results appended to the `reductions` slot.
 #' @export Feature.Reduction.Pcoa
@@ -218,16 +220,16 @@ Feature.Reduction.Umap <- function(object, PCA=20, n_neighbors=30, min.dist=0.01
 #' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
 #' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
 #' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data.reduction.pcoa <- Feature.Reduction.Pcoa(data_cleaned, draw=TRUE, save = FALSE)
+#' data.reduction.pcoa <- Feature.Reduction.Pcoa(data_cleaned, show=TRUE, save = FALSE)
 
-Feature.Reduction.Pcoa <- function(object, draw = TRUE, save=FALSE) {
+Feature.Reduction.Pcoa <- function(object, show = TRUE, save=FALSE) {
   dataset <- get.nearest.dataset(object)
   distance.matrix <- vegdist(dataset, method = "euclidean")
   data.red <- data.frame(dudi.pco(distance.matrix, scannf = FALSE, nf=2)$li)
   names(data.red) <- c('PCoA 1', 'PCoA 2')
   
   object@reductions$PCoA <- data.red
-  if (draw){
+  if (show){
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
       geom_point(alpha = 0.5) +
@@ -268,11 +270,12 @@ Feature.Reduction.Intensity <- function(object, bands) {
   bands <- as.list(bands)
   a <- lapply(bands, function(x) confirm.select(object, x))
   name <- lapply(bands, confirm.name)
-  names(a) <- name
-  if(is.null(object@interested.bands)){
+  names(a) <- unlist(name)
+  if(length(object@interested.bands) == 0){
     object@interested.bands <- a
   } else {
     object@interested.bands <- merge(object@interested.bands, a, by = "row.names", all = TRUE)[,-1]
+    rownames(object@interested.bands) <- NULL
   }
   return(object)
 }

@@ -4,12 +4,12 @@
 \alias{Feature.Reduction.Pca}
 \title{Perform PCA Reduction and Plotting}
 \usage{
-Feature.Reduction.Pca(object, draw = TRUE, save = FALSE, n_pc = 2)
+Feature.Reduction.Pca(object, show = TRUE, save = FALSE, n_pc = 2)
 }
 \arguments{
 \item{object}{A Ramanome object containing the dataset and metadata.}
 
-\item{draw}{A logical value indicating whether to draw the PCA plot. Defaults to TRUE.}
+\item{show}{A logical value indicating whether to draw the PCA plot. Defaults to TRUE.}
 
 \item{save}{A logical value indicating whether to save the plot as a file. Defaults to FALSE.}
 
@@ -24,5 +24,5 @@ Performs Principal Component Analysis (PCA) based on the last spectral matrix in
 \examples{
 data(RamEx_data)
 data_processed <- Preprocessing.OneStep(RamEx_data)
-data.reduction.pca <- Feature.Reduction.Pca(data_processed, draw=TRUE, save = FALSE)
+data.reduction.pca <- Feature.Reduction.Pca(data_processed, show=TRUE, save = FALSE)
 }

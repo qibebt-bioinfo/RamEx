@@ -10,7 +10,7 @@ Feature.Reduction.Umap(
   n_neighbors = 30,
   min.dist = 0.01,
   spread = 1,
-  draw = TRUE,
+  show = TRUE,
   save = FALSE,
   seed = 42
 )
@@ -26,7 +26,7 @@ Feature.Reduction.Umap(
 
 \item{spread}{Scales the effective scale of points in the embedding. Works with min.dist to control cluster density—higher values spread points apart, while lower values compress them.}
 
-\item{draw}{A logical value indicating whether to draw the plot. Defaults to TRUE.}
+\item{show}{A logical value indicating whether to draw the plot. Defaults to TRUE.}
 
 \item{save}{A logical value indicating whether to save the plot as a PNG file. Defaults to FALSE.}
 
@@ -44,6 +44,6 @@ data is stored in the object and a plot is generated if specified.
 \examples{
 data(RamEx_data)
 data_processed <- Preprocessing.OneStep(RamEx_data)
-data.reduction.umap <- Feature.Reduction.Umap(data_processed, draw=TRUE, save = FALSE)
+data.reduction.umap <- Feature.Reduction.Umap(data_processed, show=TRUE, save = FALSE)
 
 }

@@ -4,12 +4,12 @@
 \alias{Feature.Reduction.Pcoa}
 \title{Perform Principal Coordinate Analysis (PCoA) and Plot Results}
 \usage{
-Feature.Reduction.Pcoa(object, draw = TRUE, save = FALSE)
+Feature.Reduction.Pcoa(object, show = TRUE, save = FALSE)
 }
 \arguments{
 \item{object}{A Ramanome object containing the dataset and metadata.}
 
-\item{draw}{A logical value indicating whether to draw the PCoA plot. Defaults to TRUE.}
+\item{show}{A logical value indicating whether to draw the PCoA plot. Defaults to TRUE.}
 
 \item{save}{A logical value indicating whether to save the plot as a PNG file. Defaults to FALSE.}
 }
@@ -31,5 +31,5 @@ data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
 data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
 qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
 data_cleaned <- data_normalized[qc_icod$quality,]
-data.reduction.pcoa <- Feature.Reduction.Pcoa(data_cleaned, draw=TRUE, save = FALSE)
+data.reduction.pcoa <- Feature.Reduction.Pcoa(data_cleaned, show=TRUE, save = FALSE)
 }

@@ -10,7 +10,7 @@ Feature.Reduction.Tsne(
   perplexity = 5,
   theta = 0.5,
   max_iter = 1000,
-  draw = TRUE,
+  show = TRUE,
   save = FALSE,
   seed = 42
 )
@@ -26,7 +26,7 @@ Feature.Reduction.Tsne(
 
 \item{max_iter}{Controls the balance between local and global structure in the t-SNE algorithm. Typical values range from 5 to 50, with higher values preserving more global structure.}
 
-\item{draw}{A logical value indicating whether to draw the plot. Defaults to TRUE.}
+\item{show}{A logical value indicating whether to draw the plot. Defaults to TRUE.}
 
 \item{save}{A logical value indicating whether to save the plot as a PNG file. Defaults to FALSE.}
 
@@ -41,5 +41,5 @@ Performs t-SNE (t-Distributed Stochastic Neighbor Embedding) on the last spectra
 \examples{
 data(RamEx_data)
 data_processed <- Preprocessing.OneStep(RamEx_data)
-data.reduction.tsne <- Feature.Reduction.Tsne(data_processed, draw=TRUE, save = FALSE)
+data.reduction.tsne <- Feature.Reduction.Tsne(data_processed, show=TRUE, save = FALSE)
 }

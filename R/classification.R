@@ -245,12 +245,14 @@ Classification.Gmm <- function(train, test = NULL, n_pc = 20, show=TRUE, save=FA
   gmm_model <- Mclust(data_train_20)
   data_test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:n_pc] %>% as.data.frame
   data_pre <- predict(gmm_model, data_test_20)
-  pred.train <- confusion.plot(label_train, predict(gmm_model, data_train_20))
+  cat('Training accuracy of GMM: ')
+  pred.train <- confusion.plot(label_train, predict(gmm_model, data_train_20)$class)
   pca_params <- list(
     center = data.pca$center,
     scale = data.pca$scale,
     rotation = data.pca$rotation[, 1:n_pc]
   )
+  cat('Test accuracy of GMM: ')
   pred.test <- confusion.plot(label_val, data_pre$class)
   if(save){
     cat('Saving plot to the current working directory: ', getwd(), '\n')
@@ -258,7 +260,7 @@ Classification.Gmm <- function(train, test = NULL, n_pc = 20, show=TRUE, save=FA
   if(show){print(pred.train)
     print(pred.test)}
 
-  if (is.null(test)) return(list(model=gmm_model, pca_params = pca_params)) else return(list(model=gmm_model, pred_test = data_pre$classification, pca_params = pca_params))}
+  if (is.null(test)) return(list(model=gmm_model, pca_params = pca_params)) else return(list(model=gmm_model, pred_test = data_pre$class, pca_params = pca_params))}
 
 
 #' Predict using a trained classification model
