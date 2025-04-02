@@ -21,7 +21,7 @@
 #' @importFrom parallel makeCluster
 #' @importFrom parallel detectCores
 #' @importFrom RcppAnnoy AnnoyEuclidean
-#' importForm data.table rbindlist
+#' @importFrom data.table rbindlist
 #' @examples
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
