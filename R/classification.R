@@ -40,7 +40,8 @@ stratified_partition <- function(labels, p = 0.7) {
 #' 
 #' @examples
 #' data(RamEx_data)
-#' Classification.Lda(RamEx_data)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' model.lda <- Classification.Lda(data_processed)
 Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42, n_pc = 20) {
   set.seed(seed)
   if (is.null(test)) {
@@ -109,7 +110,8 @@ Classification.Lda <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 #' 
 #' @examples
 #' data(RamEx_data)
-#' Classification.Svm(RamEx_data)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' model.svm <- Classification.Svm(data_processed)
 Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=42) {
   set.seed(seed)
   if (is.null(test)) {
@@ -166,7 +168,8 @@ Classification.Svm <- function(train, test = NULL, show=TRUE, save=FALSE, seed=4
 #' 
 #' @examples
 #' data(RamEx_data)
-#' Classification.Rf(RamEx_data)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' model.rf <- Classification.Rf(data_processed)
 Classification.Rf <- function(train, test = NULL, ntree = 100, mtry = 2, show=TRUE, save=FALSE, seed=42) {
   set.seed(seed)
   if (is.null(test)) {
@@ -220,8 +223,8 @@ Classification.Rf <- function(train, test = NULL, ntree = 100, mtry = 2, show=TR
 
 #' @examples
 #' data(RamEx_data)
-#' Classification.Gmm(RamEx_data)
-#' 
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' model.gmm <- Classification.Gmm(data_processed)
 Classification.Gmm <- function(train, test = NULL, n_pc = 20, show=TRUE, save=FALSE, seed=42) {
   set.seed(seed)
   if (is.null(test)) {
@@ -276,10 +279,11 @@ Classification.Gmm <- function(train, test = NULL, n_pc = 20, show=TRUE, save=FA
 #'
 #' @examples
 #' data(RamEx_data)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' # Train a model
-#' model <- Classification.Rf(RamEx_data)
+#' model <- Classification.Rf(data_processed)
 #' # Use the model to predict new data
-#' predictions <- predict_classification(model, RamEx_data)
+#' predictions <- predict_classification(model, data_processed)
 predict_classification <- function(model, new_data, show = TRUE, save = FALSE) {
   # Get the new data
   new_data_matrix <- get.nearest.dataset(new_data)

@@ -1,13 +1,11 @@
 #' Perform PCA Reduction and Plotting
 #'
-#' This function performs Principal Component Analysis (PCA) on the dataset stored in
-#' a Ramanome object and plots the first two principal components. The function can
-#' also save the plot as a PNG file.
+#' Performs Principal Component Analysis (PCA) based on the last spectral matrix in the 'datasets' slot
 #'
 #' @param object A Ramanome object containing the dataset and metadata.
 #' @param draw A logical value indicating whether to draw the PCA plot. Defaults to TRUE.
 #' @param save A logical value indicating whether to save the plot as a file. Defaults to FALSE.
-#' @param n_pc The number of principal components to get. Defaults to 2.
+#' @param n_pc The number of principal components to save. Defaults to 2.
 #' 
 #' @return The updated Ramanome object with the PCA results appended to the `reductions` slot.
 #' @export Feature.Reduction.Pca
@@ -19,24 +17,19 @@
 
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data.reduction.pca <- Feature.Reduction.Pca(data_cleaned, draw=TRUE, save = FALSE)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' data.reduction.pca <- Feature.Reduction.Pca(data_processed, draw=TRUE, save = FALSE)
 
 Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE, n_pc = 2) {
   dataset <- get.nearest.dataset(object)
   data.red <- data.frame(prcomp_irlba(dataset, n = n_pc, center = TRUE, scale. = TRUE)$x[, 1:n_pc])
-  names(data.red) <- c('PC 1', 'PC 2')
+  names(data.red) <- paste0('PC ', 1:n_pc)
   
   object@reductions$PCA <- data.red
   if (draw){
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
-      geom_point() +
+      geom_point(alpha = 0.5) +
       labs(x = names[1], y = names[2]) +
       theme_classic()
     print(plot)
@@ -52,15 +45,17 @@ Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE, n_pc = 2) {
 
 #' Perform t-SNE Dimensionality Reduction and Plotting
 #'
-#' This function performs t-SNE (t-Distributed Stochastic Neighbor Embedding) on a
-#' dataset extracted from a Ramanome object. It reduces the dimensionality to two
-#' dimensions and creates a plot of the results. The plot can be customized with various
-#' themes and labels.
+#' Performs t-SNE (t-Distributed Stochastic Neighbor Embedding) on the last spectral matrix in the 'datasets' slot
 #'
 #' @param object A Ramanome object containing the dataset and metadata.
+#' @param PCA Optional. A numeric value indicating the number of principal components to use. Defaults to 20 (if NULL,raw data matrix will be used to generate t-SNE plot).
+#' @param perplexity Controls the balance between local and global structure in the t-SNE algorithm. Typical values range from 5 to 50, with higher values preserving more global structure.
+#' @param theta A speed-up parameter for approximate computation (Barnes-Hut algorithm). It ranges from 0 to 1, where smaller values yield more precise results but at higher computational cost (default is 0.5)
+#' @param max_iter Controls the balance between local and global structure in the t-SNE algorithm. Typical values range from 5 to 50, with higher values preserving more global structure.
 #' @param draw A logical value indicating whether to draw the plot. Defaults to TRUE.
-#' @param save A logical value indicating whether to save the plot as a PNG file.
-#' Defaults to FALSE.
+#' @param save A logical value indicating whether to save the plot as a PNG file. Defaults to FALSE.
+#' @param seed A numeric value indicating the seed for the random number generator. Defaults to 42.
+#' 
 #' @return The updated Ramanome object with the t-SNE results appended to the reductions slot.
 #' @export Feature.Reduction.Tsne
 #' @importFrom Rtsne Rtsne
@@ -71,39 +66,39 @@ Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE, n_pc = 2) {
 
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data.reduction.tsne <- Feature.Reduction.Tsne(data_cleaned, draw=TRUE, save = FALSE)
-Feature.Reduction.Tsne <- function(object, draw = TRUE, save=FALSE, seed=42) {
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' data.reduction.tsne <- Feature.Reduction.Tsne(data_processed, draw=TRUE, save = FALSE)
+Feature.Reduction.Tsne <- function(object, PCA=20, perplexity=5, theta=0.5, max_iter=1000,draw = TRUE, save=FALSE, seed=42) {
   set.seed(seed)
-  dataset <- get.nearest.dataset(object)
+  if (!is.null(PCA)) {
+    if (is.null(object@reductions$PCA)) {object <- Feature.Reduction.Pca(object, PCA)} 
+    dataset <- object@reductions$PCA}
+  else {
+    dataset <- get.nearest.dataset(object)
+  }
   
   data.red <- data.frame(Rtsne::Rtsne(
     dataset,
     dims = 2,
-    perplexity = 5,
-    theta = 0.5,
+    perplexity = perplexity,
+    theta = theta,
     verbose = FALSE,
-    max_iter = 1000
+    max_iter = max_iter
   )$Y)
   colnames(data.red) <- c("tSNE 1", "tSNE 2")
-  object@reductions <- append(object@reductions, list(data.red))
   object@reductions$tSNE <- data.red
   
   if (draw){
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
-      geom_point() +
+      geom_point(alpha = 0.5) +
       labs(x = names[1], y = names[2]) +
       theme_classic()
     print(plot)
   }
   
   if (save) {
+    cat('Saving t-SNE plot to the current working directory: ', getwd(), '\n')
     ggsave(paste("Reduction.tsne.png"), plot, width = 8, height = 6)
   }
   
@@ -118,10 +113,17 @@ Feature.Reduction.Tsne <- function(object, draw = TRUE, save=FALSE, seed=42) {
 #' data is stored in the object and a plot is generated if specified.
 #'
 #' @param object A Ramanome object containing the dataset.
-#' @param draw A logical value indicating whether to generate a plot. Defaults to TRUE.
+#' @param PCA A numeric value indicating the number of principal components to use. Defaults to 20 (if NULL,raw data matrix will be used to generate UMAP plot). 
+#' @param n_neighbors Controls the balance between local and global structure in UMAP. Higher values capture more global structure, while lower values focus on local details (typical range: 5–50).
+#' @param min.dist Determines the minimum distance between points in the embedding. Lower values (e.g., 0.1) produce tighter clusters, while higher values (e.g., 0.5) allow more spread.
+#' @param spread Scales the effective scale of points in the embedding. Works with min.dist to control cluster density—higher values spread points apart, while lower values compress them.
+#' @param draw A logical value indicating whether to draw the plot. Defaults to TRUE.
 #' @param save A logical value indicating whether to save the plot as a PNG file. Defaults to FALSE.
+#' @param seed A numeric value indicating the seed for the random number generator. Defaults to 42.
+#' 
 #' @return The updated Ramanome object with the UMAP reduction results.
 #' @export Feature.Reduction.Umap
+#' 
 #' @importFrom uwot umap
 #' @importFrom irlba prcomp_irlba
 #' @importFrom parallel detectCores
@@ -132,34 +134,35 @@ Feature.Reduction.Tsne <- function(object, draw = TRUE, save=FALSE, seed=42) {
 
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data.reduction.umap <- Feature.Reduction.Umap(data_cleaned, draw=TRUE, save = FALSE)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' data.reduction.umap <- Feature.Reduction.Umap(data_processed, draw=TRUE, save = FALSE)
 #'
-Feature.Reduction.Umap <- function(object, draw = TRUE, save=FALSE, seed=42) {
+Feature.Reduction.Umap <- function(object, PCA=20, n_neighbors=30, min.dist=0.01,spread=1, draw = TRUE, save=FALSE, seed=42) {
   set.seed(seed)
-  dataset <- get.nearest.dataset(object)
-  data.red.pca <- data.frame(prcomp_irlba(dataset, n = 20, center = TRUE, scale. = TRUE)$x[, 1:20])
-  data.red <- data.frame(uwot::umap(data.red.pca, scale = FALSE,  n_threads = detectCores(),n_neighbors = 30, a=0.9922, b=1.112, metric = 'cosine',seed=123))
+  if (!is.null(PCA)) {
+    if (is.null(object@reductions$PCA)) {object <- Feature.Reduction.Pca(object, PCA)} 
+    dataset <- object@reductions$PCA}
+  else {
+    dataset <- get.nearest.dataset(object)
+  }
+
+  data.red <- data.frame(uwot::umap(dataset, scale = FALSE,  n_threads = detectCores(),
+  n_neighbors = n_neighbors, min.dist=min.dist, spread=spread, a=0.9922, b=1.112, metric = 'cosine',seed=seed))
   colnames(data.red) <- c("UMAP 1", "UMAP 2")
   
-  object@reductions <- append(object@reductions, list(data.red))
   object@reductions$UMAP <- data.red
   
   if(draw){
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
-      geom_point() +
+      geom_point(alpha = 0.5) +
       labs(x = names[1], y = names[2]) +
       theme_classic()
     print(plot)
   }
   
   if (save) {
+    cat('Saving UMAP plot to the current working directory: ', getwd(), '\n')
     ggsave(paste("Reduction.umap.png"), plot, width = 8, height = 6)
   }
   return(object)
@@ -200,20 +203,20 @@ Feature.Reduction.Pcoa <- function(object, draw = TRUE, save=FALSE) {
   dataset <- get.nearest.dataset(object)
   distance.matrix <- vegdist(dataset, method = "euclidean")
   data.red <- data.frame(dudi.pco(distance.matrix, scannf = FALSE, nf=2)$li)
-  names(data.red) <- c('PC 1', 'PC 2')
+  names(data.red) <- c('PCoA 1', 'PCoA 2')
   
-  object@reductions <- append(object@reductions, list(data.red))
   object@reductions$PCoA <- data.red
   if (draw){
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
-      geom_point() +
+      geom_point(alpha = 0.5) +
       labs(x = names[1], y = names[2]) +
       theme_classic()
     print(plot)
   }
   
   if (save) {
+    cat('Saving PCoA plot to the current working directory: ', getwd(), '\n')
     ggsave(paste("Reduction.pcoa.png"), plot, width = 8, height = 6)
   }
   
@@ -221,32 +224,23 @@ Feature.Reduction.Pcoa <- function(object, draw = TRUE, save=FALSE) {
 }
 
 
-#' Extract Intensity Values at Specified Wavelengths
+#' Extract Intensity Values at Specified Wavelengths or a Range of Wavelengths
 #'
-#' This function retrieves the Feature.Reduction.Intensity values at specified wavelengths or wavelength
-#' ranges from a Ramanome object. It uses `confirm.select` to get the spectral data and
-#' `confirm.name` to format the names of the selected wavelengths or ranges.
+#' Retrieves the intensity values at specified wavelengths or the area under the curve of intensity values at a range of wavelengths from a Ramanome object.
 #'
-#' @param object A Ramanome object containing spectral data and wavelength information.
-#' @param wavenumber A single numeric value, a vector of numeric values, or a list of
-#' numeric values representing wavelengths or wavelength ranges.
-#' @return The updated Ramanome object with the extracted Feature.Reduction.Intensity values appended to
-#' the `interested.bands` slot.
+#' @param object A Ramanome object.
+#' @param bands A single numeric value, a vector of numeric values, or a list of numeric values representing wavelengths or wavelength ranges.
+#' @return The updated Ramanome object with the extracted intensity values appended to the `interested.bands` slot.
 #' @export Feature.Reduction.Intensity
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-Feature.Reduction.Intensity <- function(object, wavenumber) {
-  wavenumber <- as.list(wavenumber)
-  a <- lapply(wavenumber, function(x) confirm.select(object, x))
-  name <- lapply(wavenumber, confirm.name)
-  object@interested.bands <- append(object@interested.bands, a)
-  names(object@interested.bands) <- c(names(object@interested.bands), unlist(name))
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' data_cleaned <- Feature.Reduction.Intensity(data_processed, list(c(2000,2250),c(2750,3050), 1450, 1665)) 
+Feature.Reduction.Intensity <- function(object, bands) {
+  bands <- as.list(bands)
+  a <- lapply(bands, function(x) confirm.select(object, x))
+  name <- lapply(bands, confirm.name)
+  names(a) <- name
+  object@interested.bands <- merge(object@interested.bands, a, by = "row.names", all = TRUE)
   return(object)
 }
