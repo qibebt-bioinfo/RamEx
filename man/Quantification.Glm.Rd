@@ -3,37 +3,33 @@
 \name{Quantification.Glm}
 \alias{Quantification.Glm}
 \title{Generalized linear model (GLM)
-SExtends linear regression by allowing the dependent
-variable to follow distributions other than
-normal (e.g., binomial, Poisson) and uses a link function
- to relate predictors to the response}
+Extends linear regression by allowing response variables to follow non-normal distributions via link functions.}
 \usage{
-Quantification.Glm(train, test = NULL)
+Quantification.Glm(train, test = NULL, n_pc = 20, seed = 42)
 }
 \arguments{
 \item{train}{The training data object}
 
-\item{test}{The test data object (optional)}
+\item{test}{The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).}
+
+\item{n_pc}{The number of principal components that the PCA model extract for further GLM model building. Feature extraction is recommended to reduce the multicollinearity among predictors.}
+
+\item{seed}{The seed for the random number generator}
 }
 \value{
-The GLM prediction result.
+A list containing:
+\describe{ 
+  \item{model}{The GLM model}
+  \item{pred_test}{The prediction for test data if test is provided}
+  \item{pca_params}{The pre-feature extraction PCA parameters used for the GLM model building}
+}
 }
 \description{
 Generalized linear model (GLM)
-SExtends linear regression by allowing the dependent
-variable to follow distributions other than
-normal (e.g., binomial, Poisson) and uses a link function
- to relate predictors to the response
+Extends linear regression by allowing response variables to follow non-normal distributions via link functions.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-data_cleaned <- Feature.Reduction.Pca(data_cleaned, draw=FALSE , save = FALSE)
-quan_glm <- Quantification.Glm(data_cleaned)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+quan_glm <- Quantification.Glm(data_processed)
 }

@@ -3,35 +3,33 @@
 \name{Quantification.Mlr}
 \alias{Quantification.Mlr}
 \title{Multiple linear regression (MLR)
-Simple and interpretable regression method, but assumes
-no multicollinearity among predictors and a linear
-relationship between predictors and response}
+A linear approach modeling the relationship between multiple predictors and a response variable via linear coefficients.}
 \usage{
-Quantification.Mlr(train, test = NULL)
+Quantification.Mlr(train, test = NULL, n_pc = 20, seed = 42)
 }
 \arguments{
 \item{train}{The training data object}
 
-\item{test}{The test data object (optional)}
+\item{test}{The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).}
+
+\item{n_pc}{The number of principal components that the PCA model extract for further MLR model building. Feature extraction is recommended to reduce the multicollinearity among predictors.}
+
+\item{seed}{The seed for the random number generator}
 }
 \value{
-The MLR prediction result.
+A list containing:
+\describe{ 
+  \item{model}{The MLR model}
+  \item{pred_test}{The prediction for test data if test is provided}
+  \item{pca_params}{The pre-feature extraction PCA parameters used for the MLR model building}
+}
 }
 \description{
 Multiple linear regression (MLR)
-Simple and interpretable regression method, but assumes
-no multicollinearity among predictors and a linear
-relationship between predictors and response
+A linear approach modeling the relationship between multiple predictors and a response variable via linear coefficients.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-data_cleaned <- Feature.Reduction.Pca(data_cleaned,  draw=FALSE , save = FALSE)
-quan_mlr <- Quantification.Mlr(data_cleaned)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+quan_mlr <- Quantification.Mlr(data_processed)
 }

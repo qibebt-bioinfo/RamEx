@@ -4,12 +4,12 @@
 \alias{Qualitycontrol.Dis}
 \title{Detect outliers in a dataset based on distance from the mean spectrum}
 \usage{
-Qualitycontrol.Dis(object, min.dis = 1)
+Qualitycontrol.Dis(object, max.dis = 1)
 }
 \arguments{
 \item{object}{Ramanome Object}
 
-\item{min.dis}{The minimum euclidean distance threshold for marking a spectrum as an outlier.
+\item{max.dis}{The maximum euclidean distance threshold for marking a spectrum as an outlier.
 Defaults to 1.}
 }
 \value{

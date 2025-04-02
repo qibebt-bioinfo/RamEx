@@ -2,50 +2,41 @@
 % Please edit documentation in R/Phenotype-Analysis.R
 \name{Phenotype.Analysis.Louvaincluster}
 \alias{Phenotype.Analysis.Louvaincluster}
-\title{Perform Louvain Clustering on Spectral Data}
+\title{Louvain Clustering}
 \usage{
 Phenotype.Analysis.Louvaincluster(
   object,
   resolutions,
-  npc = 10,
+  n_pc = 10,
   threshold = 0.001,
   k = 30,
-  n_tree = 50
+  n_tree = 50,
+  seed = 42
 )
 }
 \arguments{
-\item{object}{A Ramanome object containing the spectral data.}
+\item{object}{A Ramanome object.}
 
 \item{resolutions}{A vector of resolutions at which to perform the Louvain clustering.}
 
-\item{npc}{The number of principal components to retain in the PCA. Defaults to 10.}
+\item{n_pc}{The number of principal components to retain in the PCA. Defaults to 10.}
 
-\item{threshold}{The minimum number of samples required to consider a cluster valid.
-Defaults to 0.001.}
+\item{threshold}{The minimum number of samples required to consider a cluster valid. Defaults to 0.001.}
 
-\item{k}{The number of nearest neighbors to consider. Defaults to 30.}
+\item{k}{Number of Nearest Neighbors, determines how many nearest neighbors each data point will consider when building the k-NN graph. A larger k will result in a denser graph, where each node is connected to more neighbors. This can capture broader local structures but may blur fine-grained distinctions. A smaller k will produce a sparser graph, emphasizing local structures but potentially missing broader patterns.}
 
-\item{n_tree}{The number of trees to use in the Approximate Nearest Neighbor search.
-Defaults to 50.}
+\item{n_tree}{The number of trees to use in the Approximate Nearest Neighbor search. Defaults to 50.
+A higher n_tree improves the accuracy of the nearest neighbor search but increases computation time and memory usage. A lower n_tree speeds up the search but may return less accurate neighbors.}
 }
 \value{
 A data frame containing the cluster assignments for each resolution.
 }
 \description{
-This function performs Louvain clustering on the spectral data stored in a Ramanome
-object. It first reduces the dimensionality of the data using PCA, then calculates
-the k-nearest neighbors for each point, and finally applies the Louvain algorithm
-to detect communities at different resolutions.
+A graph-based community detection algorithm that optimizes modularity to identify clusters by iteratively merging nodes to maximize within-cluster connections.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+data_processed <- Preprocessing.OneStep(RamEx_data)
 #options(mc.cores = 2)
-#clusters_Louvaincluster <- Phenotype.Analysis.Louvaincluster(object = data_cleaned, resolutions = c(0.8))
+#clusters_Louvaincluster <- Phenotype.Analysis.Louvaincluster(object = data_processed, resolutions = c(0.8))
 }

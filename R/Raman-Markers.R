@@ -7,6 +7,7 @@
 #'
 #' @return A matrix containing mislabel scores for each class.
 #' @importFrom stats model.matrix
+#' @noRd
 
 
 get.mislabel.scores <- function(y, y.prob) {
@@ -28,6 +29,7 @@ get.mislabel.scores <- function(y, y.prob) {
 #' @param nfolds The number of folds to generate.
 #'
 #' @return A vector containing the fold assignments for each sample.
+#' @noRd
 
 
 balanced.folds <- function(y, nfolds = 10) {
@@ -61,6 +63,7 @@ balanced.folds <- function(y, nfolds = 10) {
 #'
 #' @return A list containing the cross-validation results including predicted labels, class probabilities, feature importances, and error rates.
 #' @importFrom randomForest randomForest
+#' @noRd
 
 rf.cross.validation <- function(x, y, nfolds = 10, verbose = FALSE, ...) {
   if (nfolds == -1) nfolds <- length(y)
@@ -122,7 +125,7 @@ rf.cross.validation <- function(x, y, nfolds = 10, verbose = FALSE, ...) {
 #'   \item{importances}{A vector of feature importances based on mean decrease accuracy.}
 #' }
 #' @importFrom randomForest randomForest
-
+#' @noRd
 
 rf.out.of.bag <- function(x, y, verbose = FALSE, ntree = 500, ...) {
   rf.model <- randomForest::randomForest(
@@ -154,7 +157,7 @@ rf.out.of.bag <- function(x, y, verbose = FALSE, ntree = 500, ...) {
 #' @param x A matrix or data frame containing the predictors.
 #'
 #' @return A matrix with the predicted class probabilities for each sample.
-
+#' @noRd
 get.oob.probability.from.forest <- function(model, x) {
   # get aggregated class votes for each sample using only OOB trees
   votes <- get.oob.votes.from.forest(model, x)
@@ -174,7 +177,7 @@ get.oob.probability.from.forest <- function(model, x) {
 #'
 #' @return A matrix of class votes for each sample, with rows representing samples and columns representing classes.
 #' @importFrom stats predict
-
+#' @noRd
 
 get.oob.votes.from.forest <- function(model, x) {
   # Get aggregated class votes for each sample using only OOB trees
@@ -211,7 +214,8 @@ get.oob.votes.from.forest <- function(model, x) {
 #'   - A confusion matrix file showing classification performance
 #'
 #' @importFrom utils write.table
-
+#' @noRd
+#' 
 save.rf.results <- function(result, rf.opts, feature.ids, outdir) {
   save.rf.results.summary(result, rf.opts, outdir = outdir)
   save.rf.results.probabilities(result, outdir = outdir)
@@ -230,6 +234,7 @@ save.rf.results <- function(result, rf.opts, feature.ids, outdir) {
 #' @param outdir The output directory to save the summary file
 #'
 #' @return None
+#' @noRd
 
 save.rf.results.summary <- function(result, rf.opts, filename = 'summary.xls', outdir) {
   err <- hyperSpec::mean(result$errs)
@@ -260,7 +265,7 @@ save.rf.results.summary <- function(result, rf.opts, filename = 'summary.xls', o
 #' @param outdir The output directory to save the probabilities file
 #' @return NULL. The function saves a tab-delimited text file containing class probabilities
 #'         for each sample, with rows for samples and columns for class probabilities.
-
+#' @noRd
 save.rf.results.probabilities <- function(result, filename = 'cv_probabilities.xls', outdir) {
   filepath <- sprintf('%s/%s', outdir, filename)
   sink(filepath)
@@ -276,6 +281,7 @@ save.rf.results.probabilities <- function(result, filename = 'cv_probabilities.x
 #' @param outdir The output directory to save the probabilities file
 #' @return NULL. The function saves a tab-delimited text file containing mislabeling scores
 #'         for each sample, with columns for sample ID and corresponding mislabeling score.
+#' @noRd
 
 save.rf.results.mislabeling <- function(result, filename = 'mislabeling.xls', outdir) {
   filepath <- sprintf('%s/%s', outdir, filename)
@@ -296,7 +302,7 @@ save.rf.results.mislabeling <- function(result, filename = 'mislabeling.xls', ou
 #' @param outdir The path to the output directory
 #'
 #' @return None
-
+#' @noRd
 
 save.rf.results.importances <- function(result, feature.ids, filename = 'feature_importance_scores.xls', outdir) {
   filepath <- sprintf('%s/%s', outdir, filename)
@@ -330,7 +336,7 @@ save.rf.results.importances <- function(result, feature.ids, filename = 'feature
 #' @param outdir The path to the output directory
 #'
 #' @return None
-
+#' @noRd
 
 save.rf.results.confusion.matrix <- function(result, filename = 'confusion_matrix.xls', outdir) {
   filepath <- sprintf('%s/%s', outdir, filename)
@@ -366,6 +372,8 @@ save.rf.results.confusion.matrix <- function(result, filename = 'confusion_matri
 #' @importFrom stats kruskal.test
 #' @importFrom stats bartlett.test
 #' @importFrom stats p.adjust
+#' @noRd
+#' 
 BetweenGroup.test <- function(data, group, p.adj.method = "bonferroni", paired = FALSE) {
   # p.adjust.methods
   # c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none")
@@ -460,13 +468,14 @@ BetweenGroup.test <- function(data, group, p.adj.method = "bonferroni", paired =
 #'
 #' @param object A Ramanome object.
 #' @param outfolder The output folder to save the results.
-#' @param draw Logical value indicating whether to draw a heatmap.
-#' @param threshold The threshold value for feature importances.
-#' @param ntree The number of trees in the random forest model.
+#' @param threshold The threshold value for RBCS feature importances.
+#' @param ntree The number of trees to build the random forest model.
 #' @param errortype The error type used in random forest model evaluation.
 #' @param verbose Logical value indicating whether to display progress messages.
 #' @param nfolds The number of folds used in cross-validation.
 #' @param rf.cv Logical value indicating whether to perform random forest with cross-validation.
+#' @param show Logical value indicating whether to show the heatmap.
+#' @param save Logical value indicating whether to draw the heatmap.
 #'
 #' @return A data frame containing the selected feature importances.
 #' @importFrom pheatmap pheatmap
@@ -477,26 +486,21 @@ BetweenGroup.test <- function(data, group, p.adj.method = "bonferroni", paired =
 #' @export Raman.Markers.Rbcs
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, draw = FALSE)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' RBCS.markers <- Raman.Markers.Rbcs(data_processed, threshold = 0.003, draw = FALSE)
 
 
 Raman.Markers.Rbcs <- function(
     object,
     outfolder = "RF_imps",
-    draw = TRUE,
     threshold = 0.002,
     ntree = 1000,
     errortype = 'oob',
     verbose = FALSE,
     nfolds = 3,
-    rf.cv = FALSE
+    rf.cv = FALSE,
+    show = TRUE,
+    save = FALSE
 ) {
   x <- get.nearest.dataset(object)
   y <- object@meta.data$group
@@ -507,6 +511,7 @@ Raman.Markers.Rbcs <- function(
   
   # RF importances of features
   dir.create(outfolder)
+  cat('Saving RBCS importances of Raman features to the current working directory: ', getwd(), '/', outfolder, '\n')
   
   imps <- oob.result$importances
   imps <- imps[order(imps, decreasing = TRUE)]
@@ -527,7 +532,8 @@ Raman.Markers.Rbcs <- function(
   rownames(means) <- means[, 1]
   means %<>% .[, -1]
   colnames(means) %<>% as.numeric() %>% round(., 0)
-  if (draw) {
+  if (save) {
+    cat('Saving RBCS heatmap to the current working directory: ', getwd(), '\n')
     pheatmap::pheatmap(
       means[, -1],
       show_colnames = TRUE,
@@ -538,6 +544,16 @@ Raman.Markers.Rbcs <- function(
       filename = 'RBCS.heatmap.png',
       width = length(imps.cutoff) / 4,
       height = length(unique(y)) / 2
+    )
+  }
+  if (show) {
+    pheatmap::pheatmap(
+      means[, -1],
+      show_colnames = TRUE,
+      angle_col = 45,
+      scale = "none",
+      cluster_cols = TRUE,
+      cluster_rows = TRUE
     )
   }
   return(imps.cutoff)

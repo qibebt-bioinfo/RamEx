@@ -4,30 +4,29 @@
 \alias{Quantification.Pls}
 \title{Partial Least Squares (PLS)}
 \usage{
-Quantification.Pls(train, test = NULL)
+Quantification.Pls(train, test = NULL, n_comp = 8, seed = 42)
 }
 \arguments{
-\item{train}{The training data object}
+\item{train}{The training Ramanome object}
 
-\item{test}{The test data object (optional)}
+\item{test}{The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).}
+
+\item{n_comp}{The number of latent components that the PLS model extract from the training data to model the response variable}
+
+\item{seed}{The seed for the random number generator}
 }
 \value{
-The PLS model.
+A list containing:
+\describe{ 
+  \item{model}{The PLS model}
+  \item{pred_test}{The prediction for test data if test is provided}
+}
 }
 \description{
-A regression method that reduces predictors to a smaller set of latent
-variables while maximizing the covariance between predictors and response
- variables, ideal for situations where predictors are highly collinear
- or when the number of predictors exceeds the number of observations
+A regression method that projects predictors and responses to latent variables to maximize covariance.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-quan_pls <- Quantification.Pls(data_cleaned)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+quan_pls <- Quantification.Pls(data_processed)
 }

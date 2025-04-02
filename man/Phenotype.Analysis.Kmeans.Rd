@@ -4,29 +4,27 @@
 \alias{Phenotype.Analysis.Kmeans}
 \title{k-Means Clustering Analysis}
 \usage{
-Phenotype.Analysis.Kmeans(object, k)
+Phenotype.Analysis.Kmeans(object, n_pc = 10, k)
 }
 \arguments{
-\item{object}{A Ramanome object containing the dataset.}
+\item{object}{A Ramanome object.}
+
+\item{n_pc}{The number of principal components to retain in the PCA. Defaults to 10.}
 
 \item{k}{the number of clusters.}
 }
 \value{
-The datafram which contains Kmeans result.
+A list containing:
+\describe{ 
+  \item{clusters}{The cluster assignments for each data point}
+  \item{centers}{The coordinates of the cluster centers}
+}
 }
 \description{
-A centroid-based clustering algorithm that partitions
-data into a predefined number of clusters by assigning
-sample to the nearest center
+A centroid-based partitioning algorithm that assigns data points to clusters by minimizing the sum of squared distances between points and their cluster centers
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,] 
-data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-clusters_kmneans <- Phenotype.Analysis.Kmeans(data_cleaned,5)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+clusters_kmneans <- Phenotype.Analysis.Kmeans(data_processed,5)
 }

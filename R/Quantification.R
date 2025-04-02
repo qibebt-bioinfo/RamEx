@@ -1,82 +1,72 @@
 #' Partial Least Squares (PLS)
 #'
-#' A regression method that reduces predictors to a smaller set of latent
-#' variables while maximizing the covariance between predictors and response
-#'  variables, ideal for situations where predictors are highly collinear
-#'  or when the number of predictors exceeds the number of observations
+#' A regression method that projects predictors and responses to latent variables to maximize covariance.
 #'
-#' @param train The training data object
-#' @param test The test data object (optional)
-#' @return The PLS model.
+#' @param train The training Ramanome object
+#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).
+#' @param n_comp The number of latent components that the PLS model extract from the training data to model the response variable
+#' @param seed The seed for the random number generator
+#' 
+#' @return A list containing:
+#' \describe{ 
+#'   \item{model}{The PLS model}
+#'   \item{pred_test}{The prediction for test data if test is provided}
+#' }  
 #' @export Quantification.Pls
 #' @importFrom pls plsr
 #' @importFrom stringr str_extract
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' quan_pls <- Quantification.Pls(data_cleaned)
-Quantification.Pls <- function(train, test = NULL) {
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' quan_pls <- Quantification.Pls(data_processed)
+Quantification.Pls <- function(train, test = NULL,n_comp = 8, seed = 42) {
+  set.seed(seed)
   if (is.null(test)) {
-    data_set <- train@datasets$normalized.data
+    data_set <- get.nearest.dataset(train)
     labels <- train@meta.data$group
+    labels <- as.numeric(str_extract(labels, "\\d+"))
     index <- stratified_partition(labels, p = 0.7)
-    labels <- str_extract(labels, "\\d+")
-    labels <- as.numeric(labels)
     data_train <- data_set[index,]
-    data_train <- as.data.frame(data_train)
-    data_train <- as.matrix(data_train)
-    label_train <- labels[index]
+    label_train <- as.numeric(labels[index])
     data_val <- data_set[-index,]
-    data_val <- as.data.frame(data_val)
-    data_val <- as.matrix(data_val)
     label_val <- labels[-index]
   } else {
-    data_train <- train@datasets$normalized.data
+    data_train <- get.nearest.dataset(train)
     label_train <- train@meta.data$group
-    label_train <- str_extract(label_train, "\\d+")
-    label_train <- as.numeric(label_train)
-    data_train <- as.data.frame(data_train)
-    data_train <- as.matrix(data_train)
-    data_val <- test@datasets$normalized.data
-    data_val <- as.data.frame(data_val)
-    data_val <- as.matrix(data_val)
+    label_train <- as.numeric(str_extract(label_train, "\\d+"))
+    data_val <- get.nearest.dataset(test)
     label_val <- test@meta.data$group
-    label_val <- str_extract(label_val, "\\d+")
-    label_val <- as.numeric(label_val)
+    label_val <- as.numeric(str_extract(label_val, "\\d+"))
   }
-  pls_model <- plsr(label_train ~ data_train, ncomp = 8, scale = TRUE, validation = "none")
-  pre_result <- predict(pls_model, data_val, ncomp = 8)
+
+  pls_model <- plsr(label_train ~ data_train, ncomp = n_comp, scale = TRUE, validation = "none")
+  pre_result <- predict(pls_model, data_val, ncomp = n_comp)
   if (is.null(test)) return(list(model=pls_model)) else return(list(model=pls_model, pred_test = pre_result))
 }
 
 #' Multiple linear regression (MLR)
-#' Simple and interpretable regression method, but assumes
-#' no multicollinearity among predictors and a linear
-#' relationship between predictors and response
+#' A linear approach modeling the relationship between multiple predictors and a response variable via linear coefficients.
+#' 
 #' @param train The training data object
-#' @param test The test data object (optional)
-#' @return The MLR prediction result.
+#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).
+#' @param n_pc The number of principal components that the PCA model extract for further MLR model building. Feature extraction is recommended to reduce the multicollinearity among predictors.
+#' @param seed The seed for the random number generator
+#' 
+#' @return A list containing:
+#' \describe{ 
+#'   \item{model}{The MLR model}
+#'   \item{pred_test}{The prediction for test data if test is provided}
+#'   \item{pca_params}{The pre-feature extraction PCA parameters used for the MLR model building}
+#' }  
 #' @export Quantification.Mlr
 #' @importFrom stats lm
 #' @importFrom stringr str_extract
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' data_cleaned <- Feature.Reduction.Pca(data_cleaned,  draw=FALSE , save = FALSE)
-#' quan_mlr <- Quantification.Mlr(data_cleaned)
-Quantification.Mlr <- function(train, test = NULL) {
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' quan_mlr <- Quantification.Mlr(data_processed)
+Quantification.Mlr <- function(train, test = NULL, n_pc = 20, seed = 42) {
+  set.seed(seed)
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
     labels <- train@meta.data$group
@@ -97,38 +87,42 @@ Quantification.Mlr <- function(train, test = NULL) {
   label_val <- as.numeric(label_val)
   
   data.pca <- prcomp(data_train, scale = TRUE, retx = TRUE)
-  data_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
-  test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
+  data_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:n_pc] %>% as.data.frame
+  test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:n_pc] %>% as.data.frame
   
   mlr_model <- lm(label_train~ ., data = data_20)
   pre_result <- predict(mlr_model, test_20)
-  if (is.null(test)) return(list(model=mlr_model)) else return(list(model=mlr_model, pred_test = pre_result))
+  pca_params <- list(
+    center = data.pca$center,
+    scale = data.pca$scale,
+    rotation = data.pca$rotation[, 1:n_pc]
+  )
+  if (is.null(test)) return(list(model=mlr_model, pca_params = pca_params)) else return(list(model=mlr_model, pred_test = pre_result, pca_params = pca_params))
 }
 
 #' Generalized linear model (GLM)
-#' SExtends linear regression by allowing the dependent
-#' variable to follow distributions other than
-#' normal (e.g., binomial, Poisson) and uses a link function
-#'  to relate predictors to the response
+#' Extends linear regression by allowing response variables to follow non-normal distributions via link functions.
 #'
 #' @param train The training data object
-#' @param test The test data object (optional)
-#' @return The GLM prediction result.
+#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).
+#' @param n_pc The number of principal components that the PCA model extract for further GLM model building. Feature extraction is recommended to reduce the multicollinearity among predictors.
+#' @param seed The seed for the random number generator
+#' 
+#' @return A list containing:
+#' \describe{ 
+#'   \item{model}{The GLM model}
+#'   \item{pred_test}{The prediction for test data if test is provided}
+#'   \item{pca_params}{The pre-feature extraction PCA parameters used for the GLM model building}
+#' }  
 #' @export Quantification.Glm
 #' @importFrom stats glm
 #' @importFrom stringr str_extract
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' data_cleaned <- Feature.Reduction.Pca(data_cleaned, draw=FALSE , save = FALSE)
-#' quan_glm <- Quantification.Glm(data_cleaned)
-Quantification.Glm <- function(train, test = NULL) {
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' quan_glm <- Quantification.Glm(data_processed)
+Quantification.Glm <- function(train, test = NULL, n_pc = 20, seed = 42) {
+  set.seed(seed)
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
     labels <- train@meta.data$group
@@ -149,10 +143,66 @@ Quantification.Glm <- function(train, test = NULL) {
   label_val <- as.numeric(label_val)
   
   data.pca <- prcomp(data_train, scale = TRUE, retx = TRUE)
-  data_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
-  test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:20] %>% as.data.frame
+  data_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:n_pc] %>% as.data.frame
+  test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:n_pc] %>% as.data.frame
   
   glm_model <- glm(label_train~ ., data_20, family = gaussian())
   pre_result <- predict(glm_model, test_20,  type = "response")
-  if (is.null(test)) return(list(model=glm_model)) else return(list(model=glm_model, pred_test = pre_result))
+  pca_params <- list(
+    center = data.pca$center,
+    scale = data.pca$scale,
+    rotation = data.pca$rotation[, 1:n_pc]
+  )
+  if (is.null(test)) return(list(model=glm_model, pca_params = pca_params)) else return(list(model=glm_model, pred_test = pre_result, pca_params = pca_params))
 }
+
+
+#' Predict using a saved quantification model
+#'
+#' This function uses a saved quantification model to predict values for new data.
+#'
+#' @param model The saved quantification model (from Quantification.Pls, Quantification.Mlr, or Quantification.Glm)
+#' @param new_data The new data object to predict
+#' @param show Whether to show the plot of the results
+#' @param save Whether to save the plot of the results (default path: getwd())
+#'
+#' @return A list containing:
+#' \describe{
+#'   \item{predictions}{The predicted values for the new data}
+#' }
+#'
+#' @export
+#'
+#' @examples
+#' data(RamEx_data)
+#' # Train a model
+#' model <- Quantification.Pls(RamEx_data)
+#' # Use the model to predict new data
+#' predictions <- predict_quantification(model, RamEx_data)
+predict_quantification <- function(model, new_data) {
+  # Get the new data
+  new_data_matrix <- get.nearest.dataset(new_data)
+  
+  # Determine model type and make predictions
+  if (inherits(model$model, "mvr")) {
+    # For PLS model
+    pred <- predict(model$model, new_data_matrix, ncomp = model$model$ncomp)
+    predictions <- pred
+    
+  } else if (inherits(model$model, "lm")) {
+    # For MLR model
+    new_data_20 <- scale(new_data_matrix, center = model$pca_params$center, scale = model$pca_params$scale) %*% model$pca_params$rotation %>% as.data.frame
+    predictions <- predict(model$model, new_data_20)
+    
+  } else if (inherits(model$model, "glm")) {
+    # For GLM model
+    new_data_20 <- scale(new_data_matrix, center = model$pca_params$center, scale = model$pca_params$scale) %*% model$pca_params$rotation %>% as.data.frame
+    predictions <- predict(model$model, new_data_20, type = "response")
+    
+  } else {
+    stop("Unsupported model type")
+  }
+  
+  return(list(predictions = predictions))
+}
+

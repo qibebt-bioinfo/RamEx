@@ -7,13 +7,14 @@
 Raman.Markers.Rbcs(
   object,
   outfolder = "RF_imps",
-  draw = TRUE,
   threshold = 0.002,
   ntree = 1000,
   errortype = "oob",
   verbose = FALSE,
   nfolds = 3,
-  rf.cv = FALSE
+  rf.cv = FALSE,
+  show = TRUE,
+  save = FALSE
 )
 }
 \arguments{
@@ -21,11 +22,9 @@ Raman.Markers.Rbcs(
 
 \item{outfolder}{The output folder to save the results.}
 
-\item{draw}{Logical value indicating whether to draw a heatmap.}
+\item{threshold}{The threshold value for RBCS feature importances.}
 
-\item{threshold}{The threshold value for feature importances.}
-
-\item{ntree}{The number of trees in the random forest model.}
+\item{ntree}{The number of trees to build the random forest model.}
 
 \item{errortype}{The error type used in random forest model evaluation.}
 
@@ -34,6 +33,10 @@ Raman.Markers.Rbcs(
 \item{nfolds}{The number of folds used in cross-validation.}
 
 \item{rf.cv}{Logical value indicating whether to perform random forest with cross-validation.}
+
+\item{show}{Logical value indicating whether to show the heatmap.}
+
+\item{save}{Logical value indicating whether to draw the heatmap.}
 }
 \value{
 A data frame containing the selected feature importances.
@@ -43,12 +46,6 @@ This function performs random forest classification on Raman data and generates 
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, draw = FALSE)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+RBCS.markers <- Raman.Markers.Rbcs(data_processed, threshold = 0.003, draw = FALSE)
 }
