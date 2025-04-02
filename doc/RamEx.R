@@ -6,7 +6,7 @@ knitr::opts_chunk$set(
 
 ## -----------------------------------------------------------------------------
 library(RamEx)
-library(magrittr)
+library(dplyr)
 data(RamEx_data)
 options(mc.cores = 2)
 
@@ -34,7 +34,7 @@ data.reduction <- Feature.Reduction.Pca(data_cleaned) %>% Feature.Reduction.Pcoa
 
 ROC_markers <- Raman.Markers.Roc(Preprocessing.Cutoff(data_cleaned, 1400, 1600), paired  = TRUE, threshold = 0.6) 
 cor_markers <- Raman.Markers.Correlations(Preprocessing.Cutoff(data_cleaned, 1400, 1600), min.cor = 0.6) 
-RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, draw = F) 
+RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, show = F) 
 
 # IRCA
 #-Global IRCA. This module maybe consumed for a longer period of time due to the image drawing

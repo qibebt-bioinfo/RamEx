@@ -278,7 +278,7 @@ Classification.Gmm <- function(train, test = NULL, n_pc = 20, show=TRUE, save=FA
 #'   \item{probabilities}{The prediction probabilities for each class (if available)}
 #' }
 #'
-#' @export 
+#' @export predict_classification
 #'
 #' @examples
 #' data(RamEx_data)

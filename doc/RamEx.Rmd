@@ -30,6 +30,7 @@ Raman spectra are respectively tracked in single txt files, and their meta info 
 Here we assume there's only one factor of the dataset, which means RamEx do not contain multiple-factor analysis. If you have multiple factors but they are independent of each other, these factors will be treated as one factor.
 ```{r}
 library(RamEx)
+library(dplyr)
 data(RamEx_data)
 options(mc.cores = 2)
 ```
@@ -71,7 +72,7 @@ data.reduction <- Feature.Reduction.Pca(data_cleaned) %>% Feature.Reduction.Pcoa
 ```{r}
 ROC_markers <- Raman.Markers.Roc(Preprocessing.Cutoff(data_cleaned, 1400, 1600), paired  = TRUE, threshold = 0.6) 
 cor_markers <- Raman.Markers.Correlations(Preprocessing.Cutoff(data_cleaned, 1400, 1600), min.cor = 0.6) 
-RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, draw = T) 
+RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, show = T) 
 ```
 # IRCA
 -Global IRCA. This module maybe consumed for a longer period of time due to the image drawing

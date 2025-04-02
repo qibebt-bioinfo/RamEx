@@ -70,8 +70,8 @@ data.reduction <- Feature.Reduction.Pca(data_cleaned) %>% Feature.Reduction.Pcoa
 
 # Markers analysis
 ```{r}
-ROC_markers <- Raman.Markers.Roc(Preprocessing.Cutoff(data_cleaned, 1400, 1600), paired  = TRUE, threshold = 0.6) 
-cor_markers <- Raman.Markers.Correlations(Preprocessing.Cutoff(data_cleaned, 1400, 1600), min.cor = 0.6) 
+ROC_markers <- Raman.Markers.Roc(Preprocessing.Cutoff(data_cleaned, 1400, 1500), paired  = TRUE, threshold = 0.6) 
+cor_markers <- Raman.Markers.Correlations(Preprocessing.Cutoff(data_cleaned, 1400, 1500), min.cor = 0.6) 
 RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, show = T) 
 ```
 # IRCA
