@@ -168,30 +168,13 @@ mean.spec <- function(data, group, gap = 0.3) {
       aes(color = Group),
       linewidth = 0.8
     ) +
-    theme_bw() +
     labs(y = "Normalized Intensity (a.u.)") +
     xlab(expression(paste("Wavenumber (cm"^{ -1 }, ")"))) +
     scale_x_continuous(
       expand = c(0, 0),
       breaks = c(500,1000,1500,2000, 2500,3000,3500)
     ) +
-    theme(
-      panel.grid = element_blank(),
-      panel.grid.minor = element_blank(),
-      legend.title = element_blank(),
-      legend.text = element_markdown(size = 15),
-      legend.background = element_blank(),
-      text = element_text(color = "black"),
-      axis.title.y = element_text(size = 20, angle = 90),
-      axis.text.x = element_text(size = 15, angle = 0),
-      axis.text.y = element_blank(),
-      strip.background = element_rect(fill = "white"),
-      strip.text = element_text(size = 20),
-      axis.ticks = element_line(linewidth = 1),
-      axis.ticks.y = element_blank(),
-      axis.ticks.length = unit(0.4, "lines"),
-      axis.title = element_text(size = 20)
-    )
+    theme_classic()
 
   return(plot)
 }

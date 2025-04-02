@@ -13,14 +13,8 @@
 #' @importFrom mdatools constraint
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' #data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' decom_mcrals <- Spectral.Decomposition.Mcrals(data_cleaned, 2)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' decom_mcrals <- Spectral.Decomposition.Mcrals(data_processed, 2)
 
 Spectral.Decomposition.Mcrals<- function(object, ncomp) {
   mcrals <- mdatools::mcrals(object@datasets$normalized.data, ncomp,cont.constraints =list(
@@ -49,14 +43,8 @@ Spectral.Decomposition.Mcrals<- function(object, ncomp) {
 #' @importFrom ica icafast
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' #data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' decom_ica <- Spectral.Decomposition.Ica(data_cleaned, 2)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' decom_ica <- Spectral.Decomposition.Ica(data_processed, 2)
 
 Spectral.Decomposition.Ica <- function(object, ncomp) {
   ica.result <- icafast(object@datasets$normalized.data, ncomp)
@@ -79,14 +67,8 @@ Spectral.Decomposition.Ica <- function(object, ncomp) {
 #' @importFrom NMF nmf
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' #data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' decom_nmf <- Spectral.Decomposition.Nmf(data_cleaned)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' decom_nmf <- Spectral.Decomposition.Nmf(data_processed)
 
 
 Spectral.Decomposition.Nmf <- function(object) {

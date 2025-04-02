@@ -126,6 +126,7 @@ pred_new <- predict_classification(model.lda, data_cleaned)
 quan_pls <- Quantification.Pls(data_cleaned) 
 quan_mlr <- Quantification.Mlr(data_cleaned) 
 quan_glm <- Quantification.Glm(data_cleaned) 
+pred_new <- predict_quantification(quan_pls, data_cleaned)
 ```
 
 #### Spectral decomposition

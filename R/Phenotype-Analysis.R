@@ -39,7 +39,7 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,n_pc=10, thres
     data.red <- prcomp_irlba(get.nearest.dataset(object), n = n_pc, center = TRUE, scale. = TRUE)$x
   }
   
-  matrix <- asmatrix(data.red)
+  matrix <- as.matrix(data.red)
   
   cat('Creating the communities...\n')
   
@@ -136,8 +136,9 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,n_pc=10, thres
 #' A centroid-based partitioning algorithm that assigns data points to clusters by minimizing the sum of squared distances between points and their cluster centers
 #'
 #' @param object A Ramanome object.
-#' @param n_pc The number of principal components to retain in the PCA. Defaults to 10.
 #' @param k the number of clusters.
+#' @param n_pc The number of principal components to retain in the PCA. Defaults to 10.
+
 #' @return A list containing:
 #' \describe{ 
 #'   \item{clusters}{The cluster assignments for each data point}
@@ -150,7 +151,7 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,n_pc=10, thres
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' clusters_kmneans <- Phenotype.Analysis.Kmeans(data_processed,5)
 
-Phenotype.Analysis.Kmeans <- function(object, n_pc=10, k) {
+Phenotype.Analysis.Kmeans <- function(object, k, n_pc=10) {
   if (!is.null(object@reductions$PCA)) {
     if(ncol(object@reductions$PCA) < n_pc) {
       data.red <- prcomp_irlba(get.nearest.dataset(object), n = n_pc, center = TRUE, scale. = TRUE)$x

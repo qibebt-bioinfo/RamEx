@@ -12,7 +12,7 @@
 #' data_preprocessed <- Preprocessing.OneStep(RamEx_data) 
 Preprocessing.OneStep <- function(object) {
      data_normalized <- Preprocessing.Smooth.Sg(object) %>% Preprocessing.Baseline.Polyfit %>% Preprocessing.Normalize(., "ch")
-     qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data, var_tol = 0.4)
+     qc_icod <- Qualitycontrol.ICOD(data_normalized)
      data_cleaned <- data_normalized[qc_icod$quality,]
      return(data_cleaned)}
 

@@ -30,12 +30,19 @@ Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE, n_pc = 2) {
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
       geom_point(alpha = 0.5) +
-      labs(x = names[1], y = names[2]) +
+      labs(x = names[1], y = names[2],color = 'Group') +
       theme_classic()
     print(plot)
   }
   
   if (save) {
+    if(is.null(plot)){
+      names <- colnames(data.red)
+      plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
+        geom_point(alpha = 0.5) +
+        labs(x = names[1], y = names[2],color = 'Group') +
+        theme_classic()
+    }
     cat('Saving PCA plot to the current working directory: ', getwd(), '\n')
     ggsave(paste("Reduction.pca.png"), plot, width = 8, height = 6)
   }
@@ -92,12 +99,19 @@ Feature.Reduction.Tsne <- function(object, PCA=20, perplexity=5, theta=0.5, max_
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
       geom_point(alpha = 0.5) +
-      labs(x = names[1], y = names[2]) +
+      labs(x = names[1], y = names[2],color = 'Group') +
       theme_classic()
     print(plot)
   }
   
   if (save) {
+    if(is.null(plot)){
+      names <- colnames(data.red)
+      plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
+        geom_point(alpha = 0.5) +
+        labs(x = names[1], y = names[2],color = 'Group') +
+        theme_classic()
+    }
     cat('Saving t-SNE plot to the current working directory: ', getwd(), '\n')
     ggsave(paste("Reduction.tsne.png"), plot, width = 8, height = 6)
   }
@@ -147,7 +161,7 @@ Feature.Reduction.Umap <- function(object, PCA=20, n_neighbors=30, min.dist=0.01
   }
 
   data.red <- data.frame(uwot::umap(dataset, scale = FALSE,  n_threads = detectCores(),
-  n_neighbors = n_neighbors, min.dist=min.dist, spread=spread, a=0.9922, b=1.112, metric = 'cosine',seed=seed))
+  n_neighbors = n_neighbors, min_dist=min.dist, spread=spread, a=0.9922, b=1.112, metric = 'cosine',seed=seed))
   colnames(data.red) <- c("UMAP 1", "UMAP 2")
   
   object@reductions$UMAP <- data.red
@@ -156,12 +170,19 @@ Feature.Reduction.Umap <- function(object, PCA=20, n_neighbors=30, min.dist=0.01
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
       geom_point(alpha = 0.5) +
-      labs(x = names[1], y = names[2]) +
+      labs(x = names[1], y = names[2],color = 'Group') +
       theme_classic()
     print(plot)
   }
   
   if (save) {
+    if(is.null(plot)){
+      names <- colnames(data.red)
+      plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
+        geom_point(alpha = 0.5) +
+        labs(x = names[1], y = names[2],color = 'Group') +
+        theme_classic()
+    }
     cat('Saving UMAP plot to the current working directory: ', getwd(), '\n')
     ggsave(paste("Reduction.umap.png"), plot, width = 8, height = 6)
   }
@@ -210,12 +231,19 @@ Feature.Reduction.Pcoa <- function(object, draw = TRUE, save=FALSE) {
     names <- colnames(data.red)
     plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
       geom_point(alpha = 0.5) +
-      labs(x = names[1], y = names[2]) +
+      labs(x = names[1], y = names[2],color = 'Group') +
       theme_classic()
     print(plot)
   }
   
   if (save) {
+    if(is.null(plot)){
+      names <- colnames(data.red)
+      plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
+        geom_point(alpha = 0.5) +
+        labs(x = names[1], y = names[2],color = 'Group') +
+        theme_classic()
+    }
     cat('Saving PCoA plot to the current working directory: ', getwd(), '\n')
     ggsave(paste("Reduction.pcoa.png"), plot, width = 8, height = 6)
   }
@@ -241,6 +269,10 @@ Feature.Reduction.Intensity <- function(object, bands) {
   a <- lapply(bands, function(x) confirm.select(object, x))
   name <- lapply(bands, confirm.name)
   names(a) <- name
-  object@interested.bands <- merge(object@interested.bands, a, by = "row.names", all = TRUE)
+  if(is.null(object@interested.bands)){
+    object@interested.bands <- a
+  } else {
+    object@interested.bands <- merge(object@interested.bands, a, by = "row.names", all = TRUE)[,-1]
+  }
   return(object)
 }

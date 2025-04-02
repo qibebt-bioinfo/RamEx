@@ -4,14 +4,14 @@
 \alias{Phenotype.Analysis.Kmeans}
 \title{k-Means Clustering Analysis}
 \usage{
-Phenotype.Analysis.Kmeans(object, n_pc = 10, k)
+Phenotype.Analysis.Kmeans(object, k, n_pc = 10)
 }
 \arguments{
 \item{object}{A Ramanome object.}
 
-\item{n_pc}{The number of principal components to retain in the PCA. Defaults to 10.}
-
 \item{k}{the number of clusters.}
+
+\item{n_pc}{The number of principal components to retain in the PCA. Defaults to 10.}
 }
 \value{
 A list containing:

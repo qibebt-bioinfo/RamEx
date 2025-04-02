@@ -245,6 +245,7 @@ Classification.Gmm <- function(train, test = NULL, n_pc = 20, show=TRUE, save=FA
   gmm_model <- Mclust(data_train_20)
   data_test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:n_pc] %>% as.data.frame
   data_pre <- predict(gmm_model, data_test_20)
+  pred.train <- confusion.plot(label_train, predict(gmm_model, data_train_20))
   pca_params <- list(
     center = data.pca$center,
     scale = data.pca$scale,

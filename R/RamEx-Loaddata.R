@@ -11,6 +11,7 @@
 #' @importFrom data.table fread
 #' @importFrom stats splinefun
 #' @export read.single
+#' @noRd
 
 read.single <- function(cell_path,xout){
   if(!is.na(cell_path)&&cell_path!="")
@@ -143,6 +144,7 @@ read.spec <- function(data_path, group.index = 1, group.levels = NULL, cutoff = 
 #' @importFrom parallel parLapply
 #' @importFrom data.table fread
 #' @importFrom stringr str_split
+#' @noRd
 read.spec.load <- function(data_path, group.index = 1, group.levels = NULL, cutoff = c(500, 3150), interpolation = FALSE) {
   filenames <- list.files(data_path, pattern = "*.txt",  full.names = TRUE,include.dirs = TRUE, recursive = TRUE)
   if(length(grep('Metadata.txt', filenames)) != 0)
