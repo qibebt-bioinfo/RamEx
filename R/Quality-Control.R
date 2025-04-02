@@ -639,7 +639,7 @@ Qualitycontrol.T2 <- function(object, signif = 0.05){
 #' Spectra with a distance greater than a specified threshold are marked as outliers.
 #'
 #' @param object Ramanome Object
-#' @param min.dis The minimum euclidean distance threshold for marking a spectrum as an outlier.
+#' @param max.dis The maximum euclidean distance threshold for marking a spectrum as an outlier.
 #'                 Defaults to 1.
 #' @return A data frame containing two columns: 'out' indicating whether each spectrum is an
 #'         outlier, and 'dis' containing the corresponding distance values.
@@ -648,7 +648,7 @@ Qualitycontrol.T2 <- function(object, signif = 0.05){
 #' @examples
 #' data(RamEx_data)
 #' qc_dis <- Qualitycontrol.Dis(RamEx_data)
-Qualitycontrol.Dis <- function(object, min.dis=1){
+Qualitycontrol.Dis <- function(object, max.dis=1){
   x <- get.nearest.dataset(object)
   pred_outliers <- rep(TRUE, nrow(x))
   out_na <- which(is.na(rowSums(x)))
@@ -658,13 +658,13 @@ Qualitycontrol.Dis <- function(object, min.dis=1){
   dis_matrix <- apply(x, 1, function(row) sqrt(sum((row - mean_spec)^2)))
   temp.dis <- quantile(dis_matrix, probs = 0.9)
   while(TRUE){
-    pred_outliers[dis_matrix>max(temp.dis, min.dis)] <- FALSE
+    pred_outliers[dis_matrix>max(temp.dis, max.dis)] <- FALSE
     mean_spec <- colMeans(x[pred_outliers,])
     dis_matrix <- apply(x, 1, function(row) sqrt(sum((row - mean_spec)^2)))
-    if(n_out==length(pred_outliers[!pred_outliers]))  {temp.dis <- temp.dis*0.95;pred_outliers[dis_matrix>max(temp.dis, min.dis)] <- FALSE}
+    if(n_out==length(pred_outliers[!pred_outliers]))  {temp.dis <- temp.dis*0.95;pred_outliers[dis_matrix>max(temp.dis, max.dis)] <- FALSE}
     else{temp.dis <- quantile(dis_matrix, probs = 0.9)}
     n_out <- length(pred_outliers[!pred_outliers])
-    if(all(dis_matrix[pred_outliers]<min.dis))
+    if(all(dis_matrix[pred_outliers]<max.dis))
       break
   }
   return(data.frame(quality=pred_outliers, distance=dis_matrix))

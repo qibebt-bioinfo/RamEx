@@ -119,6 +119,7 @@ model.gmm <- Classification.Gmm(data_cleaned)
 model.lda <- Classification.Lda(data_cleaned)
 model.rf <- Classification.Rf(data_cleaned)
 model.svm <- Classification.Svm(data_cleaned)
+pred_new <- predict_classification(model.lda, data_cleaned)
 ```
 #### Quantifications
 ```{r}
