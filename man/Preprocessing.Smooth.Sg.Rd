@@ -4,26 +4,22 @@
 \alias{Preprocessing.Smooth.Sg}
 \title{Smooth Spectral Data Using Savitzky-Golay Filter to reduce high-frequency noises}
 \usage{
-Preprocessing.Smooth.Sg(object, m = 0, p = 5, w = 11, delta.wav = 2)
+Preprocessing.Smooth.Sg(object, m = 0, p = 5, w = 11)
 }
 \arguments{
-\item{object}{A Ramanome object containing the spectral data.}
+\item{object}{A Ramanome object.}
 
-\item{m}{The order of the polynomial used in the Savitzky-Golay filter. Defaults to 0.}
+\item{m}{Whether perform differentiation. Defaults to 0.}
 
-\item{p}{The number of points to use in the Savitzky-Golay filter. Defaults to 5.}
+\item{p}{The order of the polynomial used in the Savitzky-Golay filter. Defaults to 5.}
 
-\item{w}{The window size used in the Savitzky-Golay filter. Defaults to 11.}
-
-\item{delta.wav}{The change in wavelength between each data point. Defaults to 2.}
+\item{w}{The window size used for polynomial fitting. Defaults to 11.}
 }
 \value{
 A Ramanome object with smoothed spectra, named as "smooth.data" in the 'datasets' slot
 }
 \description{
-This function applies the Savitzky-Golay filter to the spectral data in a Ramanome
-object to reduce noise. The filter is applied to the central portion of the data,
-preserving the first and last few columns as specified by the `w` parameter.
+The Savitzky-Golay filter is a digital smoothing technique that preserves the shape and height of spectral peaks by fitting a polynomial to a moving window of data points.
 }
 \examples{
 data(RamEx_data)

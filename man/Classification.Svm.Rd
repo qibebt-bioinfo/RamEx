@@ -29,5 +29,6 @@ This function performs classification using SVM
 }
 \examples{
 data(RamEx_data)
-Classification.Svm(RamEx_data)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+model.svm <- Classification.Svm(data_processed)
 }

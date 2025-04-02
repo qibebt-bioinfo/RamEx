@@ -38,5 +38,6 @@ This function performs classification using PC-LDA
 }
 \examples{
 data(RamEx_data)
-Classification.Lda(RamEx_data)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+model.lda <- Classification.Lda(data_processed)
 }

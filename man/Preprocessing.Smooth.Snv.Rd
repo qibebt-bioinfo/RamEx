@@ -7,10 +7,10 @@
 Preprocessing.Smooth.Snv(object)
 }
 \arguments{
-\item{object}{A Ramanome object containing the raw spectral data.}
+\item{object}{A Ramanome object.}
 }
 \value{
-The updated Ramanome object with the SNV-transformed data.
+A Ramanome object with SNV-transformed spectra, named as "smooth.data" in the 'datasets' slot
 }
 \description{
 This function applies the Standard Normal Variate (SNV) transformation to the raw

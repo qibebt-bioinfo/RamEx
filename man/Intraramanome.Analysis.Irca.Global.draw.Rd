@@ -4,12 +4,14 @@
 \alias{Intraramanome.Analysis.Irca.Global.draw}
 \title{Perform IRCA analysis on global scale}
 \usage{
-Intraramanome.Analysis.Irca.Global.draw(dataset, group)
+Intraramanome.Analysis.Irca.Global.draw(dataset, group, threshold = 0.6)
 }
 \arguments{
 \item{dataset}{The input dataset for analysis}
 
-\item{group}{The group information for the dataset}
+\item{threshold}{The threshold value for correlation. Default is 0.6.}
+
+\item{save}{Logical value to indicate whether to save the Global IRCA plot. Default is FALSE.}
 }
 \value{
 A dataframe containing the significant correlations between variables

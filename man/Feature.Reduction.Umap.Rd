@@ -4,14 +4,33 @@
 \alias{Feature.Reduction.Umap}
 \title{Perform UMAP Dimensionality Reduction}
 \usage{
-Feature.Reduction.Umap(object, draw = TRUE, save = FALSE, seed = 42)
+Feature.Reduction.Umap(
+  object,
+  PCA = 20,
+  n_neighbors = 30,
+  min.dist = 0.01,
+  spread = 1,
+  draw = TRUE,
+  save = FALSE,
+  seed = 42
+)
 }
 \arguments{
 \item{object}{A Ramanome object containing the dataset.}
 
-\item{draw}{A logical value indicating whether to generate a plot. Defaults to TRUE.}
+\item{PCA}{A numeric value indicating the number of principal components to use. Defaults to 20 (if NULL,raw data matrix will be used to generate UMAP plot).}
+
+\item{n_neighbors}{Controls the balance between local and global structure in UMAP. Higher values capture more global structure, while lower values focus on local details (typical range: 5–50).}
+
+\item{min.dist}{Determines the minimum distance between points in the embedding. Lower values (e.g., 0.1) produce tighter clusters, while higher values (e.g., 0.5) allow more spread.}
+
+\item{spread}{Scales the effective scale of points in the embedding. Works with min.dist to control cluster density—higher values spread points apart, while lower values compress them.}
+
+\item{draw}{A logical value indicating whether to draw the plot. Defaults to TRUE.}
 
 \item{save}{A logical value indicating whether to save the plot as a PNG file. Defaults to FALSE.}
+
+\item{seed}{A numeric value indicating the seed for the random number generator. Defaults to 42.}
 }
 \value{
 The updated Ramanome object with the UMAP reduction results.
@@ -24,12 +43,7 @@ data is stored in the object and a plot is generated if specified.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-data.reduction.umap <- Feature.Reduction.Umap(data_cleaned, draw=TRUE, save = FALSE)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+data.reduction.umap <- Feature.Reduction.Umap(data_processed, draw=TRUE, save = FALSE)
 
 }

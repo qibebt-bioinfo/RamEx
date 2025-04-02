@@ -34,6 +34,6 @@ a mixture of Gaussian distributions and assigns probabilities
 }
 \examples{
 data(RamEx_data)
-Classification.Gmm(RamEx_data)
-
+data_processed <- Preprocessing.OneStep(RamEx_data)
+model.gmm <- Classification.Gmm(data_processed)
 }

@@ -41,5 +41,6 @@ This function performs classification using RF
 }
 \examples{
 data(RamEx_data)
-Classification.Rf(RamEx_data)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+model.rf <- Classification.Rf(data_processed)
 }

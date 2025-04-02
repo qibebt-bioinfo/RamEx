@@ -2,20 +2,22 @@
 % Please edit documentation in R/Preprocessing.R
 \name{Preprocessing.Spike}
 \alias{Preprocessing.Spike}
-\title{Pre spike the spec. with Rcpp}
+\title{Remove cosmic rays from the spectra}
 \usage{
-Preprocessing.Spike(object, device)
+Preprocessing.Spike(object, device = "CPU", sharpen = 33)
 }
 \arguments{
 \item{object}{The rammanome class}
 
 \item{device}{Parallel device, default is null for CPU, can be set to "GPU"}
+
+\item{sharpen}{The sharpening factor of the convolution kernel, default is 33}
 }
 \value{
-A rammanome object
+The Ramanome object with cosmic rays removed spectra, named as "spike.data" in the 'datasets' slot
 }
 \description{
-This function performs Pre spike function
+recognize the cosmic rays by a sharp convolution kernel and replace them with the average of the neighboring pixels
 }
 \examples{
 data(RamEx_data)

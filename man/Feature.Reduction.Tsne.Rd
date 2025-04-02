@@ -4,32 +4,42 @@
 \alias{Feature.Reduction.Tsne}
 \title{Perform t-SNE Dimensionality Reduction and Plotting}
 \usage{
-Feature.Reduction.Tsne(object, draw = TRUE, save = FALSE, seed = 42)
+Feature.Reduction.Tsne(
+  object,
+  PCA = 20,
+  perplexity = 5,
+  theta = 0.5,
+  max_iter = 1000,
+  draw = TRUE,
+  save = FALSE,
+  seed = 42
+)
 }
 \arguments{
 \item{object}{A Ramanome object containing the dataset and metadata.}
 
+\item{PCA}{Optional. A numeric value indicating the number of principal components to use. Defaults to 20 (if NULL,raw data matrix will be used to generate t-SNE plot).}
+
+\item{perplexity}{Controls the balance between local and global structure in the t-SNE algorithm. Typical values range from 5 to 50, with higher values preserving more global structure.}
+
+\item{theta}{A speed-up parameter for approximate computation (Barnes-Hut algorithm). It ranges from 0 to 1, where smaller values yield more precise results but at higher computational cost (default is 0.5)}
+
+\item{max_iter}{Controls the balance between local and global structure in the t-SNE algorithm. Typical values range from 5 to 50, with higher values preserving more global structure.}
+
 \item{draw}{A logical value indicating whether to draw the plot. Defaults to TRUE.}
 
-\item{save}{A logical value indicating whether to save the plot as a PNG file.
-Defaults to FALSE.}
+\item{save}{A logical value indicating whether to save the plot as a PNG file. Defaults to FALSE.}
+
+\item{seed}{A numeric value indicating the seed for the random number generator. Defaults to 42.}
 }
 \value{
 The updated Ramanome object with the t-SNE results appended to the reductions slot.
 }
 \description{
-This function performs t-SNE (t-Distributed Stochastic Neighbor Embedding) on a
-dataset extracted from a Ramanome object. It reduces the dimensionality to two
-dimensions and creates a plot of the results. The plot can be customized with various
-themes and labels.
+Performs t-SNE (t-Distributed Stochastic Neighbor Embedding) on the last spectral matrix in the 'datasets' slot
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-data.reduction.tsne <- Feature.Reduction.Tsne(data_cleaned, draw=TRUE, save = FALSE)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+data.reduction.tsne <- Feature.Reduction.Tsne(data_processed, draw=TRUE, save = FALSE)
 }

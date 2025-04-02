@@ -4,12 +4,23 @@
 \alias{Intraramanome.Analysis.Irca.Local}
 \title{Perform local IRCA analysis}
 \usage{
-Intraramanome.Analysis.Irca.Local(object, bands_ann)
+Intraramanome.Analysis.Irca.Local(
+  object,
+  bands_ann,
+  threshold = 0.6,
+  show = TRUE,
+  save = FALSE
+)
 }
 \arguments{
-\item{object}{The Raman spectroscopy data object.}
+\item{object}{A Ramanome object.}
 
-\item{bands_ann}{The band annotation data.}
+\item{bands_ann}{The band annotation data recording the band numbers and their corresponding groups.}
+
+\item{show}{Logical value to indicate whether to show the IRCA plots. Default is TRUE.}
+
+\item{save}{Logical value to indicate whether to save the IRCA plots. Default is FALSE
+.}
 }
 \value{
 No return value, called for side effects. The function generates and saves PNG files
@@ -21,13 +32,8 @@ It generates negative IRCA plots for each group and saves them as png files.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
+data_processed <- Preprocessing.OneStep(RamEx_data)
 bands_ann <- data.frame(rbind(cbind(c(742,850,872,971,997,1098,1293,1328,1426,1576),'Nucleic acid'),cbind(c(824,883,1005,1033,1051,1237,1559,1651),'Protein'),cbind(c(1076,1119,1370,2834,2866,2912),'Lipids')))
 colnames(bands_ann) <- c('Wave_num', 'Group')
-Intraramanome.Analysis.Irca.Local(data_cleaned, bands_ann = bands_ann)
+Intraramanome.Analysis.Irca.Local(data_processed, bands_ann = bands_ann)
 }

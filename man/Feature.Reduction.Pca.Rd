@@ -13,23 +13,16 @@ Feature.Reduction.Pca(object, draw = TRUE, save = FALSE, n_pc = 2)
 
 \item{save}{A logical value indicating whether to save the plot as a file. Defaults to FALSE.}
 
-\item{n_pc}{The number of principal components to get. Defaults to 2.}
+\item{n_pc}{The number of principal components to save. Defaults to 2.}
 }
 \value{
 The updated Ramanome object with the PCA results appended to the `reductions` slot.
 }
 \description{
-This function performs Principal Component Analysis (PCA) on the dataset stored in
-a Ramanome object and plots the first two principal components. The function can
-also save the plot as a PNG file.
+Performs Principal Component Analysis (PCA) based on the last spectral matrix in the 'datasets' slot
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-data.reduction.pca <- Feature.Reduction.Pca(data_cleaned, draw=TRUE, save = FALSE)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+data.reduction.pca <- Feature.Reduction.Pca(data_processed, draw=TRUE, save = FALSE)
 }

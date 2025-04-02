@@ -568,7 +568,7 @@ Intraramanome.Analysis.Irca.Global.cal <- function(dataset, group, threshold = 0
 #' )
 #'
 
-Intraramanome.Analysis.Irca.Local.draw <- function(dataset, bands_ann) {
+Intraramanome.Analysis.Irca.Local.draw <- function(dataset, bands_ann, threshold = 0.6) {
   outliers <- outliers_maha_chisquare(dataset)
   if (length(outliers) != 0) {
     dataset <- dataset[-outliers,]
@@ -576,7 +576,7 @@ Intraramanome.Analysis.Irca.Local.draw <- function(dataset, bands_ann) {
   Plot_local_chordDiagram_rpvalue(
     dataset,
     Neg_Edge = TRUE,
-    Threshold = 0.6,
+    Threshold = threshold,
     bands_ann = bands_ann
   )
 }
@@ -653,7 +653,7 @@ Intraramanome.Analysis.Irca.Global <- function(object, threshold = 0.6, show = T
 #' colnames(bands_ann) <- c('Wave_num', 'Group')
 #' Intraramanome.Analysis.Irca.Local(data_processed, bands_ann = bands_ann)
 
-Intraramanome.Analysis.Irca.Local <- function(object, bands_ann, show = TRUE, save = FALSE) {
+Intraramanome.Analysis.Irca.Local <- function(object, bands_ann, threshold = 0.6, show = TRUE, save = FALSE) {
   dataset <- get.nearest.dataset(object)
   waves <- round(object@wavenumber, 0)
   locs <- unlist(lapply(as.numeric(bands_ann$Wave_num), function(x)which.min(abs(object@wavenumber - x))))
@@ -671,11 +671,11 @@ Intraramanome.Analysis.Irca.Local <- function(object, bands_ann, show = TRUE, sa
         height = 3,
       type = 'png'
     )
-      Intraramanome.Analysis.Irca.Local.draw(temp_data, bands_ann)
+      Intraramanome.Analysis.Irca.Local.draw(temp_data, bands_ann, threshold)
       grDevices::dev.off()
     }
     if (show) {
-      Intraramanome.Analysis.Irca.Local.draw(temp_data, bands_ann)
+      Intraramanome.Analysis.Irca.Local.draw(temp_data, bands_ann, threshold)
     }
 
   })

@@ -2,32 +2,23 @@
 % Please edit documentation in R/Feature-Reduction.R
 \name{Feature.Reduction.Intensity}
 \alias{Feature.Reduction.Intensity}
-\title{Extract Intensity Values at Specified Wavelengths}
+\title{Extract Intensity Values at Specified Wavelengths or a Range of Wavelengths}
 \usage{
-Feature.Reduction.Intensity(object, wavenumber)
+Feature.Reduction.Intensity(object, bands)
 }
 \arguments{
-\item{object}{A Ramanome object containing spectral data and wavelength information.}
+\item{object}{A Ramanome object.}
 
-\item{wavenumber}{A single numeric value, a vector of numeric values, or a list of
-numeric values representing wavelengths or wavelength ranges.}
+\item{bands}{A single numeric value, a vector of numeric values, or a list of numeric values representing wavelengths or wavelength ranges.}
 }
 \value{
-The updated Ramanome object with the extracted Feature.Reduction.Intensity values appended to
-the `interested.bands` slot.
+The updated Ramanome object with the extracted intensity values appended to the `interested.bands` slot.
 }
 \description{
-This function retrieves the Feature.Reduction.Intensity values at specified wavelengths or wavelength
-ranges from a Ramanome object. It uses `confirm.select` to get the spectral data and
-`confirm.name` to format the names of the selected wavelengths or ranges.
+Retrieves the intensity values at specified wavelengths or the area under the curve of intensity values at a range of wavelengths from a Ramanome object.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+data_processed <- Preprocessing.OneStep(RamEx_data)
+data_cleaned <- Feature.Reduction.Intensity(data_processed, list(c(2000,2250),c(2750,3050), 1450, 1665)) 
 }

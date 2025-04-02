@@ -3,32 +3,22 @@
 \name{Intraramanome.Analysis.2Dcos}
 \alias{Intraramanome.Analysis.2Dcos}
 \title{2D Correlation Spectroscopy Analysis (2D-COS)
-Captures both synchronous (simultaneous changes) and
-asynchronous (sequential changes) relationships, providing
-detailed insights into spectral changes}
+Captures both synchronous (simultaneous changes) and asynchronous (sequential changes) relationships, providing detailed insights into spectral changes}
 \usage{
 Intraramanome.Analysis.2Dcos(object)
 }
 \arguments{
-\item{object}{A Ramanome object containing the dataset.}
+\item{object}{A Ramanome object.}
 }
 \value{
 synchronous and asynchronous correlation spectra result
 }
 \description{
 2D Correlation Spectroscopy Analysis (2D-COS)
-Captures both synchronous (simultaneous changes) and
-asynchronous (sequential changes) relationships, providing
-detailed insights into spectral changes
+Captures both synchronous (simultaneous changes) and asynchronous (sequential changes) relationships, providing detailed insights into spectral changes
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#reslut_2dos <- Intraramanome.Analysis.2Dcos(data_cleaned)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+corr_2d <- Intraramanome.Analysis.2Dcos(data_processed)
 }

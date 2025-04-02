@@ -2,19 +2,19 @@
 % Please edit documentation in R/Preprocessing.R
 \name{Preprocessing.Background.Remove}
 \alias{Preprocessing.Background.Remove}
-\title{Perform background subtraction on Ramanome object}
+\title{Subtract background spectra from the cell spectra}
 \usage{
 Preprocessing.Background.Remove(object, cell.index, cal_mean = FALSE)
 }
 \arguments{
 \item{object}{A Ramanome object.}
 
-\item{cell.index}{The index of the cell component in the filenames.}
+\item{cell.index}{The index of the cell component in the filenames, where the background spectra are recorded as 'bg' or 'BG'.}
 
-\item{cal_mean}{Logical value indicating whether to calculate the mean background spectrum.}
+\item{cal_mean}{Logical value indicating whether to calculate the mean spectra with in a cell when a cell contains multiple spectra.}
 }
 \value{
-The modified Ramanome object.
+A Ramanome object with background-subtracted spectra, named as "sub_data" in the 'datasets' slot
 }
 \description{
 This function performs background subtraction on a Ramanome object by subtracting the background spectra from the dataset.

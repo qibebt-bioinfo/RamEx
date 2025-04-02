@@ -4,7 +4,7 @@
 \alias{Intraramanome.Analysis.Irca.Local.draw}
 \title{Perform IRCA analysis on local scale}
 \usage{
-Intraramanome.Analysis.Irca.Local.draw(dataset, bands_ann)
+Intraramanome.Analysis.Irca.Local.draw(dataset, bands_ann, threshold = 0.6)
 }
 \arguments{
 \item{dataset}{The input dataset for analysis}

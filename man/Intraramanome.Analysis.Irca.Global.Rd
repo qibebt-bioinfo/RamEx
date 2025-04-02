@@ -2,26 +2,37 @@
 % Please edit documentation in R/Intra-Ramanome-Analysis.R
 \name{Intraramanome.Analysis.Irca.Global}
 \alias{Intraramanome.Analysis.Irca.Global}
-\title{Perform global IRCA analysis}
+\title{Perform global IRCA analysis and save the results}
 \usage{
-Intraramanome.Analysis.Irca.Global(object)
+Intraramanome.Analysis.Irca.Global(
+  object,
+  threshold = 0.6,
+  show = TRUE,
+  save = FALSE
+)
 }
 \arguments{
 \item{object}{The Raman spectroscopy data object.}
+
+\item{threshold}{The threshold value for correlation. Default is 0.6.}
+
+\item{show}{Logical value to indicate whether to show the IRCA plots. Default is TRUE.}
+
+\item{save}{Logical value to indicate whether to save the IRCA plots. Default is FALSE.}
 }
 \value{
 A matrix containing the global IRCA interests.
 }
 \description{
-This function performs global IRCA analysis on the given Raman spectroscopy data object.
+Performs global IRCA analysis on the given Raman spectroscopy data object.
 It generates negative IRCA plots for each group and saves them as jpeg files.
+}
+\details{
+More details about the IRCA analysis can be found in the reference below.
+He Y., Huang S., Zhang P., Ji Y., Xu J., 2021. Intra-Ramanome Correlation Analysis Unveils Metabolite Conversion Network from an Isogenic Population of Cells. mBio
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-IRCA.interests <- Intraramanome.Analysis.Irca.Global(data_cleaned)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+IRCA.interests <- Intraramanome.Analysis.Irca.Global(data_processed)
 }

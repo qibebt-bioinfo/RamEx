@@ -27,8 +27,9 @@ This function uses a saved classification model to predict labels for new data.
 }
 \examples{
 data(RamEx_data)
+data_processed <- Preprocessing.OneStep(RamEx_data)
 # Train a model
-model <- Classification.Rf(RamEx_data)
+model <- Classification.Rf(data_processed)
 # Use the model to predict new data
-predictions <- predict_classification(model, RamEx_data)
+predictions <- predict_classification(model, data_processed)
 }
