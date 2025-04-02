@@ -27,6 +27,8 @@ Phenotype.Analysis.Louvaincluster(
 
 \item{n_tree}{The number of trees to use in the Approximate Nearest Neighbor search. Defaults to 50.
 A higher n_tree improves the accuracy of the nearest neighbor search but increases computation time and memory usage. A lower n_tree speeds up the search but may return less accurate neighbors.}
+
+\item{seed}{The seed for the random number generator.}
 }
 \value{
 A data frame containing the cluster assignments for each resolution.

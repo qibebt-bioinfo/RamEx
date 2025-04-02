@@ -2,45 +2,35 @@
 % Please edit documentation in R/Raman-Markers.R
 \name{Raman.Markers.Roc}
 \alias{Raman.Markers.Roc}
-\title{Find Markers Using ROC Analysis}
+\title{Find Markers Using receiver operator characteristic (ROC) curve}
 \usage{
-Raman.Markers.Roc(
-  matrix,
-  group,
-  threshold = 0.75,
-  paired = FALSE,
-  batch_size = 1000
-)
+Raman.Markers.Roc(object, threshold = 0.75, paired = FALSE, batch_size = 1000)
 }
 \arguments{
-\item{matrix}{A matrix of spectral data where each row represents a sample and each
-column represents a wavelength.}
+\item{object}{A Ramanome object.}
 
-\item{group}{A vector of group identifiers corresponding to each row in the matrix.}
+\item{threshold}{The minimum AUC threshold for considering a marker significant. Defaults to 0.75.}
 
-\item{threshold}{The minimum AUC threshold for considering a marker significant.Defaults to 0.75.}
+\item{paired}{Whether to consider paired markers, e.g. wave1 / wave2. Default is FALSE}
 
-\item{paired}{Marker is paired or no. Default is FALSE}
-
-\item{batch_size}{Set the batch size. Default is 1,000}
+\item{batch_size}{Sample size for each batch when traversing all possible paired markers. Default is 1,000}
 }
 \value{
+A list containing:
+\describe{
+  \item{markers_single}{A data frame of single wavelength markers with their AUC scores}
+  \item{markers_paired}{A data frame of paired wavelength markers with their AUC scores (only if paired=TRUE)}
+}
+
 A list containing two data frames: 'markers_single' for single markers and
 'markers_paired' for paired markers, each with their corresponding AUC scores.
 }
 \description{
-This function performs Receiver Operating Characteristic (ROC) analysis to identify
-markers in a dataset that are associated with different groups. It calculates the
-Area Under the Curve (AUC) for single markers and paired markers.
+Performs receiver operator characteristic curve (ROC) analysis to identify significant markers by traversing all possible single and paired markers, and calculating the Area Under the Curve (AUC) for them, thus identify Raman features that best discriminate between different groups.
+Each group/sample will get their own marker list.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-ROC_markers <- Raman.Markers.Roc(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],data_cleaned@meta.data$group)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+ROC_markers <- Raman.Markers.Roc(preprocessing.cutoff(data_processed, 800, 1300), threshold = 0.75, paired = FALSE, batch_size = 1000)
 }

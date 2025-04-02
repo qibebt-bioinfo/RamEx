@@ -2,7 +2,7 @@
 % Please edit documentation in R/RamEx-Loaddata.R
 \name{read.spec}
 \alias{read.spec}
-\title{Read and Process Spectral Data Files}
+\title{Read Spectral Data Files from a Directory}
 \usage{
 read.spec(
   data_path,

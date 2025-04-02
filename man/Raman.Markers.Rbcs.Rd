@@ -44,8 +44,12 @@ A data frame containing the selected feature importances.
 \description{
 This function performs random forest classification on Raman data and generates feature importances.
 }
+\details{
+more details about RBCS could be found in the reference below.
+Teng L., Wang X.,  Wang X.,  Gou H.,  Ren L., & Wang T., 2016. Label-free, rapid and quantitative phenotyping of stress response in e. coli via ramanome. *Scientific Reports*
+}
 \examples{
 data(RamEx_data)
 data_processed <- Preprocessing.OneStep(RamEx_data)
-RBCS.markers <- Raman.Markers.Rbcs(data_processed, threshold = 0.003, draw = FALSE)
+RBCS.markers <- Raman.Markers.Rbcs(data_processed, threshold = 0.003, show = TRUE)
 }

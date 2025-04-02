@@ -2,22 +2,25 @@
 % Please edit documentation in R/Spectral-Decomposition.R
 \name{Spectral.Decomposition.Nmf}
 \alias{Spectral.Decomposition.Nmf}
-\title{Perform Non-negative Matrix Factorization (NMF)}
+\title{Non-negative Matrix Factorization (NMF)}
 \usage{
-Spectral.Decomposition.Nmf(object)
+Spectral.Decomposition.Nmf(object, n_comp = 2, seed = 42)
 }
 \arguments{
-\item{object}{A Ramanome object containing the dataset.}
+\item{object}{A Ramanome object.}
+
+\item{seed}{The seed for the random number generator.}
+
+\item{ncomp}{The number of components to retain in the NMF decomposition.}
 }
 \value{
-A list containing the results of the NMF decomposition, including the basis
-matrices and the reconstructed matrix.
+A list containing:
+\item{basis}{The basis matrix of the NMF decomposition (n_cell x n_comp).} 
+\item{coef}{The coefficient matrix of the NMF decomposition (n_comp x n_wavelength).}
+while the reconstructed matrix is the product of the basis and coefficient matrices.
 }
 \description{
-This function applies Non-negative Matrix Factorization to the dataset retrieved from
-a Ramanome object. NMF is a technique used to decompose a non-negative matrix into
-two non-negative matrices, often used for data dimensionality reduction and feature
-extraction.
+A matrix factorization method that approximates a data matrix as the product of two non-negative matrices, ensuring interpretability through non-negativity constraints.
 }
 \examples{
 data(RamEx_data)

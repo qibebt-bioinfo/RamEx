@@ -22,9 +22,7 @@
 #' raman_obj <- new("Ramanome",
 #'   datasets = list(raw = spectra),
 #'   wavenumber = wavenumbers,
-#'   meta.data = metadata,
-#'   reductions = list(),
-#'   interested.bands = list()
+#'   meta.data = metadata
 #' )
 #'
 #' @importFrom hyperSpec nrow
@@ -43,6 +41,29 @@ Ramanome <- setClass(
     interested.bands = 'list'
   )
 )
+
+#' Access slots of Ramanome object using $ operator
+#'
+#' This method allows accessing slots of a Ramanome object using the $ operator.
+#' It can access datasets, meta.data columns, reductions, and interested.bands.
+#'
+#' @param x A Ramanome object   
+#' @param name The name of the slot to access
+#' @return The requested slot content
+#' @export
+setMethod("$", "Ramanome", function(x, name) {
+  if (name %in% names(x@datasets)) {
+    return(x@datasets[[name]])
+  } else if (name %in% colnames(x@meta.data)) {
+    return(x@meta.data[[name]])
+  } else if (name %in% names(x@reductions)) {
+    return(x@reductions[[name]])
+  } else if (name %in% names(x@interested.bands)) {
+    return(x@interested.bands[[name]])
+  } else {
+    stop(paste("No slot named", name, "found in Ramanome object"))
+  }
+})
 
 #' Show method for Ramanome objects
 #' This method will give brief information about the Ramanome object

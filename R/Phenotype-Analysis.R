@@ -9,6 +9,7 @@
 #' @param k Number of Nearest Neighbors, determines how many nearest neighbors each data point will consider when building the k-NN graph. A larger k will result in a denser graph, where each node is connected to more neighbors. This can capture broader local structures but may blur fine-grained distinctions. A smaller k will produce a sparser graph, emphasizing local structures but potentially missing broader patterns.
 #' @param n_tree The number of trees to use in the Approximate Nearest Neighbor search. Defaults to 50.
 #'                A higher n_tree improves the accuracy of the nearest neighbor search but increases computation time and memory usage. A lower n_tree speeds up the search but may return less accurate neighbors.
+#' @param seed The seed for the random number generator.
 #' @return A data frame containing the cluster assignments for each resolution.
 #' @export Phenotype.Analysis.Louvaincluster
 #' @importFrom igraph graph_from_adjacency_matrix
@@ -18,7 +19,6 @@
 #' @importFrom foreach %dopar%
 #' @import foreach foreach
 #' @importFrom parallel makeCluster
-#' @importFrom doParallel registerDoParallel
 #' @importFrom parallel detectCores
 #' @importFrom RcppAnnoy AnnoyEuclidean
 #' @examples
@@ -58,11 +58,10 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,n_pc=10, thres
   # parallel calculating
   num_cores <- detectCores() - 2
   cl <- makeCluster(num_cores)
-  registerDoParallel(cl)
   
-  clusterExport(cl, list("matrix", "nearest_neighbors", "n"), envir = environment())
+  clusterExport(cl, list("matrix", "nearest_neighbors", "n", 'k'), envir = environment())
   
-  similarities <- foreach(i = 1:n, .combine = 'rbind', .packages = c("Matrix")) %dopar% {
+  similarities_list <- parLapply(cl, 1:n, function(i) {
     rows <- rep(i, k)
     cols <- nearest_neighbors[i, ] + 1
     
@@ -71,10 +70,11 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,n_pc=10, thres
     sim_values <- numerator / denominator  # Cosine correlation
     sim_values[sim_values < 0] <- 0
     data.frame(rows = rows, cols = cols, sim = sim_values)
-  }
+  })
   
   stopCluster(cl)
   
+  similarities <- do.call(rbind, similarities_list)
   rows <- unlist(similarities$rows)
   cols <- unlist(similarities$cols)
   sims <- unlist(similarities$sim)

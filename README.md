@@ -52,13 +52,13 @@ Mean spectra will display their effects.
 Here the results of each step will be kept in the Ramanome for better debugging, and 'draw.mean' exhibit the final dataset.
 ```{r}
 RamEx_data %<>%  Preprocessing.Smooth.Sg %>% Preprocessing.Baseline.Polyfit %>% Preprocessing.Normalize(.,'ch') 
-mean.spec(RamEx_data@datasets$normalized.data, RamEx_data@meta.data$group)  
+mean.spec(RamEx_data$normalized.data, RamEx_data$group)  
 ```
 #### Quality control
 ```{r}
 qc_icod <- Qualitycontrol.ICOD(RamEx_data,var_tol = 0.5)
 data_cleaned <- RamEx_data[qc_icod$quality,] 
-mean.spec(data_cleaned@datasets$normalized.data, data_cleaned@meta.data$group,0.3)
+mean.spec(data_cleaned$normalized.data, data_cleaned$group,0.3)
 qc_mcd <- Qualitycontrol.Mcd(RamEx_data) 
 qc_t2 <- Qualitycontrol.T2(RamEx_data) 
 qc_dis <- Qualitycontrol.Dis(RamEx_data) 
@@ -77,14 +77,14 @@ CDR <- data.frame(data_cleaned@meta.data,
 #### Reduction
 Nonlinear methods, such as UMAP and t-SNE. Linear methods like PCA, pCoA. The reduced sample matrix will be contained in the Ramanome onject as 'reductions'. Attention: RamEx uses PCA to reduce the dimensions of the high-dimensional spectrum, since UMAP and t-SNE are highly complex algorithms.
 ```{r}
-data.reduction <- Feature.Reduction.Pca(data_cleaned, draw=T, save = F) %>% Feature.Reduction.Pcoa(., draw=T, save = F) %>% Feature.Reduction.Tsne(., draw=T, save = F) %>% Feature.Reduction.Umap(., draw=T, save=F) 
+data.reduction <- Feature.Reduction.Pca(data_cleaned) %>% Feature.Reduction.Pcoa %>% Feature.Reduction.Tsne %>% Feature.Reduction.Umap
 ``` 
 
 #### Markers analysis
 ```{r}
-ROC_markers <- Raman.Markers.Roc(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],data_cleaned@meta.data$group, paired  = TRUE, threshold = 0.8) 
-cor_markers <- Raman.Markers.Correlations(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],as.numeric(data_cleaned@meta.data$group), min.cor = 0.8) 
-RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, draw = F) 
+ROC_markers <- Raman.Markers.Roc(Preprocessing.Cutoff(data_cleaned, 1400, 1600), paired  = TRUE, threshold = 0.8) 
+cor_markers <- Raman.Markers.Correlations(Preprocessing.Cutoff(data_cleaned, 1400, 1600), min.cor = 0.8) 
+RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, show = T) 
 ```
 #### IRCA
 -Global IRCA. This module maybe consumed for a longer period of time due to the image drawing
@@ -119,6 +119,7 @@ model.gmm <- Classification.Gmm(data_cleaned)
 model.lda <- Classification.Lda(data_cleaned)
 model.rf <- Classification.Rf(data_cleaned)
 model.svm <- Classification.Svm(data_cleaned)
+when new data is available, you can use the following code to predict the new data by using the trained model.
 pred_new <- predict_classification(model.lda, data_cleaned)
 ```
 #### Quantifications
@@ -126,6 +127,7 @@ pred_new <- predict_classification(model.lda, data_cleaned)
 quan_pls <- Quantification.Pls(data_cleaned) 
 quan_mlr <- Quantification.Mlr(data_cleaned) 
 quan_glm <- Quantification.Glm(data_cleaned) 
+when new data is available, you can use the following code to predict the new data by using the trained model.
 pred_new <- predict_quantification(quan_pls, data_cleaned)
 ```
 

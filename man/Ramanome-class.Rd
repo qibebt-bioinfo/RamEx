@@ -38,9 +38,7 @@ metadata <- data.frame(
 raman_obj <- new("Ramanome",
   datasets = list(raw = spectra),
   wavenumber = wavenumbers,
-  meta.data = metadata,
-  reductions = list(),
-  interested.bands = list()
+  meta.data = metadata
 )
 
 }

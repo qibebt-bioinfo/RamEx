@@ -2,21 +2,22 @@
 % Please edit documentation in R/Spectral-Decomposition.R
 \name{Spectral.Decomposition.Ica}
 \alias{Spectral.Decomposition.Ica}
-\title{Perform Independent Component Analysis (ICA)}
+\title{Independent Component Analysis (ICA)}
 \usage{
-Spectral.Decomposition.Ica(object, ncomp)
+Spectral.Decomposition.Ica(object, n_comp = 2, seed = 42)
 }
 \arguments{
-\item{object}{A Ramanome object containing the dataset.}
+\item{object}{A Ramanome object.}
 
-\item{ncomp}{The number of components to retain in the ICA decomposition.}
+\item{n_comp}{The number of components to retain in the ICA decomposition.}
+
+\item{seed}{The seed for the random number generator.}
 }
 \value{
 A list containing the results of the ICA decomposition.
 }
 \description{
-This function applies the FastICA algorithm to the dataset retrieved from the Ramanome
-object using `get.nearest.dataset`. It returns the result of the ICA decomposition.
+A statistical technique that separates a multivariate signal into additive, statistically independent components, assuming non-Gaussian sources.
 }
 \examples{
 data(RamEx_data)

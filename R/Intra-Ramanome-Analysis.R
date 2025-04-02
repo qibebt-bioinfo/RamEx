@@ -499,6 +499,7 @@ Plot_local_chordDiagram_rpvalue <- function(
 #'
 #' @return A dataframe containing the significant correlations between variables
 #' @importFrom Hmisc rcorr
+#' @noRd 
 
 Intraramanome.Analysis.Irca.Global.draw <- function(dataset, group, threshold = 0.6) {
   outliers <- outliers_maha_chisquare(dataset)
@@ -554,19 +555,8 @@ Intraramanome.Analysis.Irca.Global.cal <- function(dataset, group, threshold = 0
 #' @param dataset The input dataset for analysis
 #' @param bands_ann The bands annotation information
 #' @return A chord diagram plot showing the significant correlations between variables within each band
-#' @examples
-#' # Create sample dataset
-#' n <- 100  # samples
-#' p <- 10   # variables
-#' dataset <- matrix(rnorm(n*p), nrow=n)
-#' colnames(dataset) <- paste0("W", 1:p)
-#'
-#' # Create bands annotation
-#' bands_ann <- data.frame(
-#'   Wave_num = paste0("W", 1:p),
-#'   Group = rep(c("A", "B"), each=p/2)
-#' )
-#'
+#' @noRd 
+
 
 Intraramanome.Analysis.Irca.Local.draw <- function(dataset, bands_ann, threshold = 0.6) {
   outliers <- outliers_maha_chisquare(dataset)

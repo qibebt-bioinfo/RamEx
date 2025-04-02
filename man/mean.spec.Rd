@@ -2,29 +2,22 @@
 % Please edit documentation in R/RamEx-Basic-Funciton.R
 \name{mean.spec}
 \alias{mean.spec}
-\title{Calculate Mean and Standard Deviation of Spectral Data by Group}
+\title{Calculate Mean and Standard Deviation of Spectral Data by Group and Plot}
 \usage{
 \method{mean}{spec}(data, group, gap = 0.3)
 }
 \arguments{
-\item{data}{A matrix or data frame containing the spectral data.}
+\item{data}{A matrix or data frame containing the spectral data, colnames are wavenumbers.}
 
-\item{group}{A factor or character vector indicating the group for each row in the data.}
+\item{group}{Factor indicating the group for each row in the data.}
 
 \item{gap}{A numeric value representing the vertical gap between the mean lines of different groups.}
 }
 \value{
-A ggplot2 object containing:
-  \item{Lines}{Mean spectra for each group}
-  \item{Ribbons}{Standard deviation bands around each mean spectrum}
-  \item{x-axis}{Wavenumber values}
-  \item{y-axis}{Normalized intensity values}
-  \item{Legend}{Group identifiers}
+A ggplot2 plot
 }
 \description{
-This function calculates the mean and standard deviation of spectral data for each group.
-It then creates a ggplot2 plot with ribbons representing the standard deviation and lines
-representing the mean for each group.
+Calculates the mean and standard deviation of spectral data for each group then creates a plot with ribbons representing the standard deviation and lines
 }
 \examples{
 data(RamEx_data)

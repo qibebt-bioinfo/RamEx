@@ -481,13 +481,17 @@ BetweenGroup.test <- function(data, group, p.adj.method = "bonferroni", paired =
 #' @importFrom pheatmap pheatmap
 #' @importFrom hyperSpec aggregate
 #' @importFrom dplyr %>%
-#' @importFrom magrittr %<>%
 #' @importFrom grDevices pdf
 #' @export Raman.Markers.Rbcs
+#' 
+#' @details
+#' more details about RBCS could be found in the reference below.
+#' Teng L., Wang X.,  Wang X.,  Gou H.,  Ren L., & Wang T., 2016. Label-free, rapid and quantitative phenotyping of stress response in e. coli via ramanome. *Scientific Reports* 
+#' 
 #' @examples
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
-#' RBCS.markers <- Raman.Markers.Rbcs(data_processed, threshold = 0.003, draw = FALSE)
+#' RBCS.markers <- Raman.Markers.Rbcs(data_processed, threshold = 0.003, show = TRUE)
 
 
 Raman.Markers.Rbcs <- function(
@@ -509,31 +513,30 @@ Raman.Markers.Rbcs <- function(
   y <- as.factor(y)
   oob.result <- rf.out.of.bag(x, y, verbose = verbose, ntree = ntree)
   
-  # RF importances of features
-  dir.create(outfolder)
-  cat('Saving RBCS importances of Raman features to the current working directory: ', getwd(), '/', outfolder, '\n')
-  
+  # RF importances of features  
   imps <- oob.result$importances
   imps <- imps[order(imps, decreasing = TRUE)]
   imps.cutoff <- imps[which(imps > threshold)]
   
-  sink(paste0(outfolder, "/RBCS_imps", "_All_sorted.xls"))
-  cat("\t")
-  write.table(imps, quote = FALSE, sep = "\t")
-  sink()
   
-  sink(paste0(outfolder, "/RBCS_imps", "_cutoff_sorted.xls"))
-  cat("\t")
-  write.table(imps.cutoff, quote = FALSE, sep = "\t")
-  sink()
   
   data.select <- x[, names(imps.cutoff)]
   means <- aggregate(data.select, by = list(y), mean)
   rownames(means) <- means[, 1]
-  means %<>% .[, -1]
-  colnames(means) %<>% as.numeric() %>% round(., 0)
+  means <- means[, -1]
+  colnames(means) <-  as.numeric(colnames(means)) %>% round(., 0)
   if (save) {
-    cat('Saving RBCS heatmap to the current working directory: ', getwd(), '\n')
+    cat('Saving RBCS importances of Raman features and heatmap to the current working directory: ', getwd(), '\n')
+    dir.create(outfolder)
+    sink(paste0(outfolder, "/RBCS_imps", "_All_sorted.xls"))
+    cat("\t")
+    write.table(imps, quote = FALSE, sep = "\t")
+    sink()
+  
+    sink(paste0(outfolder, "/RBCS_imps", "_cutoff_sorted.xls"))
+    cat("\t")
+    write.table(imps.cutoff, quote = FALSE, sep = "\t")
+    sink()
     pheatmap::pheatmap(
       means[, -1],
       show_colnames = TRUE,
@@ -563,15 +566,12 @@ Raman.Markers.Rbcs <- function(
 
 #' Compute Correlations with a Target Variable
 #'
-#' This function calculates the correlations between each column of a dataset X and a target
-#' variable y. It also computes the correlations for combinations of two and three
-#' variables, after applying certain transformations.
+#' Calculates the correlations between each column of a dataset X and a target variable y by traversing all possible single and paired markers.
 #'
-#' @param X A data frame containing the dataset.
-#' @param y A vector containing the target variable.
+#' @param object A Ramanome object.
 #' @param min.cor The minimum correlation threshold. Defaults to 0.8.
-#' @return A list containing the high correlation elements, individual correlations,
-#' correlations for two-variable combinations, and correlations for three-variable combinations.
+#' @return A list containing the high correlation elements and their corresponding correlations with the target variable, containing two data frames: 'correlations_singular' for single markers (group ~ wave) and 'combination_correlations_two' for paired markers (group ~ wave1 / wave2).
+#' 
 #' @export Raman.Markers.Correlations
 #' @importFrom dplyr filter
 #' @importFrom stats cor
@@ -579,21 +579,15 @@ Raman.Markers.Rbcs <- function(
 #' @importFrom parallel makeCluster
 #' @importFrom parallel clusterExport
 #' @importFrom parallel parLapply
-#' @importFrom doParallel registerDoParallel
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' options(mc.cores = 2)
-#' #cor_markers <- Raman.Markers.Correlations(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],as.numeric(data_cleaned@meta.data$group), min.cor = 0.6)
-Raman.Markers.Correlations <- function(X, y,min.cor=0.8) {
-  X <- as.data.frame(X)
+#' cor_markers <- Raman.Markers.Correlations(preprocessing.cutoff(data_processed, 800, 1300), min.cor = 0.6)
+Raman.Markers.Correlations <- function(object, min.cor=0.8) {
+  X <- as.data.frame(get.nearest.dataset(object))
   waves <- colnames(X)
+  y <- as.numeric(object@meta.data$group)
   
   correlations <- sapply(X, function(col) cor(col, y, use = "complete.obs"))
   
@@ -628,18 +622,20 @@ Raman.Markers.Correlations <- function(X, y,min.cor=0.8) {
   )
 }
 
-#' Find Markers Using ROC Analysis
+#' Find Markers Using receiver operator characteristic (ROC) curve
 #'
-#' This function performs Receiver Operating Characteristic (ROC) analysis to identify
-#' markers in a dataset that are associated with different groups. It calculates the
-#' Area Under the Curve (AUC) for single markers and paired markers.
-#'
-#' @param matrix A matrix of spectral data where each row represents a sample and each
-#' column represents a wavelength.
-#' @param group A vector of group identifiers corresponding to each row in the matrix.
-#' @param threshold The minimum AUC threshold for considering a marker significant.Defaults to 0.75.
-#' @param paired Marker is paired or no. Default is FALSE
-#' @param batch_size Set the batch size. Default is 1,000
+#' Performs receiver operator characteristic curve (ROC) analysis to identify significant markers by traversing all possible single and paired markers, and calculating the Area Under the Curve (AUC) for them, thus identify Raman features that best discriminate between different groups.
+#' Each group/sample will get their own marker list.
+#' 
+#' @param object A Ramanome object.
+#' @param threshold The minimum AUC threshold for considering a marker significant. Defaults to 0.75.
+#' @param paired Whether to consider paired markers, e.g. wave1 / wave2. Default is FALSE
+#' @param batch_size Sample size for each batch when traversing all possible paired markers. Default is 1,000
+#' @return A list containing:
+#' \describe{
+#'   \item{markers_single}{A data frame of single wavelength markers with their AUC scores}
+#'   \item{markers_paired}{A data frame of paired wavelength markers with their AUC scores (only if paired=TRUE)}
+#' }
 #' @return A list containing two data frames: 'markers_single' for single markers and
 #' 'markers_paired' for paired markers, each with their corresponding AUC scores.
 #' @export Raman.Markers.Roc
@@ -654,15 +650,11 @@ Raman.Markers.Correlations <- function(X, y,min.cor=0.8) {
 #' @import RcppParallel
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' ROC_markers <- Raman.Markers.Roc(data_cleaned@datasets$normalized.data[,sample(1:1000, 50)],data_cleaned@meta.data$group)
-Raman.Markers.Roc <- function(matrix, group, threshold = 0.75, paired = FALSE, batch_size = 1000){
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' ROC_markers <- Raman.Markers.Roc(preprocessing.cutoff(data_processed, 800, 1300), threshold = 0.75, paired = FALSE, batch_size = 1000)
+Raman.Markers.Roc <- function(object, threshold = 0.75, paired = FALSE, batch_size = 1000){
+  matrix <- get.nearest.dataset(object)
+  group <- object@meta.data$group
   os_type <- .Platform$OS.type
   if (os_type == "unix") {
     file_path <- system.file("libs/RamEx.so", package = "RamEx")
@@ -686,6 +678,7 @@ Raman.Markers.Roc <- function(matrix, group, threshold = 0.75, paired = FALSE, b
   
   if(paired){
     cat('Finding paired markers ... \n')
+    cat('This may take a while, please be patient ... \n')
     raman_markers <- calculatePairedMarkersAUC(matrix, group, threshold = threshold, batch_size = batch_size)
     raman_markers$col1 <- wave[raman_markers$col1]
     raman_markers$col2 <- wave[raman_markers$col2]

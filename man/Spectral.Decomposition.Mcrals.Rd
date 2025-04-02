@@ -2,23 +2,26 @@
 % Please edit documentation in R/Spectral-Decomposition.R
 \name{Spectral.Decomposition.Mcrals}
 \alias{Spectral.Decomposition.Mcrals}
-\title{Perform Multivariate Curve Resolution Alternating Least Squares (MCR-ALS)}
+\title{Multivariate Curve Resolution Alternating Least Squares (MCR-ALS)}
 \usage{
-Spectral.Decomposition.Mcrals(object, ncomp)
+Spectral.Decomposition.Mcrals(object, n_comp = 2, seed = 42)
 }
 \arguments{
-\item{object}{A Ramanome object containing the dataset.}
+\item{object}{A Ramanome object.}
 
-\item{ncomp}{The number of components to estimate.}
+\item{n_comp}{The number of components to estimate.}
+
+\item{seed}{The seed for the random number generator.}
 }
 \value{
-A list containing the estimated components and concentrations.
+A list containing: 
+\item{components}{The estimated components (n_wavelength x n_comp).} 
+\item{concentration}{The estimated concentrations of each cell (n_cell x n_comp).}
+while the reconstructed matrix is the product of the concentration and component matrices.
 }
 \description{
+A chemometric method that decomposes a overlapping spectra matrix into concentration and pure spectra profiles iteratively under constraints like non-negativity.
 This function applies the MCR-ALS algorithm to the dataset stored in a Ramanome object.
-MCR-ALS is a chemometric technique used to resolve overlapping spectra into their
-constituent pure components. The function returns the estimated components and
-concentrations.
 }
 \examples{
 data(RamEx_data)

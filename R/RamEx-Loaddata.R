@@ -36,12 +36,13 @@ read.single <- function(cell_path,xout){
 #' @return A data frame containing the subset of the input spectral data where the wavelength values (V1)
 #'         fall within the specified cutoff range.
 #' @export cut.spec
+#' @noRd
 cut.spec <- function(single_spec, cutoff) {
   return(single_spec[single_spec$V1 < cutoff[2] & single_spec$V1 > cutoff[1]])
 }
 
 
-#' Read and Process Spectral Data Files
+#' Read Spectral Data Files from a Directory
 #'
 #' This function reads spectral data from text files in a specified directory, applies
 #' filtering based on wavelength cutoffs, and optionally interpolates the data to

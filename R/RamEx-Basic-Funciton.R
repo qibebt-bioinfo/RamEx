@@ -8,6 +8,7 @@
 #'   \item{true_labels}{The true class labels}
 #'   \item{pred_labels}{The predicted class labels}
 #'   \item{Freq}{The normalized frequencies/probabilities for each true-predicted label pair}
+#' @noRd
 
 
 confusion.cal <- function(pred_matrix) {
@@ -20,9 +21,9 @@ confusion.cal <- function(pred_matrix) {
   return(acc_matrix)
 }
 
-#' Plot prediction results
+#' Plot confusion matrix
 #'
-#' This function plots the prediction results using a tile plot.
+#' This function plots the confusion matrix using a tile plot.
 #'
 #' @param true_labels The true labels
 #' @param pred_labels The predicted labels
@@ -78,6 +79,7 @@ confusion.plot <- function(true_labels, pred_labels) {
 #' Defaults to 0.
 #' @return NULL. The function saves the plot as a PNG file named 'mean spec.png' in the current working directory.
 #' @importFrom ggplot2 ggsave
+#' @noRd
 
 
 spec.mean.draw <- function(object, gap=0) {
@@ -90,24 +92,15 @@ spec.mean.draw <- function(object, gap=0) {
   )
 }
 
-#' Calculate Mean and Standard Deviation of Spectral Data by Group
+#' Calculate Mean and Standard Deviation of Spectral Data by Group and Plot
 #'
-#' This function calculates the mean and standard deviation of spectral data for each group.
-#' It then creates a ggplot2 plot with ribbons representing the standard deviation and lines
-#' representing the mean for each group.
+#' Calculates the mean and standard deviation of spectral data for each group then creates a plot with ribbons representing the standard deviation and lines
 #'
-#' @param data A matrix or data frame containing the spectral data.
-#' @param group A factor or character vector indicating the group for each row in the data.
+#' @param data A matrix or data frame containing the spectral data, colnames are wavenumbers.
+#' @param group Factor indicating the group for each row in the data.
 #' @param gap A numeric value representing the vertical gap between the mean lines of different groups.
-#' @return A ggplot2 object containing:
-#'   \item{Lines}{Mean spectra for each group}
-#'   \item{Ribbons}{Standard deviation bands around each mean spectrum}
-#'   \item{x-axis}{Wavenumber values}
-#'   \item{y-axis}{Normalized intensity values}
-#'   \item{Legend}{Group identifiers}
-#' @importFrom hyperSpec aggregate
-#' @importFrom ggplot2 ggplot aes geom_ribbon geom_line theme_bw labs scale_x_continuous theme
-#' @importFrom stats sd
+#' @return A ggplot2 plot
+#' @importFrom ggplot2 ggplot aes geom_ribbon geom_line labs scale_x_continuous theme
 #' @export mean.spec
 #' @examples
 #' data(RamEx_data)
@@ -177,25 +170,17 @@ mean.spec <- function(data, group, gap = 0.3) {
 }
 
 
-#' Retrieve the Nearest Dataset from a Ramanome Object
+#' Retrieve the final spectral matrix from a Ramanome Object
 #'
 #' This function extracts the most recently added dataset from a Ramanome object.
 #' It is assumed that the dataset is stored in the `datasets` slot of the Ramanome object.
 #'
-#' @param object A Ramanome object that contains datasets in its `datasets` slot.
+#' @param object A Ramanome object.
 #' @return A matrix or data frame containing the most recently added dataset from the Ramanome object.
 #' @examples
-#' # Create a sample Ramanome object with multiple datasets
-#' wavenumbers <- seq(500, 3500, by = 10)
-#' raw_spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
-#' processed_spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
-#' raman_obj <- new("Ramanome",
-#'   datasets = list(
-#'     raw = raw_spectra,
-#'     processed = processed_spectra
-#'   )
-#' )
-#'
+#' data(RamEx_data)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' data_matrix <- get.nearest.dataset(data_processed)
 
 get.nearest.dataset <- function(object) {
   dataset <- tail(names(object@datasets), 1)
@@ -218,7 +203,7 @@ get.nearest.dataset <- function(object) {
 #'   datasets = list(raw = spectra),
 #'   wavenumber = wavenumbers
 #' )
-#'
+#' @noRd
 
 select.value <- function(object, wave) {
   loc <- which.min(abs(object@wavenumber - wave))
@@ -233,7 +218,7 @@ select.value <- function(object, wave) {
 #' @param object A Ramanome object.
 #' @param waves A vector with two values representing the lower and upper bounds of the wavenumber range.
 #' @return A numeric vector containing the summed Feature.Reduction.Intensity values across the specified wavenumber range for all spectra in the dataset.
-
+#' @noRd
 
 select.band <- function(object, waves) {
   locs <- object@wavenumber <= waves[2] & object@wavenumber >= waves[1]
@@ -309,8 +294,6 @@ confirm.select <- function(object, waves) {
 #' @importFrom ggplot2 ggsave
 
 
-
-
 time.series <- function(object, reduction = 'UMAP') {
   dataset <- get.nearest.dataset(object)
   groups <- unique(object@meta.data$group)
@@ -350,7 +333,6 @@ time.series <- function(object, reduction = 'UMAP') {
 #' @importFrom ggforce geom_mark_hull
 #' @importFrom dplyr filter
 #' @importFrom scales hue_pal
-#' @importFrom ggthemes theme_tufte
 #' @importFrom ggplot2 scale_fill_manual
 #' @importFrom ggplot2 scale_color_manual
 
@@ -388,7 +370,7 @@ cluster.color <- function(data, group) {
 #'
 #' @return A data frame containing columns 3 and 4 of the input data frame for the rows where
 #'         the concatenated values of V1 and V2 match the input x value.
-
+#' @noRd
 
 single <- function(spec, x) {
   return(spec[paste(spec$V1, spec$V2) == x, 3:4])

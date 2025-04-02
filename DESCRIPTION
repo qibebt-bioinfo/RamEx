@@ -4,7 +4,7 @@ Title: Ramanome Explorer, a R package for comprehensive and efficient analysis a
 Version: 0.99.0
 Authors@R: 
     c(
-        person("Yanmei", "Zhang", role = c("aut"), comment = "Co-Author"),
+        person("Yanmei", "Zhang", email = "zhangyanmei@qibebt.ac.cn", role = c("aut", "cre")),
         person("Gongchao", "Jing", email = "jinggc@qibebt.ac.cn", role = c("aut", "cre"))
     )
 Description: By providing simple-to-use modules for computational tasks that otherwise would require substantial programming experience and algorithmic skills, RamEx should greatly facilitate the computational mining of ramanomes.More complete information about how to use RamEx can be found in the [github](https://github.com/qibebt-bioinfo/RamEx), but here you'll find a brief overview of the function and examples to mining of ramanomes:
@@ -13,13 +13,13 @@ Encoding: UTF-8
 RoxygenNote: 7.3.2
 Depends: R (>= 3.5.0)
 Imports:
-   MASS, RColorBrewer, Rcpp, RcppParallel, circlize, pls, mclust, MLmetrics, Matrix, NMF, parallel, Rtsne, cowplot, data.table, dbscan, doParallel, dplyr, e1071, fastICA, foreach, ggforce, ggplot2, ggthemes, grDevices, graphics, hyperSpec, ica, igraph, mdatools, methods, pheatmap, irlba, prospectr, purrr, randomForest, rlist, scales, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, proxy, reshape2, ggtext, RcppAnnoy, ade4, magrittr, corr2D, robustbase
+   MASS, RColorBrewer, Rcpp, RcppParallel, circlize, pls, mclust, MLmetrics, Matrix, NMF, parallel, Rtsne, cowplot, data.table, dbscan,  dplyr, e1071, fastICA, foreach, ggforce, ggplot2, grDevices, graphics, ica, igraph, mdatools, methods, pheatmap, irlba, prospectr, purrr, randomForest, rlist, scales, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, proxy, reshape2,  RcppAnnoy, ade4, corr2D, robustbase
 Suggests:
-    testthat,knitr,gpuR, Biobase
+    testthat,knitr,gpuR
 LinkingTo:
     Rcpp, RcppParallel
 biocViews: Visualization, Clustering, Software
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2024-12-11
+Packaged: 2025-04-02

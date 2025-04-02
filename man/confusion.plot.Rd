@@ -2,7 +2,7 @@
 % Please edit documentation in R/RamEx-Basic-Funciton.R
 \name{confusion.plot}
 \alias{confusion.plot}
-\title{Plot prediction results}
+\title{Plot confusion matrix}
 \usage{
 confusion.plot(true_labels, pred_labels)
 }
@@ -19,5 +19,5 @@ A ggplot2 object containing a tile plot visualization of the confusion matrix wi
   \item{text annotations}{Percentage values in each tile}
 }
 \description{
-This function plots the prediction results using a tile plot.
+This function plots the confusion matrix using a tile plot.
 }

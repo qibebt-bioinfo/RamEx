@@ -271,11 +271,15 @@ Feature.Reduction.Intensity <- function(object, bands) {
   a <- lapply(bands, function(x) confirm.select(object, x))
   name <- lapply(bands, confirm.name)
   names(a) <- unlist(name)
-  if(length(object@interested.bands) == 0){
-    object@interested.bands <- a
-  } else {
-    object@interested.bands <- merge(object@interested.bands, a, by = "row.names", all = TRUE)[,-1]
-    rownames(object@interested.bands) <- NULL
+
+  common_names <- intersect(names(object@interested.bands), names(a))
+  if (length(common_names) > 0) {
+    for (name in common_names) {
+      object@interested.bands[[name]] <- a[[name]]
+    }
   }
+  new_names <- setdiff(names(a), names(object@interested.bands))
+  object@interested.bands <- c(object@interested.bands, a[new_names])
+
   return(object)
 }
