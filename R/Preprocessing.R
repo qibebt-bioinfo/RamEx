@@ -259,26 +259,23 @@ Preprocessing.Normalize <- function(object, method, wave = NULL){
 
 #' Smooth Spectral Data Using Savitzky-Golay Filter to reduce high-frequency noises
 #'
-#' This function applies the Savitzky-Golay filter to the spectral data in a Ramanome
-#' object to reduce noise. The filter is applied to the central portion of the data,
-#' preserving the first and last few columns as specified by the `w` parameter.
+#' The Savitzky-Golay filter is a digital smoothing technique that preserves the shape and height of spectral peaks by fitting a polynomial to a moving window of data points.
 #'
-#' @param object A Ramanome object containing the spectral data.
-#' @param m The order of the polynomial used in the Savitzky-Golay filter. Defaults to 0.
-#' @param p The number of points to use in the Savitzky-Golay filter. Defaults to 5.
-#' @param w The window size used in the Savitzky-Golay filter. Defaults to 11.
-#' @param delta.wav The change in wavelength between each data point. Defaults to 2.
+#' @param object A Ramanome object.
+#' @param m Whether perform differentiation. Defaults to 0.
+#' @param p The order of the polynomial used in the Savitzky-Golay filter. Defaults to 5.
+#' @param w The window size used for polynomial fitting. Defaults to 11.
 #' @return A Ramanome object with smoothed spectra, named as "smooth.data" in the 'datasets' slot
 #' @importFrom prospectr savitzkyGolay
 #' @export Preprocessing.Smooth.Sg
 #' @examples
 #' data(RamEx_data)
 #' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-Preprocessing.Smooth.Sg <- function(object, m = 0, p = 5, w = 11, delta.wav = 2) {
+Preprocessing.Smooth.Sg <- function(object, m = 0, p = 5, w = 11) {
   pred.data <- get.nearest.dataset(object)
   pred.data <- cbind(
     pred.data[, 1:((w - 1) / 2)],
-    prospectr::savitzkyGolay(pred.data, m = m, p = p, w = w, delta.wav = delta.wav),
+    prospectr::savitzkyGolay(pred.data, m = m, p = p, w = w, delta.wav = 2),
     pred.data[, (ncol(pred.data) - (w - 1) / 2 + 1):ncol(pred.data)]
   )
   object@datasets$smooth.data <- pred.data
@@ -295,8 +292,8 @@ Preprocessing.Smooth.Sg <- function(object, m = 0, p = 5, w = 11, delta.wav = 2)
 #' The function also reports the number of spectra and the wavelength range after
 #' the transformation.
 #'
-#' @param object A Ramanome object containing the raw spectral data.
-#' @return The updated Ramanome object with the SNV-transformed data.
+#' @param object A Ramanome object.
+#' @return A Ramanome object with SNV-transformed spectra, named as "smooth.data" in the 'datasets' slot
 #' @importFrom prospectr standardNormalVariate
 #' @export Preprocessing.Smooth.Snv
 #' @examples
@@ -304,9 +301,9 @@ Preprocessing.Smooth.Sg <- function(object, m = 0, p = 5, w = 11, delta.wav = 2)
 #' data_smoothed_snv <- Preprocessing.Smooth.Snv(RamEx_data)
 
 Preprocessing.Smooth.Snv <- function(object) {
-  #pred.data <- get.nearest.dataset(object)
+  pred.data <- get.nearest.dataset(object)
   
-  object@datasets$raw.data <- prospectr::standardNormalVariate(as.data.frame(object@datasets$raw.data))
+  object@datasets$smooth.data <- prospectr::standardNormalVariate(as.data.frame(pred.data))
   
   writeLines(paste("after snv there is ", length(object), " spec data", sep = ""))
   min_wave <- min(object@wavenumber)
@@ -316,15 +313,15 @@ Preprocessing.Smooth.Snv <- function(object) {
 }
 
 
-#' Perform background subtraction on Ramanome object
+#' Subtract background spectra from the cell spectra
 #'
 #' This function performs background subtraction on a Ramanome object by subtracting the background spectra from the dataset.
 #'
 #' @param object A Ramanome object.
-#' @param cell.index The index of the cell component in the filenames.
-#' @param cal_mean Logical value indicating whether to calculate the mean background spectrum.
+#' @param cell.index The index of the cell component in the filenames, where the background spectra are recorded as 'bg' or 'BG'.
+#' @param cal_mean Logical value indicating whether to calculate the mean spectra with in a cell when a cell contains multiple spectra.
 #'
-#' @return The modified Ramanome object.
+#' @return A Ramanome object with background-subtracted spectra, named as "sub_data" in the 'datasets' slot
 #' @importFrom stringr str_extract
 #' @importFrom stringr str_split_i
 #' @importFrom stringr str_detect
@@ -394,6 +391,7 @@ Preprocessing.Background.Remove <- function(object, cell.index, cal_mean = FALSE
 #' @return A matrix where each column is a vectorized block from the input image.
 #'         For CPU device, returns a regular matrix.
 #'         For GPU device, returns a gpuMatrix.
+#' @noRd 
 matrix2vector <- function(image, kernel_height, kernel_width, device) {
   image_height <- nrow(image)
   image_width <- ncol(image)
@@ -425,18 +423,19 @@ matrix2vector <- function(image, kernel_height, kernel_width, device) {
 
 
 
-#' Pre spike the spec. with Rcpp
+#' Remove cosmic rays from the spectra
 #'
-#' This function performs Pre spike function
+#' recognize the cosmic rays by convolution with a kernel and replace them with the average of the neighboring pixels
 #'
 #' @param all_data The rammannome class
 #' @param device Parallel device, default is null for CPU, can be set to "GPU"
 #' @return A rammanome object
+#' @noRd
 
 
-gpupre_spike_matrix <- function(all_data, device = NULL) {
+gpupre_spike_matrix <- function(all_data, device = NULL, sharpen=33) {
   kernel_ori <- matrix(c(-1,-1,-1, -1,-1,-1, -1,-1,-1, -1,-1,
-                         -1,-1,-1, -1,-1,33, -1,-1,-1, -1,-1,
+                         -1,-1,-1, -1,-1,sharpen, -1,-1,-1, -1,-1,
                          -1,-1,-1, -1,-1,-1, -1,-1,-1, -1,-1),nrow = 3, byrow = TRUE)
   
   kernel_matrix <- as.vector(t(kernel_ori))
@@ -481,21 +480,23 @@ gpupre_spike_matrix <- function(all_data, device = NULL) {
   return(spc_new)
 }
 
-#' Pre spike the spec. with Rcpp
+#' Remove cosmic rays from the spectra
 #'
-#' This function performs Pre spike function
+#' recognize the cosmic rays by a sharp convolution kernel and replace them with the average of the neighboring pixels
 #'
 #' @param object The rammanome class
-#' @param device Parallel device, default is null for CPU, can be set to "GPU"
-#' @return A rammanome object
+#' @param device Parallel device, default is null for CPU, can be set to "GPU"  
+#' @param sharpen The sharpening factor of the convolution kernel, default is 33
+#' 
+#' @return The Ramanome object with cosmic rays removed spectra, named as "spike.data" in the 'datasets' slot
 #'
 #' @export Preprocessing.Spike
 #' @examples
 #' data(RamEx_data)
 #' data_spike <- Preprocessing.Spike(RamEx_data,"CPU")
-Preprocessing.Spike <- function(object, device){
+Preprocessing.Spike <- function(object, device='CPU', sharpen=33){
   data <- get.nearest.dataset(object)
-  pre.data <- gpupre_spike_matrix(data, device)
+  pre.data <- gpupre_spike_matrix(data, device, sharpen)
   object@datasets$spike.data <- pre.data
   return(object)
 }
