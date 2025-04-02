@@ -22,12 +22,6 @@ concentrations.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-#data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-decom_mcrals <- Spectral.Decomposition.Mcrals(data_cleaned, 2)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+decom_mcrals <- Spectral.Decomposition.Mcrals(data_processed, 2)
 }

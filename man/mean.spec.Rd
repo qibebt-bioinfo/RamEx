@@ -28,9 +28,6 @@ representing the mean for each group.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-mean.spec(data_normalized@datasets$baseline.data, data_normalized@meta.data$group)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+mean.spec(data_processed@datasets$normalized.data, data_processed@meta.data$group)
 }

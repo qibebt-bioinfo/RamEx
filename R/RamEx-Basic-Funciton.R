@@ -111,19 +111,16 @@ spec.mean.draw <- function(object, gap=0) {
 #' @export mean.spec
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' mean.spec(data_normalized@datasets$baseline.data, data_normalized@meta.data$group)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' mean.spec(data_processed@datasets$normalized.data, data_processed@meta.data$group)
 
 mean.spec <- function(data, group, gap = 0.3) {
   levels <- levels(group)
   group <- as.character(group)
   print(levels)
   data <- as.matrix(data)
-  spec_mean <- hyperSpec::aggregate(data, by = list(group), mean)
-  spec_sd <- hyperSpec::aggregate(data, by = list(group), sd)
+  spec_mean <- aggregate(data, by = list(group), mean)
+  spec_sd <- aggregate(data, by = list(group), sd)
   n <- nrow(spec_mean)
   i <- which(spec_mean[, 1] == levels[1])
   data_ggplot <- cbind(as.numeric(colnames(data)), t(spec_mean[i, -1] + gap * (n - 1)), t(spec_sd[i, -1]), spec_mean$Group.1[i])
@@ -177,44 +174,6 @@ mean.spec <- function(data, group, gap = 0.3) {
     theme_classic()
 
   return(plot)
-}
-#' Generate Raman imaging
-#'
-#' This function generates a Raman imaging plot for a specified peak in a Ramanome object.
-#'
-#' @param object The Ramanome object
-#' @param peak The specified peak for Raman imaging
-#' @return NULL. The function saves a JPEG file named 'Raman_Imaging_[peak].jpeg' in the current working directory.
-#'         The image shows a heatmap-style visualization of the Raman intensity distribution at the specified peak.
-#'
-#' @importFrom grDevices jpeg
-#' @importFrom graphics image
-#' @importFrom rlist list.map
-#' @importFrom grDevices dev.off
-
-
-image.peak <- function(object, peak) {
-  data <- data.frame(
-    x = as.numeric(object@meta.data$x),
-    y = as.numeric(object@meta.data$y),
-    value = object@interested.bands[[as.character(peak)]] * 100
-  )
-  data.matrix <- lapply(
-    unique(data$y), function(loc) {
-      rr.data <- data[data$y == loc,]
-      return(rr.data$value[order(rr.data$x)])
-    }
-  )
-  data.matrix <- do.call(rbind, rlist::list.map(data.matrix, .))
-  grDevices::jpeg(
-    filename = paste0('Raman_Imaging_', peak, ' .jpeg'),
-    width = length(unique(data$x)) * 30,
-    height = length(unique(data$x)) * 30,
-    quality = 150,
-    res = 200
-  )
-  graphics::image(data.matrix, axes = FALSE)
-  grDevices::dev.off()
 }
 
 
@@ -294,6 +253,7 @@ select.band <- function(object, waves) {
 #' @return A character string representing either:
 #'   \item{Single wavelength}{The wavelength value as a string}
 #'   \item{Wavelength range}{Two wavelength values separated by a tilde (~)}
+#' @noRd 
 
 confirm.name <- function(waves) {
   if (length(waves) == 1) {
@@ -322,6 +282,7 @@ confirm.name <- function(waves) {
 #'   \item{Wavelength range}{Summed Feature.Reduction.Intensity values across the specified range}
 #' @seealso select.value for retrieving data at a single wavelength.
 #' @seealso select.band for retrieving the sum of data within a wavelength range.
+#' @noRd 
 
 confirm.select <- function(object, waves) {
   if (length(waves) == 1) {
@@ -370,27 +331,6 @@ time.series <- function(object, reduction = 'UMAP') {
   return(plot)
 }
 
-#' Custom theme for time series plots
-#'
-#' This function defines a custom theme for time series plots.
-#'
-#' @return A ggplot2 theme object with customized settings:
-#'   \item{panel.grid}{Removed grid lines}
-#'   \item{panel.border}{Removed border}
-#'   \item{axis.ticks}{Removed axis ticks}
-#'   \item{axis.text}{Removed axis text}
-#'   \item{strip.background}{White background for facet strips}
-#'
-SelfTheme <- function() {
-  theme(
-    panel.grid = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks = element_blank(),
-    axis.text = element_blank(),
-    strip.background = element_rect(fill = "white")
-  )
-}
 
 #' Generate a color-coded plot for cluster visualization
 #'
@@ -433,11 +373,9 @@ cluster.color <- function(data, group) {
       data = dplyr::filter(data, group == group),
       aes(color = cluster, fill = cluster)
     ) +
-    ggthemes::theme_tufte(ticks = FALSE) +
     scale_color_manual(values = colors) +
     labs(x = '', y = '', title = group) +
-    theme_bw() +
-    SelfTheme
+    theme_classic()
 }
 
 
