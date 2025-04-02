@@ -2,7 +2,7 @@
 % Please edit documentation in R/Preprocessing.R
 \name{Preprocessing.Cutoff}
 \alias{Preprocessing.Cutoff}
-\title{Pre-process Raman data by cutting the wavenumber range}
+\title{Spectral truncation}
 \usage{
 Preprocessing.Cutoff(object, from, to)
 }
@@ -14,16 +14,12 @@ Preprocessing.Cutoff(object, from, to)
 \item{to}{The upper bound of the wavenumber range to cut.}
 }
 \value{
-The updated Ramanome object with the wavenumber range cut and the corresponding dataset.
+A Ramanome object with truncated spectra, named as "cut.data" in the 'datasets' slot
 }
 \description{
-This function cuts the wavenumber range of Raman data and updates the Raman object.
+Cutoff the spectra to the specific wavenumber range.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-Preprocessing.Cutoff(data_normalized,550, 1800)
+Preprocessing.Cutoff(RamEx_data,550, 1800)
 }

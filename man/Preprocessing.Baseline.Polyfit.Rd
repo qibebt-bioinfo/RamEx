@@ -2,23 +2,24 @@
 % Please edit documentation in R/Preprocessing.R
 \name{Preprocessing.Baseline.Polyfit}
 \alias{Preprocessing.Baseline.Polyfit}
-\title{Preprocess baseline}
+\title{Remove baseline (low frequency noises) by polynomial fitting}
 \usage{
-Preprocessing.Baseline.Polyfit(object, order = 1)
+Preprocessing.Baseline.Polyfit(object, order_1 = 1, order_2 = 6)
 }
 \arguments{
-\item{object}{The input object}
+\item{object}{Ramanome object}
 
-\item{order}{The order of the polynomial used in the baseline calculation (default: 1)}
+\item{order_1}{The order of the polynomial used in the baseline calculation for the 500–1800 cm⁻¹ region (default: 1)}
+
+\item{order_2}{The order of the polynomial used in the baseline calculation for the 1800–3050 cm⁻¹ region (default: 6)}
 }
 \value{
-The modified object with preprocessed baseline data
+The Ramanome object with baseline corrected spectra, named as "baseline.data" in the 'datasets' slot
 }
 \description{
-This function performs baseline pre-processing on the input object.
+Partitioned polynomial fitting was performed using a two-region fitting approach. A first-order (alterable) polynomial was fitted to the 500–1800 cm⁻¹ region, while a sixth-order (alterable) polynomial was applied to the 1800–3050 cm⁻¹ region.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
+data_baseline <- Preprocessing.Baseline.Polyfit(RamEx_data)
 }

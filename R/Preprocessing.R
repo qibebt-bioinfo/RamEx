@@ -1,27 +1,46 @@
-#' Preprocess baseline
+#' One step spectral preprocessing
 #'
-#' This function performs baseline pre-processing on the input object.
+#' This function performs one-step spectral preprocessing on the input Ramanome, including smoothing(SG), baseline correction(Polyfit), normalization(ch), and quality control(ICOD).
+#' If specific preprocessing methods are needed, please define/run them step by step.
+#' 
+#' @param object Ramanome object
 #'
-#' @param object The input object
-#' @param order The order of the polynomial used in the baseline calculation (default: 1)
+#' @return The Ramanome object with preprocessed spectral data
+#' @export Preprocessing.OneStep
+#' @examples
+#' data(RamEx_data)
+#' data_preprocessed <- Preprocessing.OneStep(RamEx_data) 
+Preprocessing.OneStep <- function(object) {
+     data_normalized <- Preprocessing.Smooth.Sg(object) %>% Preprocessing.Baseline.Polyfit %>% Preprocessing.Normalize(., "ch")
+     qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data, var_tol = 0.4)
+     data_cleaned <- data_normalized[qc_icod$quality,]
+     return(data_cleaned)}
+
+
+#' Remove baseline (low frequency noises) by polynomial fitting
 #'
-#' @return The modified object with preprocessed baseline data
+#' Partitioned polynomial fitting was performed using a two-region fitting approach. A first-order (alterable) polynomial was fitted to the 500–1800 cm⁻¹ region, while a sixth-order (alterable) polynomial was applied to the 1800–3050 cm⁻¹ region.
+#'
+#' @param object Ramanome object
+#' @param order_1 The order of the polynomial used in the baseline calculation for the 500–1800 cm⁻¹ region (default: 1)
+#' @param order_2 The order of the polynomial used in the baseline calculation for the 1800–3050 cm⁻¹ region (default: 6)
+#'
+#' @return The Ramanome object with baseline corrected spectra, named as "baseline.data" in the 'datasets' slot
 #' @export Preprocessing.Baseline.Polyfit
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
+#' data_baseline <- Preprocessing.Baseline.Polyfit(RamEx_data)
 
-Preprocessing.Baseline.Polyfit <- function(object, order = 1) {
+Preprocessing.Baseline.Polyfit <- function(object, order_1 = 1, order_2 = 6) {
   wavenumber <- object@wavenumber
   spc_data <- get.nearest.dataset(object)
   
   wave_max <- max(wavenumber)
   wave_min <- min(wavenumber)
   
-  if (wave_max >= 3050 & wave_min <= 600) {
+  if (wave_max >= 2600 & wave_min <= 1100) {
     idx_1 <- which(wavenumber >= floor(wave_min) & wavenumber <= 1790)
-    baseline1 <- spc.fit.poly.below(spc_data[, idx_1, drop = FALSE], spc_data[, idx_1, drop = FALSE], poly.order = order)
+    baseline1 <- spc.fit.poly.below(spc_data[, idx_1, drop = FALSE], spc_data[, idx_1, drop = FALSE], poly.order = order_1)
     corrected1 <- spc_data[, idx_1, drop = FALSE] - baseline1
     
     idx_2 <- which(wavenumber >= 1790 & wavenumber <= wave_max)
@@ -29,34 +48,27 @@ Preprocessing.Baseline.Polyfit <- function(object, order = 1) {
                            wavenumber >= 2300 & wavenumber <= 2633 | 
                            wavenumber == wavenumber[which.min(abs(wavenumber - 2783))] | 
                            wavenumber == wave_max)
-    baseline2 <- spc.fit.poly(spc_data[, support_idx, drop = FALSE], spc_data[, idx_2, drop = FALSE], poly.order = 6)
+    baseline2 <- spc.fit.poly(spc_data[, support_idx, drop = FALSE], spc_data[, idx_2, drop = FALSE], poly.order = order_2)
     corrected2 <- spc_data[, idx_2, drop = FALSE] - baseline2
     corrected <- cbind(corrected1, corrected2)
     message(paste0("The Ramanome contains ", nrow(corrected), " spectra"))
     
-  } else if (wave_max > 1750 & wave_min <= 600) {
-    idx <- which(wavenumber >= 550 & wavenumber <= 1750)
-    fit <- spc_data[, idx, drop = FALSE]
-    baseline <- spc.fit.poly.below(fit, fit, poly.order = order)
+  } else if (wave_min <= 1100) {
+    baseline1 <- spc.fit.poly.below(spc_data, spc_data, poly.order = order_1)
+    corrected <- fit - baseline
+  } else if (wave_min > 1100 & wave_max > 2600) {
+    support_idx <- which(wavenumber == wave_min |
+                          wavenumber >= 1790 & wavenumber <= 2065 | 
+                          wavenumber >= 2300 & wavenumber <= 2633 | 
+                          wavenumber == wavenumber[which.min(abs(wavenumber - 2783))] | 
+                          wavenumber == wave_max)
+    baseline <- spc.fit.poly(spc_data[, support_idx, drop = FALSE], spc_data, poly.order = order_2)
     corrected <- fit - baseline
     message(paste0("The Ramanome contains ", nrow(corrected), " spectra"))
     
-  } else if (wave_max > 3050 & wave_min < 1800 & wave_min > 600) {
-    idx <- which(wavenumber >= 1800 & wavenumber <= 3050)
-    fit <- spc_data[, idx, drop = FALSE]
-    baseline <- spc.fit.poly(fit, fit, poly.order = order)
-    corrected <- fit - baseline
-    message(paste0("The Ramanome contains ", nrow(corrected), " spectra"))
-    
-  } else if (wave_max < 3050 & wave_min > 600) {
-    idx <- which(wavenumber >= floor(wave_min) & wavenumber <= floor(wave_max))
-    fit <- spc_data[, idx, drop = FALSE]
-    baseline <- spc.fit.poly(fit, fit, poly.order = order)
-    corrected <- fit - baseline
-  } else if (wave_max < 1750 & wave_min > 600) {
-    stop("The spc is too small to baseline")
   } else {
-    stop("Something is wrong in your spc data")
+    baseline1 <- spc.fit.poly.below(spc_data, spc_data, poly.order = order_1)
+    corrected <- fit - baseline
   }
   
   corrected <- corrected[, !duplicated(colnames(corrected), fromLast = FALSE), drop = FALSE]
@@ -149,25 +161,24 @@ spc.fit.poly.below <- function(fit.to, apply.to = fit.to, poly.order = 1,
 }
 
 
-#' Remove baseline by bubble
+#' Remove baseline (low frequency noises) by bubble
 #'
-#' This function performs baseline pre-processing on the input object.
+#' Bubble method is more suitable for spectra with complex background and uneven baseline. Bubble filling was performed on the 500–1800 cm⁻¹ region, while polynomial fitting was applied to the 1800–3050 cm⁻¹ region.
 #'
 #' @param object Ramanome object
+#' @param min_bubble_widths The minimum width of the bubbles.
 #'
-#' @return The baseline corrected spectra with bubble method
+#' @return The Ramanome object with baseline corrected spectra, named as "baseline.data" in the 'datasets' slot
 #' @export Preprocessing.Baseline.Bubble
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-Preprocessing.Baseline.Bubble <- function(object){
+#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(RamEx_data)
+Preprocessing.Baseline.Bubble <- function(object,min_bubble_widths = 50){
   band_1 <- which(object@wavenumber < 1800)
   band_2 <- which(object@wavenumber > 1800 & object@wavenumber < 2700)
   band_3 <- which(object@wavenumber > 2700)
   data_matrix <- get.nearest.dataset(object)
-  data_matrix[,band_1] <- t(apply(data_matrix[,band_1], 1, function(x)bubblefill(x)$raman))
+  data_matrix[,band_1] <- t(apply(data_matrix[,band_1], 1, function(x)bubblefill(x,min_bubble_widths)$raman))
   data_matrix[,band_2] <- polyfit(data_matrix[,band_2], degree = 1, tol = 0.001, rep = 100)$corrected
   data_matrix[,band_3] <- polyfit(data_matrix[,band_3], degree = 1, tol = 0.001, rep = 100)$corrected
   data_matrix[, band_2] <- data_matrix[, band_2] - (data_matrix[,band_2[1]]-data_matrix[,band_2[1]-1])
@@ -177,24 +188,20 @@ Preprocessing.Baseline.Bubble <- function(object){
 }
 
 
-#' Pre-process Raman data by cutting the wavenumber range
-#'
-#' This function cuts the wavenumber range of Raman data and updates the Raman object.
+#' Spectral truncation
+#' 
+#' Cutoff the spectra to the specific wavenumber range.
 #'
 #' @param object A Ramanome object.
 #' @param from The lower bound of the wavenumber range to cut.
 #' @param to The upper bound of the wavenumber range to cut.
 #'
-#' @return The updated Ramanome object with the wavenumber range cut and the corresponding dataset.
+#' @return A Ramanome object with truncated spectra, named as "cut.data" in the 'datasets' slot
 #'
 #' @export Preprocessing.Cutoff
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' Preprocessing.Cutoff(data_normalized,550, 1800)
+#' Preprocessing.Cutoff(RamEx_data,550, 1800)
 Preprocessing.Cutoff <- function(object, from, to) {
   waves <- object@wavenumber
   pred.data <- get.nearest.dataset(object)
@@ -205,24 +212,21 @@ Preprocessing.Cutoff <- function(object, from, to) {
   return(object)
 }
 
-#' Pre-process Raman data by ch normalization method
-#'
-#' This function applies normalization to the Raman data based on the ch method/max method/specific method/area method and updates the Raman object.
+#' Normalize the spectra matrix
 #'
 #' @param object A Ramanome object.
-#' @param method The normalize method
-#' @param wave The interested wavenumber
-#' @return The updated Ramanome object with normalized Raman data.
+#' @param method The normalize method. "area" for area normalization, "specific" for specific wavenumber normalization, "max" for maximum normalization, "ch" for continuum normalization.
+#' @param wave The interested wavenumber for specific normalization.
+#' 
+#' @return A Ramanome object with normalized spectra, named as "normalized.data" in the 'datasets' slot
 #' @export Preprocessing.Normalize
+#' 
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized_ch <- Preprocessing.Normalize(data_baseline, "ch")
-#' #data_normalized_specific <- Preprocessing.Normalize(data_baseline, "specific")
-#' data_normalized_max <- Preprocessing.Normalize(data_baseline, "max")
-#' data_normalized_area <- Preprocessing.Normalize(data_baseline, "area")
+#' data_normalized_ch <- Preprocessing.Normalize(RamEx_data, "ch")
+#' #data_normalized_specific <- Preprocessing.Normalize(RamEx_data, "specific", 1650)
+#' data_normalized_max <- Preprocessing.Normalize(RamEx_data, "max")
+#' data_normalized_area <- Preprocessing.Normalize(RamEx_data, "area")
 Preprocessing.Normalize <- function(object, method, wave = NULL){
   
   dataset <- get.nearest.dataset(object)
@@ -253,7 +257,7 @@ Preprocessing.Normalize <- function(object, method, wave = NULL){
   }
 }
 
-#' Smooth Spectral Data Using Savitzky-Golay Filter
+#' Smooth Spectral Data Using Savitzky-Golay Filter to reduce high-frequency noises
 #'
 #' This function applies the Savitzky-Golay filter to the spectral data in a Ramanome
 #' object to reduce noise. The filter is applied to the central portion of the data,
@@ -264,7 +268,7 @@ Preprocessing.Normalize <- function(object, method, wave = NULL){
 #' @param p The number of points to use in the Savitzky-Golay filter. Defaults to 5.
 #' @param w The window size used in the Savitzky-Golay filter. Defaults to 11.
 #' @param delta.wav The change in wavelength between each data point. Defaults to 2.
-#' @return The updated Ramanome object with the smoothed spectral data.
+#' @return A Ramanome object with smoothed spectra, named as "smooth.data" in the 'datasets' slot
 #' @importFrom prospectr savitzkyGolay
 #' @export Preprocessing.Smooth.Sg
 #' @examples

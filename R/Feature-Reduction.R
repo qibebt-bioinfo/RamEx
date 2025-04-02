@@ -7,7 +7,7 @@
 #' @param object A Ramanome object containing the dataset and metadata.
 #' @param draw A logical value indicating whether to draw the PCA plot. Defaults to TRUE.
 #' @param save A logical value indicating whether to save the plot as a file. Defaults to FALSE.
-#' @param seed A numeric value indicating the seed for the random number generator. Defaults to 42.
+#' @param n_pc The number of principal components to get. Defaults to 2.
 #' 
 #' @return The updated Ramanome object with the PCA results appended to the `reductions` slot.
 #' @export Feature.Reduction.Pca
@@ -27,12 +27,11 @@
 #' data_cleaned <- data_normalized[qc_icod$quality,]
 #' data.reduction.pca <- Feature.Reduction.Pca(data_cleaned, draw=TRUE, save = FALSE)
 
-Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE) {
+Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE, n_pc = 2) {
   dataset <- get.nearest.dataset(object)
-  data.red <- data.frame(prcomp_irlba(dataset, n = 20, center = TRUE, scale. = TRUE)$x[, 1:2])
+  data.red <- data.frame(prcomp_irlba(dataset, n = n_pc, center = TRUE, scale. = TRUE)$x[, 1:n_pc])
   names(data.red) <- c('PC 1', 'PC 2')
   
-  object@reductions <- append(object@reductions, list(data.red))
   object@reductions$PCA <- data.red
   if (draw){
     names <- colnames(data.red)
@@ -43,7 +42,8 @@ Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE) {
     print(plot)
   }
   
-  if (FALSE) {
+  if (save) {
+    cat('Saving PCA plot to the current working directory: ', getwd(), '\n')
     ggsave(paste("Reduction.pca.png"), plot, width = 8, height = 6)
   }
   

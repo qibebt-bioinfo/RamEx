@@ -2,7 +2,7 @@
 % Please edit documentation in R/Preprocessing.R
 \name{Preprocessing.Smooth.Sg}
 \alias{Preprocessing.Smooth.Sg}
-\title{Smooth Spectral Data Using Savitzky-Golay Filter}
+\title{Smooth Spectral Data Using Savitzky-Golay Filter to reduce high-frequency noises}
 \usage{
 Preprocessing.Smooth.Sg(object, m = 0, p = 5, w = 11, delta.wav = 2)
 }
@@ -18,7 +18,7 @@ Preprocessing.Smooth.Sg(object, m = 0, p = 5, w = 11, delta.wav = 2)
 \item{delta.wav}{The change in wavelength between each data point. Defaults to 2.}
 }
 \value{
-The updated Ramanome object with the smoothed spectral data.
+A Ramanome object with smoothed spectra, named as "smooth.data" in the 'datasets' slot
 }
 \description{
 This function applies the Savitzky-Golay filter to the spectral data in a Ramanome

@@ -4,7 +4,7 @@
 \alias{Feature.Reduction.Pca}
 \title{Perform PCA Reduction and Plotting}
 \usage{
-Feature.Reduction.Pca(object, draw = TRUE, save = FALSE)
+Feature.Reduction.Pca(object, draw = TRUE, save = FALSE, n_pc = 2)
 }
 \arguments{
 \item{object}{A Ramanome object containing the dataset and metadata.}
@@ -13,7 +13,7 @@ Feature.Reduction.Pca(object, draw = TRUE, save = FALSE)
 
 \item{save}{A logical value indicating whether to save the plot as a file. Defaults to FALSE.}
 
-\item{seed}{A numeric value indicating the seed for the random number generator. Defaults to 42.}
+\item{n_pc}{The number of principal components to get. Defaults to 2.}
 }
 \value{
 The updated Ramanome object with the PCA results appended to the `reductions` slot.

@@ -2,22 +2,22 @@
 % Please edit documentation in R/Preprocessing.R
 \name{Preprocessing.Baseline.Bubble}
 \alias{Preprocessing.Baseline.Bubble}
-\title{Remove baseline by bubble}
+\title{Remove baseline (low frequency noises) by bubble}
 \usage{
-Preprocessing.Baseline.Bubble(object)
+Preprocessing.Baseline.Bubble(object, min_bubble_widths = 50)
 }
 \arguments{
 \item{object}{Ramanome object}
+
+\item{min_bubble_widths}{The minimum width of the bubbles.}
 }
 \value{
-The baseline corrected spectra with bubble method
+The Ramanome object with baseline corrected spectra, named as "baseline.data" in the 'datasets' slot
 }
 \description{
-This function performs baseline pre-processing on the input object.
+Bubble method is more suitable for spectra with complex background and uneven baseline. Bubble filling was performed on the 500–1800 cm⁻¹ region, while polynomial fitting was applied to the 1800–3050 cm⁻¹ region.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
+data_baseline_bubble <- Preprocessing.Baseline.Bubble(RamEx_data)
 }

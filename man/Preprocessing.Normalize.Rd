@@ -2,30 +2,27 @@
 % Please edit documentation in R/Preprocessing.R
 \name{Preprocessing.Normalize}
 \alias{Preprocessing.Normalize}
-\title{Pre-process Raman data by ch normalization method}
+\title{Normalize the spectra matrix}
 \usage{
 Preprocessing.Normalize(object, method, wave = NULL)
 }
 \arguments{
 \item{object}{A Ramanome object.}
 
-\item{method}{The normalize method}
+\item{method}{The normalize method. "area" for area normalization, "specific" for specific wavenumber normalization, "max" for maximum normalization, "ch" for continuum normalization.}
 
-\item{wave}{The interested wavenumber}
+\item{wave}{The interested wavenumber for specific normalization.}
 }
 \value{
-The updated Ramanome object with normalized Raman data.
+A Ramanome object with normalized spectra, named as "normalized.data" in the 'datasets' slot
 }
 \description{
-This function applies normalization to the Raman data based on the ch method/max method/specific method/area method and updates the Raman object.
+Normalize the spectra matrix
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized_ch <- Preprocessing.Normalize(data_baseline, "ch")
-#data_normalized_specific <- Preprocessing.Normalize(data_baseline, "specific")
-data_normalized_max <- Preprocessing.Normalize(data_baseline, "max")
-data_normalized_area <- Preprocessing.Normalize(data_baseline, "area")
+data_normalized_ch <- Preprocessing.Normalize(RamEx_data, "ch")
+#data_normalized_specific <- Preprocessing.Normalize(RamEx_data, "specific", 1650)
+data_normalized_max <- Preprocessing.Normalize(RamEx_data, "max")
+data_normalized_area <- Preprocessing.Normalize(RamEx_data, "area")
 }
