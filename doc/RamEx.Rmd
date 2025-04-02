@@ -22,12 +22,13 @@ By providing simple-to-use modules for computational tasks that otherwise would 
 More complete information about how to use RamEx can be found in the [github](https://github.com/qibebt-bioinfo/RamEx), but here you'll find a brief overview of the function and examples to mining of ramanomes:
 
 ##Installaiton
+```{r}
 library(devtools)
 install_github("qibebt-bioinfo/RamEx")
+```
 ##Getting Started
 # Data Loading
 Raman spectra are respectively tracked in single txt files, and their meta info is recorded in the file name.
-Here we assume there's only one factor of the dataset, which means RamEx do not contain multiple-factor analysis. If you have multiple factors but they are independent of each other, these factors will be treated as one factor.
 ```{r}
 library(RamEx)
 library(dplyr)
@@ -35,14 +36,15 @@ data(RamEx_data)
 options(mc.cores = 2)
 ```
 # Pretreatment
-Spectral pretreatment will make the spectrum clearer, containing smoothing, baseline removal, normalization and truncation.
+SSpectral pretreatment will make the spectrum clearer, containing smoothing, baseline removal, normalization and truncation.
 Mean spectra will display their effects.
-Here the results of each step will be kept in the Ramanome for better debugging, and 'draw.mean' exhibit the final dataset.
+Here the results of each step will be kept in the Ramanome for better debugging, and 'mean.spec' exhibit the final dataset.
 ```{r}
 RamEx_data <- RamEx_data %>% Preprocessing.Smooth.Sg %>% Preprocessing.Baseline.Polyfit %>% Preprocessing.Normalize(.,'ch') 
 mean.spec(RamEx_data$normalized.data, RamEx_data$group)  
 ```
 # Quality control
+Remove the samples with low quality or abnormal spectral acquisition. ICOD method is recommended to perform quality control (QC). Each method will return a logical vector, indicating the quality of each cell sample.
 ```{r}
 qc_icod <- Qualitycontrol.ICOD(RamEx_data)
 data_cleaned <- RamEx_data[qc_icod$quality,] 
@@ -54,7 +56,7 @@ qc_snr <- Qualitycontrol.Snr(RamEx_data, 'easy')
 ```
 
 # Interested Bands
-Get single-cell intensitiy or intensity accumulationy within a wavenumber range, pls give a list containing multiple bands or band ranges. These feature selection results will be saved as 'interested.bands' in the given Ramanome object. Further, you can add some equations by yourself. 
+Get single-cell intensitiy or intensity accumulationy within a wavenumber range, pls give a list containing multiple bands or band ranges. These feature selection results will be saved as 'interested.bands' in the given Ramanome object. Further, you can add some equations by yourself (e.g. calculate CDR). 
 ```{r}
 data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
 # calculate CDR
@@ -63,23 +65,26 @@ CDR <- data.frame(data_cleaned@meta.data,
 ```
 
 # Reduction
-Nonlinear methods, such as UMAP and t-SNE. Linear methods like PCA, pCoA. The reduced sample matrix will be contained in the Ramanome onject as 'reductions'. Attention: RamEx uses PCA to reduce the dimensions of the high-dimensional spectrum, since UMAP and t-SNE are highly complex algorithms.
+Nonlinear methods, such as UMAP and t-SNE. Linear methods like PCA, pCoA. The reduced sample matrix will be contained in the Ramanome onject as 'reductions'. Attention: A pre-treatment of large spectral matrix by PCA is recommended, since UMAP and t-SNE are highly complex algorithms.
 ```{r}
 data.reduction <- Feature.Reduction.Pca(data_cleaned) %>% Feature.Reduction.Pcoa %>% Feature.Reduction.Tsne %>% Feature.Reduction.Umap
 ``` 
 
 # Markers analysis
+RamEx provides three types of markers analysis: ROC, correlation and RBCS. 
+In addition to singular Raman markers, paired bands are also examined
 ```{r}
 ROC_markers <- Raman.Markers.Roc(Preprocessing.Cutoff(data_cleaned, 1400, 1600), paired  = TRUE, threshold = 0.6) 
 cor_markers <- Raman.Markers.Correlations(Preprocessing.Cutoff(data_cleaned, 1400, 1600), min.cor = 0.6) 
 RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, show = T) 
 ```
 # IRCA
--Global IRCA. This module maybe consumed for a longer period of time due to the image drawing
+Observe the single-cell heterogeneity within the Ramanome/microbial community and to elucidate intracellular metabolite conversions.
+- Global IRCA.
 ```{r}
 IRCA.interests <- Intraramanome.Analysis.Irca.Global(data_cleaned)
 ```
--Local IRCA
+- Local IRCA
 ```{r}
 bands_ann <- data.frame(rbind(cbind(c(742,850,872,971,997,1098,1293,1328,1426,1576),'Nucleic acid'),
                               cbind(c(824,883,1005,1033,1051,1237,1559,1651),'Protein'),
@@ -88,10 +93,12 @@ colnames(bands_ann) <- c('Wave_num', 'Group')
 Intraramanome.Analysis.Irca.Local(data_cleaned, bands_ann = bands_ann)
 ```
 - 2D-COS
+Captures both synchronous (simultaneous changes) and asynchronous (sequential changes) relationships, providing detailed insights into spectral changes
 ```{r}
 data_cos <- Intraramanome.Analysis.2Dcos(data_cleaned) 
 ```
 # Phenotype analysis
+RamEx provides three types of phenotype analysis: Louvain clustering, K-means clustering and hierarchical clustering.
 ```{r}
 clusters_louvain <- Phenotype.Analysis.Louvaincluster(object = data_cleaned, resolutions = c(0.8)) 
 clusters_kmneans <- Phenotype.Analysis.Kmeans(data_cleaned,5)
@@ -99,25 +106,27 @@ clusters_hca <- Phenotype.Analysis.Hca(data_cleaned)
 ```
 
 # Classifications
--PC-LDA
--SVM
--Random Forest
+Gaussian Mixture Model (GMM), Linear Discriminant Analysis (LDA), Random Forest (RF), Support Vector Machine (SVM)
 ```{r}
 model.gmm <- Classification.Gmm(data_cleaned)
 model.lda <- Classification.Lda(data_cleaned)
 model.rf <- Classification.Rf(data_cleaned)
 model.svm <- Classification.Svm(data_cleaned)
+# when new data is available, you can use the following code to predict the new data by using the trained model.
 pred_new <- predict_classification(model.lda, data_cleaned)
 ```
 # Quantifications
+Partial Least Squares (PLS), Multiple Linear Regression (MLR), Generalized Linear Model (GLM)
 ```{r}
 quan_pls <- Quantification.Pls(data_cleaned) 
 quan_mlr <- Quantification.Mlr(data_cleaned) 
 quan_glm <- Quantification.Glm(data_cleaned) 
+# when new data is available, you can use the following code to predict the new data by using the trained model.
 pred_new <- predict_quantification(quan_pls, data_cleaned)
 ```
 
 # Spectral decomposition
+Multiple Component Regression - Alternating Least Squares (MCR-ALS), Independent Component Analysis (ICA), Non-negative Matrix Factorization (NMF) are provide to decompose the spectral matrix into multiple components.
 ```{r}
 decom_mcr <- Spectral.Decomposition.Mcrals(data_cleaned,n_comp = 2)
 decom_ica <- Spectral.Decomposition.Ica(data_cleaned, n_comp = 2) 
