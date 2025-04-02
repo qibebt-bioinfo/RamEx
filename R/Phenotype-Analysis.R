@@ -1,18 +1,14 @@
-#' Perform Louvain Clustering on Spectral Data
+#' Louvain Clustering
 #'
-#' This function performs Louvain clustering on the spectral data stored in a Ramanome
-#' object. It first reduces the dimensionality of the data using PCA, then calculates
-#' the k-nearest neighbors for each point, and finally applies the Louvain algorithm
-#' to detect communities at different resolutions.
+#' A graph-based community detection algorithm that optimizes modularity to identify clusters by iteratively merging nodes to maximize within-cluster connections.
 #'
-#' @param object A Ramanome object containing the spectral data.
+#' @param object A Ramanome object.
 #' @param resolutions A vector of resolutions at which to perform the Louvain clustering.
-#' @param npc The number of principal components to retain in the PCA. Defaults to 10.
-#' @param threshold The minimum number of samples required to consider a cluster valid.
-#'                  Defaults to 0.001.
-#' @param k The number of nearest neighbors to consider. Defaults to 30.
-#' @param n_tree The number of trees to use in the Approximate Nearest Neighbor search.
-#'               Defaults to 50.
+#' @param n_pc The number of principal components to retain in the PCA. Defaults to 10.
+#' @param threshold The minimum number of samples required to consider a cluster valid. Defaults to 0.001.
+#' @param k Number of Nearest Neighbors, determines how many nearest neighbors each data point will consider when building the k-NN graph. A larger k will result in a denser graph, where each node is connected to more neighbors. This can capture broader local structures but may blur fine-grained distinctions. A smaller k will produce a sparser graph, emphasizing local structures but potentially missing broader patterns.
+#' @param n_tree The number of trees to use in the Approximate Nearest Neighbor search. Defaults to 50.
+#'                A higher n_tree improves the accuracy of the nearest neighbor search but increases computation time and memory usage. A lower n_tree speeds up the search but may return less accurate neighbors.
 #' @return A data frame containing the cluster assignments for each resolution.
 #' @export Phenotype.Analysis.Louvaincluster
 #' @importFrom igraph graph_from_adjacency_matrix
@@ -27,21 +23,23 @@
 #' @importFrom RcppAnnoy AnnoyEuclidean
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' #options(mc.cores = 2)
-#' #clusters_Louvaincluster <- Phenotype.Analysis.Louvaincluster(object = data_cleaned, resolutions = c(0.8))
+#' #clusters_Louvaincluster <- Phenotype.Analysis.Louvaincluster(object = data_processed, resolutions = c(0.8))
 
-Phenotype.Analysis.Louvaincluster <- function(object, resolutions,npc=10, threshold=0.001, k=30, n_tree=50) {
+Phenotype.Analysis.Louvaincluster <- function(object, resolutions,n_pc=10, threshold=0.001, k=30, n_tree=50, seed=42) {
+  set.seed(seed)
+  if (!is.null(object@reductions$PCA)) {
+    if(ncol(object@reductions$PCA) < n_pc) {
+      data.red <- prcomp_irlba(get.nearest.dataset(object), n = n_pc, center = TRUE, scale. = TRUE)$x
+    } else {
+      data.red <- object@reductions$PCA[,1:n_pc]
+    }
+  } else {
+    data.red <- prcomp_irlba(get.nearest.dataset(object), n = n_pc, center = TRUE, scale. = TRUE)$x
+  }
   
-  data.red <- prcomp_irlba(get.nearest.dataset(object), n = npc, center = TRUE, scale. = TRUE)
-  
-  matrix <- data.red$x
+  matrix <- asmatrix(data.red)
   
   cat('Creating the communities...\n')
   
@@ -135,41 +133,44 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,npc=10, thresh
 
 #' k-Means Clustering Analysis
 #'
-#' A centroid-based clustering algorithm that partitions
-#' data into a predefined number of clusters by assigning
-#' sample to the nearest center
+#' A centroid-based partitioning algorithm that assigns data points to clusters by minimizing the sum of squared distances between points and their cluster centers
 #'
-#' @param object A Ramanome object containing the dataset.
+#' @param object A Ramanome object.
+#' @param n_pc The number of principal components to retain in the PCA. Defaults to 10.
 #' @param k the number of clusters.
-#' @return The datafram which contains Kmeans result.
+#' @return A list containing:
+#' \describe{ 
+#'   \item{clusters}{The cluster assignments for each data point}
+#'   \item{centers}{The coordinates of the cluster centers}
+#' }
 #' @export Phenotype.Analysis.Kmeans
 #' @importFrom stats kmeans
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,] 
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' clusters_kmneans <- Phenotype.Analysis.Kmeans(data_cleaned,5)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' clusters_kmneans <- Phenotype.Analysis.Kmeans(data_processed,5)
 
-Phenotype.Analysis.Kmeans <- function(object, k) {
-  data_x <- get.nearest.dataset(object)
-  cl <- kmeans(data_x, k)
+Phenotype.Analysis.Kmeans <- function(object, n_pc=10, k) {
+  if (!is.null(object@reductions$PCA)) {
+    if(ncol(object@reductions$PCA) < n_pc) {
+      data.red <- prcomp_irlba(get.nearest.dataset(object), n = n_pc, center = TRUE, scale. = TRUE)$x
+    } else {
+      data.red <- object@reductions$PCA[,1:n_pc]
+    }
+  } else {
+    data.red <- prcomp_irlba(get.nearest.dataset(object), n = n_pc, center = TRUE, scale. = TRUE)$x
+  }
+  cl <- kmeans(as.matrix(data.red), k)
   return(list(clusters = cl$cluster, centers = cl$centers))
 }
 
 
-#' Perform Hierarchical Clustering Analysis (HCA)
+#' Hierarchical Clustering Analysis (HCA)
 #'
-#' This function performs hierarchical clustering on the dataset retrieved from a
-#' Ramanome object using the average linkage method. It calculates the Euclidean distance
-#' matrix and then applies the hierarchical clustering algorithm to create a dendrogram.
+#' An iterative clustering method that builds a nested tree of clusters by progressively merging similar samples or dividing dissimilar ones, visualized as a dendrogram showing relationships at multiple scales.
 #' The function also plots the resulting dendrogram.
 #'
-#' @param object A Ramanome object containing the dataset.
+#' @param object A Ramanome object.
 #' @return The hierarchical clustering fit object.
 #' @export Phenotype.Analysis.Hca
 #' @importFrom stats hclust
@@ -177,14 +178,8 @@ Phenotype.Analysis.Kmeans <- function(object, k) {
 #' @importFrom graphics plot
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data_cleaned <- Feature.Reduction.Intensity(data_cleaned, list(c(2000,2250),c(2750,3050), 1450, 1665))
-#' clusters_hca <- Phenotype.Analysis.Hca(data_cleaned)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' clusters_hca <- Phenotype.Analysis.Hca(data_processed)
 
 Phenotype.Analysis.Hca <- function(object) {
   dataset <- object@datasets$normalized.data

@@ -22,7 +22,7 @@
 
 Feature.Reduction.Pca <- function(object, draw = TRUE, save=FALSE, n_pc = 2) {
   dataset <- get.nearest.dataset(object)
-  data.red <- data.frame(prcomp_irlba(dataset, n = n_pc, center = TRUE, scale. = TRUE)$x[, 1:n_pc])
+  data.red <- data.frame(prcomp_irlba(dataset, n = n_pc, center = TRUE, scale. = TRUE)$x)
   names(data.red) <- paste0('PC ', 1:n_pc)
   
   object@reductions$PCA <- data.red
