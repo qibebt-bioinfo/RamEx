@@ -145,6 +145,7 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,n_pc=10, thres
 #'   \item{clusters}{The cluster assignments for each data point}
 #'   \item{centers}{The coordinates of the cluster centers}
 #' }
+#' 
 #' @export Phenotype.Analysis.Kmeans
 #' @importFrom stats kmeans
 #' @examples
