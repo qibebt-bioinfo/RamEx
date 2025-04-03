@@ -12,12 +12,12 @@ options(mc.cores = 2)
 
 ## -----------------------------------------------------------------------------
 RamEx_data <- RamEx_data %>% Preprocessing.Smooth.Sg %>% Preprocessing.Baseline.Polyfit %>% Preprocessing.Normalize(.,'ch') 
-mean.spec(RamEx_data$normalized.data, RamEx_data$group)  
+plot(RamEx_data)
 
 ## -----------------------------------------------------------------------------
 qc_icod <- Qualitycontrol.ICOD(RamEx_data)
 data_cleaned <- RamEx_data[qc_icod$quality,] 
-mean.spec(data_cleaned$normalized.data, data_cleaned$group,0.3)
+plot(data_cleaned)
 qc_mcd <- Qualitycontrol.Mcd(RamEx_data) 
 qc_t2 <- Qualitycontrol.T2(RamEx_data) 
 qc_dis <- Qualitycontrol.Dis(RamEx_data) 
