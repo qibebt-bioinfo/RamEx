@@ -250,13 +250,6 @@ predict_classification <- function(model, new_data, show = TRUE, save = FALSE) {
     predictions <- pred
     probabilities <- predict(model$model, new_data_matrix, type = "prob")
     
-  } else if (inherits(model$model, "Mclust")) {
-    # For GMM model
-    new_data_20 <- scale(new_data_matrix, center = model$pca_params$center, scale = model$pca_params$scale) %*% model$pca_params$rotation %>% as.data.frame
-    pred <- predict(model$model, new_data_20)
-    predictions <- pred$classification
-    probabilities <- pred$z
-    
   } else {
     stop("Unsupported model type")
   }

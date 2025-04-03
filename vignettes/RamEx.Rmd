@@ -98,17 +98,17 @@ Captures both synchronous (simultaneous changes) and asynchronous (sequential ch
 data_cos <- Intraramanome.Analysis.2Dcos(data_cleaned) 
 ```
 # Phenotype analysis
-RamEx provides three types of phenotype analysis: Louvain clustering, K-means clustering and hierarchical clustering.
+RamEx provides four types of phenotype analysis: Louvain clustering, K-means clustering, Gaussian Mixture Model and hierarchical clustering.
 ```{r}
 clusters_louvain <- Phenotype.Analysis.Louvaincluster(object = data_cleaned, resolutions = c( 0.8)) 
 clusters_kmneans <- Phenotype.Analysis.Kmeans(data_cleaned,5)
 clusters_hca <- Phenotype.Analysis.Hca(data_cleaned)
+clusters_gmm <- Phenotype.Analysis.Gmm(data_cleaned)
 ```
 
 # Classifications
-Gaussian Mixture Model (GMM), Linear Discriminant Analysis (LDA), Random Forest (RF), Support Vector Machine (SVM)
+Linear Discriminant Analysis (LDA), Random Forest (RF), Support Vector Machine (SVM)
 ```{r}
-model.gmm <- Classification.Gmm(data_cleaned)
 model.lda <- Classification.Lda(data_cleaned)
 model.rf <- Classification.Rf(data_cleaned)
 model.svm <- Classification.Svm(data_cleaned)
