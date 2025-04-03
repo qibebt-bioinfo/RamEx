@@ -299,22 +299,22 @@ predict_classification <- function(model, new_data, show = TRUE, save = FALSE) {
     predictions <- pred$class
     probabilities <- pred$posterior
     
-  } else if (inherits(model, "svm")) {
+  } else if (inherits(model$model, "svm")) {
     # For SVM model
     pred <- predict(model$model, new_data_matrix, probability = TRUE)
     predictions <- pred
     probabilities <- attr(pred, "probabilities")
     
-  } else if (inherits(model, "randomForest")) {
+  } else if (inherits(model$model, "randomForest")) {
     # For Random Forest model
-    pred <- predict(model, new_data_matrix, type = "response")
+    pred <- predict(model$model, new_data_matrix, type = "response")
     predictions <- pred
-    probabilities <- predict(model, new_data_matrix, type = "prob")
+    probabilities <- predict(model$model, new_data_matrix, type = "prob")
     
-  } else if (inherits(model, "Mclust")) {
+  } else if (inherits(model$model, "Mclust")) {
     # For GMM model
     new_data_20 <- scale(new_data_matrix, center = model$pca_params$center, scale = model$pca_params$scale) %*% model$pca_params$rotation %>% as.data.frame
-    pred <- predict(model, new_data_20)
+    pred <- predict(model$model, new_data_20)
     predictions <- pred$classification
     probabilities <- pred$z
     
