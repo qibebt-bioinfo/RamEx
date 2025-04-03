@@ -237,8 +237,8 @@ save.rf.results <- function(result, rf.opts, feature.ids, outdir) {
 #' @noRd
 
 save.rf.results.summary <- function(result, rf.opts, filename = 'summary.xls', outdir) {
-  err <- hyperSpec::mean(result$errs)
-  err.sd <- stats::sd(result$errs)
+  err <- mean(result$errs)
+  err.sd <- sd(result$errs)
   baseline.err <- 1 - max(table(y)) / length(y)
   filepath <- sprintf('%s/%s', outdir, filename)
   sink(filepath)
@@ -479,7 +479,6 @@ BetweenGroup.test <- function(data, group, p.adj.method = "bonferroni", paired =
 #'
 #' @return A data frame containing the selected feature importances.
 #' @importFrom pheatmap pheatmap
-#' @importFrom hyperSpec aggregate
 #' @importFrom dplyr %>%
 #' @importFrom grDevices pdf
 #' @export Raman.Markers.Rbcs
