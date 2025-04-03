@@ -58,6 +58,7 @@ data_cos <- Intraramanome.Analysis.2Dcos(data_cleaned)
 
 clusters_louvain <- Phenotype.Analysis.Louvaincluster(object = data_cleaned, resolutions = c(0.8)) 
 clusters_kmneans <- Phenotype.Analysis.Kmeans(data_cleaned,5)
+clusters_gmm <- Phenotype.Analysis.Gmm(data_cleaned)
 clusters_hca <- Phenotype.Analysis.Hca(data_cleaned)
 
 
@@ -66,7 +67,6 @@ clusters_hca <- Phenotype.Analysis.Hca(data_cleaned)
 #-SVM
 #-Random Forest
 
-model.gmm <- Classification.Gmm(data_cleaned)
 model.lda <- Classification.Lda(data_cleaned)
 model.rf <- Classification.Rf(data_cleaned)
 model.svm <- Classification.Svm(data_cleaned)
