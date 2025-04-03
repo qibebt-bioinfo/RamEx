@@ -50,7 +50,7 @@ RamEx_data <- read.spec('dir_path/to/your/data')
 #### Pretreatment
 Spectral pretreatment will make the spectrum clearer, containing smoothing, baseline removal, normalization and truncation.
 Mean spectra will display their effects.
-Here the results of each step will be kept in the Ramanome for better debugging, and 'mean.spec' exhibit the final dataset.
+Here the results of each step will be kept in the Ramanome for better debugging, and 'plot' exhibit the final dataset.
 ```{r}
 RamEx_data <- RamEx_data %>% Preprocessing.Smooth.Sg %>% Preprocessing.Baseline.Polyfit %>% Preprocessing.Normalize(.,'ch') 
 plot(RamEx_data)  
@@ -203,6 +203,10 @@ If you still face issues, please consider reaching out to the respective SDK sup
 When using RamEx for xxxx  ---> 
 
 ### Key papers 
+**RamEx**   
+Zhang Y., Jing G., Xu J., Sun L., 2025. [RamEx: An R package for high-throughput microbial ramanome analyses with accurate quality assessment](https://doi.org/10.1101/2025.03.10.642505). *bioRxiv* 
+
+
 **IRCA**   
 He Y., Huang S., Zhang P., Ji Y., Xu J., 2021. [Intra-Ramanome Correlation Analysis Unveils Metabolite Conversion Network from an Isogenic Population of Cells](https://doi.org/10.1128/mbio.01470-21). *mBio* 
 
