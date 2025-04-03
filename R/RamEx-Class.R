@@ -25,8 +25,6 @@
 #'   meta.data = metadata
 #' )
 #'
-#' @importFrom hyperSpec nrow
-#' @importFrom hyperSpec print
 #' @importFrom methods setClass
 #' @importFrom methods setMethod
 #' @export
@@ -65,6 +63,23 @@ setMethod("$", "Ramanome", function(x, name) {
   }
 })
 
+#' Get available slot names for Ramanome object
+#'
+#' This method returns all available slot names that can be accessed using the $ operator.
+#' It enables tab-completion in RStudio and other IDEs.
+#'
+#' @param x A Ramanome object
+#' @return A character vector of available slot names
+#' @export
+setMethod("names", "Ramanome", function(x) {
+  c(
+    names(x@datasets),
+    colnames(x@meta.data),
+    names(x@reductions),
+    names(x@interested.bands)
+  )
+})
+
 #' Show method for Ramanome objects
 #' This method will give brief information about the Ramanome object
 #' @param object The Ramanome object
@@ -85,7 +100,6 @@ setMethod("$", "Ramanome", function(x, name) {
 #' # Display object information
 #' show(raman_obj)
 #' @export
-
 setMethod(
   f = "show",
   signature = "Ramanome",
@@ -129,13 +143,24 @@ setMethod(
 #' )
 #' 
 #' @export
-
 setMethod("[", "Ramanome", function(x, i, j, ..., drop = TRUE) {
   new.wavenumber = x@wavenumber
   new.datasets = lapply(x@datasets,'[',i,)
   new.meta.data = x@meta.data[i,]
-  new.reductions = lapply(x@reductions,'[',i,)
-  new.interested.bands = lapply(x@interested.bands,'[',i,)
+  new.reductions = lapply(x@reductions, function(reduction) {
+    if (is.matrix(reduction)) {
+      reduction[i, , drop = FALSE]
+    } else {
+      reduction
+    }
+  })
+  new.interested.bands = lapply(x@interested.bands, function(bands) {
+    if (is.matrix(bands)) {
+      bands[i, , drop = FALSE]
+    } else {
+      bands
+    }
+  })
   new_obj <- new("Ramanome", wavenumber = new.wavenumber, datasets = new.datasets, meta.data=new.meta.data,
                  reductions=new.reductions, interested.bands=new.interested.bands )
   return(new_obj)
@@ -145,82 +170,42 @@ setMethod("[", "Ramanome", function(x, i, j, ..., drop = TRUE) {
 #'
 #' @param x The Ramanome object
 #' @return An integer indicating the number of samples in the Ramanome object
-#' @examples
-#' # Create sample Ramanome object
-#' wavenumbers <- seq(500, 3500, by = 10)
-#' spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
-#' metadata <- data.frame(
-#'   group = factor(rep(c("Control", "Treatment"), each = 50))
-#' )
-#' raman_obj <- new("Ramanome",
-#'   datasets = list(raw = spectra),
-#'   wavenumber = wavenumbers,
-#'   meta.data = metadata
-#' )
-#' 
-#' # Get number of samples
-#' n_samples <- length(raman_obj)
-#' print(n_samples)
 #' @export
-
 setMethod("length", "Ramanome", function(x) {
   nrow(get.nearest.dataset(x))
 })
 
-#' #' Plot method for Ramanome objects
-#' #'
-#' #' @param x The Ramanome object
-#' #' @param y Character specifying the plot type
-#' #' @importFrom hyperSpec plot
-#' #' @importFrom hyperSpec print
-#' #' @importFrom methods setMethod
-#'
-#'
-#' setMethod("plot",
-#'           signature(x = "Ramanome", y = "character"),
-#'           function(x, y, ...) {
-#'             tmp <- hyperSpec::plot(x, y, ...)
-#'             if (is(tmp, "trellis"))
-#'               hyperSpec::print(tmp)
-#'             invisible(tmp)
-#'           }
-#' )
+
 
 #' Combine Ramanome objects by row binding
 #'
 #' @param x The first Ramanome object
 #' @param y The second Ramanome object
 #' @return A new Ramanome object containing the combined data from both input objects
-#' @examples
-#' # Create two sample Ramanome objects
-#' wavenumbers <- seq(500, 3500, by = 10)
-#' spectra1 <- matrix(rnorm(50 * length(wavenumbers)), nrow = 50)
-#' spectra2 <- matrix(rnorm(50 * length(wavenumbers)), nrow = 50)
-#' metadata1 <- data.frame(
-#'   group = factor(rep("Control", 50))
-#' )
-#' metadata2 <- data.frame(
-#'   group = factor(rep("Treatment", 50))
-#' )
-#' 
-#' raman_obj1 <- new("Ramanome",
-#'   datasets = list(raw = spectra1),
-#'   wavenumber = wavenumbers,
-#'   meta.data = metadata1
-#' )
-#' 
-#' raman_obj2 <- new("Ramanome",
-#'   datasets = list(raw = spectra2),
-#'   wavenumber = wavenumbers,
-#'   meta.data = metadata2
-#' )
-#' 
-#' # Combine the two objects
-#' combined_obj <- rbind2(raman_obj1, raman_obj2)
 #' @export
 
 setMethod("rbind2", signature(x = "Ramanome", y = "Ramanome"),
           function(x, y) {
-            Ramanome(wavenumber = x@wavenumber ,datasets = list(data = rbind(get.nearest.dataset(x),
-                                                                             get.nearest.dataset(y))), meta.data = rbind(x@meta.data, y@meta.data))
+            Ramanome(wavenumber = x@wavenumber ,
+                      datasets = list(data = rbind(get.nearest.dataset(x), get.nearest.dataset(y))), 
+                      meta.data = rbind(x@meta.data, y@meta.data))
           })
+
+#' Plot mean spectra for Ramanome objects
+#'
+#' Mean spectra of each group in a given Ramanome
+#' The latest spectral matrix in datasets slot and the group information in meta.data slot are used for plotting
+#'
+#' @param x A Ramanome object
+#' @param y Not used (required for plot generic)
+#' @param ... Additional arguments passed to mean.spec()
+#' @return A plot showing mean spectra and the diversity of each group
+#' @export
+setMethod("plot", "Ramanome", function(x, y, ...) {
+  # 获取光谱数据和分组信息
+  spectra <- get.nearest.dataset(x)
+  groups <- x@meta.data$group
+  
+  # 使用 mean.spec 绘制平均光谱
+  mean.spec(spectra, groups, ...)
+})

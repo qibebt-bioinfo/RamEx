@@ -35,6 +35,7 @@ confusion.cal <- function(pred_matrix) {
 #'   \item{text annotations}{Percentage values in each tile}
 #' @import ggplot2
 #' @import dplyr
+#' @export confusion.plot
 confusion.plot <- function(true_labels, pred_labels) {
   pred_matrix <- as.data.frame(table(true_labels, pred_labels))
   colnames(pred_matrix) <- c('true_labels', 'pred_labels', 'Freq')
