@@ -31,10 +31,19 @@
 
 ### Installation
 
-RamEx will be installed from GitHub:.
+You can install RamEx in two ways:
+
+1. From GitHub (recommended for latest version):
 ```{r}
 library('devtools')
 install_github("qibebt-bioinfo/RamEx")
+```
+
+2. From tar.gz file:
+- Download the latest release: [RamEx_0.3.1.tar.gz](https://github.com/qibebt-bioinfo/RamEx/releases/download/v0.3.1/RamEx_0.3.1.tar.gz)
+- Install from local file:
+```{r}
+install.packages("path/to/RamEx_0.3.1.tar.gz", repos = NULL, type = "source")
 ```
 
 ### Getting Started
@@ -191,6 +200,9 @@ RamEx also offers an online version. Please visit (http://ramex.single-cell.cn).
   - macOS users can leverage Homebrew for a seamless installation experience also refer to the [POCL documentation](https://github.com/pocl/pocl).
 If you still face issues, please consider reaching out to the respective SDK support forums or the [OpenCL community](https://www.khronos.org/opencl/).
 
+**Q: Can't install RamEx?**  
+**A:** Please refer to the [Installation](#installation) section for detailed instructions.
+
 <!--(it's recommended to use the latest version - RamEx 2.1)  -->
 
 <!--<img src="xxx"></br> 
@@ -204,14 +216,14 @@ When using RamEx for xxxx  --->
 
 ### Key papers 
 **RamEx**   
-Zhang Y., Jing G., Xu J., Sun L., 2025. [RamEx: An R package for high-throughput microbial ramanome analyses with accurate quality assessment](https://doi.org/10.1101/2025.03.10.642505). *bioRxiv* 
+Zhang Y., Jing G., ..., Xu J., Sun L., 2025. [RamEx: An R package for high-throughput microbial ramanome analyses with accurate quality assessment](https://doi.org/10.1101/2025.03.10.642505). *bioRxiv* 
 
 
 **IRCA**   
 He Y., Huang S., Zhang P., Ji Y., Xu J., 2021. [Intra-Ramanome Correlation Analysis Unveils Metabolite Conversion Network from an Isogenic Population of Cells](https://doi.org/10.1128/mbio.01470-21). *mBio* 
 
 **RBCS**  
-Teng L., Wang X.,  Wang X.,  Gou H.,  Ren L., & Wang T., 2016. [Label-free, rapid and quantitative phenotyping of stress response in e. coli via ramanome](https://www.nature.com/articles/srep34359.pdf). *Scientific Reports* 
+Teng L., ...,  Huang W.E., Xu J., 2016. [Label-free, rapid and quantitative phenotyping of stress response in e. coli via ramanome](https://www.nature.com/articles/srep34359.pdf). *Scientific Reports* 
 
 <!--**Other key papers**  
 - IRCA:  

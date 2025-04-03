@@ -209,7 +209,7 @@ Phenotype.Analysis.Hca <- function(object) {
 #' @return A vector containing the cluster assignments for each data point
 #' @export Phenotype.Analysis.Gmm
 #' @importFrom mclust Mclust
-
+#' @importFrom mclust mclustBIC
 #' @examples
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
