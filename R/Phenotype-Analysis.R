@@ -196,3 +196,38 @@ Phenotype.Analysis.Hca <- function(object) {
   )
   return(fit.average)
 }
+
+
+#' Gaussian Mixture Model (GMM)
+#'
+#' A probabilistic model that assumes data is generated from a mixture of Gaussian distributions. 
+#' Models are estimated by EM algorithm initialized by hierarchical model-based agglomerative clustering. The optimal model is then selected according to BIC.
+#'
+#' @param object The Ramanome object
+#' @param n_pc The number of principal components to use
+#' 
+#' @return A vector containing the cluster assignments for each data point
+#' @export Classification.Gmm
+#' @importFrom mclust Mclust
+
+#' @examples
+#' data(RamEx_data)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' cluster_gmm <- Phenotype.Analysis.Gmm(data_processed)
+Phenotype.Analysis.Gmm <- function(object, n_pc = 20, seed=42) {
+  set.seed(seed)
+  if (!is.null(object@reductions$PCA)) {
+    if(ncol(object@reductions$PCA) < n_pc) {
+      data.red <- prcomp_irlba(get.nearest.dataset(object), n = n_pc, center = TRUE, scale. = TRUE)$x
+    } else {
+      data.red <- object@reductions$PCA[,1:n_pc]
+    }
+  } else {
+    data.red <- prcomp_irlba(get.nearest.dataset(object), n = n_pc, center = TRUE, scale. = TRUE)$x
+  }
+  
+  gmm_model <- Mclust(data.red, verbose = FALSE)
+
+  return(gmm_model$classification)
+}
+

@@ -202,67 +202,6 @@ Classification.Rf <- function(train, test = NULL, ntree = 100, mtry = 2, show=TR
   if (is.null(test)) return(list(model=model.rf)) else return(list(model=model.rf, pred_test = data_pre))
 }
 
-#' Gaussian Mixture Model (GMM)
-#'
-#' A probabilistic model that assumes data is generated from
-#' a mixture of Gaussian distributions and assigns probabilities
-#'  to each class
-#'
-#' @param train The training data object
-#' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).
-#' @param n_pc The number of principal components to use
-#' 
-#' @return A list containing:
-#' \describe{ 
-#'   \item{model}{The GMM model}
-#'   \item{pred_test}{The prediction for test data if test is provided}
-#' }
-#' @export Classification.Gmm
-#' @importFrom mclust Mclust
-#' @importFrom mclust mclustBIC
-
-#' @examples
-#' data(RamEx_data)
-#' data_processed <- Preprocessing.OneStep(RamEx_data)
-#' model.gmm <- Classification.Gmm(data_processed)
-Classification.Gmm <- function(train, test = NULL, n_pc = 20, show=TRUE, save=FALSE, seed=42) {
-  set.seed(seed)
-  if (is.null(test)) {
-    data_set <- get.nearest.dataset(train)
-    labels <- train@meta.data$group
-    index <- stratified_partition(labels, p = 0.7)
-    data_train <- data_set[index,]
-    label_train <- as.numeric(labels[index])
-    data_val <- data_set[-index,]
-    label_val <- labels[-index]
-  } else {
-    data_train <- get.nearest.dataset(train)
-    label_train <- train@meta.data$group
-    data_val <- get.nearest.dataset(test)
-    label_val <- test@meta.data$group}
-  data.pca <- prcomp(data_train, scale = TRUE, retx = TRUE)
-  data_train_20 <- scale(data_train, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:n_pc] %>% as.data.frame
-  gmm_model <- Mclust(data_train_20)
-  data_test_20 <- scale(data_val, center = data.pca$center, scale = data.pca$scale) %*% data.pca$rotation[, 1:n_pc] %>% as.data.frame
-  data_pre <- predict(gmm_model, data_test_20)
-  cat('Training accuracy of GMM: ')
-  pred.train <- confusion.plot(label_train, predict(gmm_model, data_train_20)$class)
-  pca_params <- list(
-    center = data.pca$center,
-    scale = data.pca$scale,
-    rotation = data.pca$rotation[, 1:n_pc]
-  )
-  cat('Test accuracy of GMM: ')
-  pred.test <- confusion.plot(label_val, data_pre$class)
-  if(save){
-    cat('Saving plot to the current working directory: ', getwd(), '\n')
-    ggsave('Classification_GMM_Test.png', pred.test, width = length(unique(label_val)) + 1, height = length(unique(label_train)))}
-  if(show){print(pred.train)
-    print(pred.test)}
-
-  if (is.null(test)) return(list(model=gmm_model, pca_params = pca_params)) else return(list(model=gmm_model, pred_test = data_pre$class, pca_params = pca_params))}
-
-
 #' Predict using a trained classification model
 #'
 #' This function uses a saved classification model to predict labels for new data.
