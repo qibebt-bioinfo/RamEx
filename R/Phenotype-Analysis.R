@@ -207,7 +207,7 @@ Phenotype.Analysis.Hca <- function(object) {
 #' @param n_pc The number of principal components to use
 #' 
 #' @return A vector containing the cluster assignments for each data point
-#' @export Classification.Gmm
+#' @export Phenotype.Analysis.Gmm
 #' @importFrom mclust Mclust
 
 #' @examples
