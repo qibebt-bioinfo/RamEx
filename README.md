@@ -86,8 +86,8 @@ data.reduction <- Feature.Reduction.Pca(data_cleaned) %>% Feature.Reduction.Pcoa
 RamEx provides three types of markers analysis: ROC, correlation and RBCS. 
 In addition to singular Raman markers, paired bands are also examined
 ```{r}
-ROC_markers <- Raman.Markers.Roc(Preprocessing.Cutoff(data_cleaned, 1400, 1500), paired  = TRUE, threshold = 0.8) 
-cor_markers <- Raman.Markers.Correlations(Preprocessing.Cutoff(data_cleaned, 1400, 1500), min.cor = 0.8) 
+ROC_markers <- Raman.Markers.Roc(Preprocessing.Cutoff(data_cleaned, 1400, 1500), paired  = TRUE, threshold = 0.6) 
+cor_markers <- Raman.Markers.Correlations(Preprocessing.Cutoff(data_cleaned, 1400, 1500), min.cor = 0.6) 
 RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, show = T) 
 ```
 #### IRCA
@@ -98,10 +98,11 @@ IRCA.interests <- Intraramanome.Analysis.Irca.Global(data_cleaned)
 ```
 - Local IRCA
 ```{r}
-bands_ann <- data.frame(rbind(cbind(c(742,850,872,971,997,1098,1293,1328,1426,1576),'Nucleic acid'),
-                              cbind(c(824,883,1005,1033,1051,1237,1559,1651),'Protein'),
-                              cbind(c(1076,1119,1370,2834,2866,2912),'Lipids')))
-colnames(bands_ann) <- c('Wave_num', 'Group')
+bands_ann <- data.frame(
+  Wave_num = c(742,850,872,971,997,1098,1293,1328,1426,1576,
+               824,883,1005,1033,1051,1237,1559,1651,
+               1076,1119,1370,2834,2866,2912),
+  Group = rep(c('Nucleic acid', 'Protein', 'Lipids'), times = c(10, 8, 6)) )
 Intraramanome.Analysis.Irca.Local(data_cleaned, bands_ann = bands_ann)
 ```
 - 2D-COS 
@@ -112,7 +113,7 @@ data_cos <- Intraramanome.Analysis.2Dcos(data_cleaned)
 #### Phenotype analysis
 RamEx provides three types of phenotype analysis: Louvain clustering, K-means clustering and hierarchical clustering.
 ```{r}
-clusters_louvain <- Phenotype.Analysis.Louvaincluster(object = data_cleaned, resolutions = c(0.6, 0.8)) 
+clusters_louvain <- Phenotype.Analysis.Louvaincluster(object = data_cleaned, resolutions = c(0.8)) 
 clusters_kmneans <- Phenotype.Analysis.Kmeans(data_cleaned,5)
 clusters_hca <- Phenotype.Analysis.Hca(data_cleaned)
 ```
