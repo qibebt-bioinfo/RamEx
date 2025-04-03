@@ -31,19 +31,10 @@
 
 ### Installation
 
-You can install RamEx in two ways:
-
-1. From GitHub (recommended for latest version):
+RamEx will be installed from GitHub:.
 ```{r}
 library('devtools')
 install_github("qibebt-bioinfo/RamEx")
-```
-
-2. From tar.gz file:
-- Download the latest release: [RamEx_0.3.1.tar.gz](https://github.com/qibebt-bioinfo/RamEx/releases/download/v0.3.1/RamEx_0.3.1.tar.gz)
-- Install from local file:
-```{r}
-install.packages("path/to/RamEx_0.3.1.tar.gz", repos = NULL, type = "source")
 ```
 
 ### Getting Started
@@ -199,9 +190,6 @@ RamEx also offers an online version. Please visit (http://ramex.single-cell.cn).
 - macOS:
   - macOS users can leverage Homebrew for a seamless installation experience also refer to the [POCL documentation](https://github.com/pocl/pocl).
 If you still face issues, please consider reaching out to the respective SDK support forums or the [OpenCL community](https://www.khronos.org/opencl/).
-
-**Q: Can't install RamEx?**  
-**A:** Please refer to the [Installation](#installation) section for detailed instructions.
 
 <!--(it's recommended to use the latest version - RamEx 2.1)  -->
 
