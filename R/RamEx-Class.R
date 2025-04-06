@@ -124,45 +124,64 @@ setMethod(
 #' Subset method for Ramanome objects
 #'
 #' @param x The Ramanome object
-#' @param i The indices for subsetting
-#' @param j Index or name of the slot to subset
+#' @param i The indices for subsetting rows
+#' @param j The indices for subsetting columns (wavenumbers)
 #' @param ... Additional arguments
 #' @param drop Boolean indicating whether to drop unused slots (default: TRUE)
 #' @return A new Ramanome object containing the subset of data
-#' @examples
-#' # Create sample Ramanome object
-#' wavenumbers <- seq(500, 3500, by = 10)
-#' spectra <- matrix(rnorm(100 * length(wavenumbers)), nrow = 100)
-#' metadata <- data.frame(
-#'   group = factor(rep(c("Control", "Treatment"), each = 50))
-#' )
-#' raman_obj <- new("Ramanome",
-#'   datasets = list(raw = spectra),
-#'   wavenumber = wavenumbers,
-#'   meta.data = metadata
-#' )
-#' 
 #' @export
 setMethod("[", "Ramanome", function(x, i, j, ..., drop = TRUE) {
-  new.wavenumber = x@wavenumber
-  new.datasets = lapply(x@datasets,'[',i,)
-  new.meta.data = x@meta.data[i,]
-  new.reductions = lapply(x@reductions, function(reduction) {
+  # 处理行索引
+  if (missing(i)) {
+    i <- seq_len(nrow(get.nearest.dataset(x)))
+  }
+  
+  # 处理列索引（wavenumber）
+  if (missing(j)) {
+    j <- seq_along(x@wavenumber)
+  }
+  
+  # 更新 wavenumber
+  new.wavenumber <- x@wavenumber[j]
+  
+  # 更新 datasets
+  new.datasets <- lapply(x@datasets, function(dataset) {
+    if (is.matrix(dataset)) {
+      dataset[i, j, drop = FALSE]
+    } else {
+      dataset
+    }
+  })
+  
+  # 更新 meta.data
+  new.meta.data <- x@meta.data[i, , drop = FALSE]
+  
+  # 更新 reductions
+  new.reductions <- lapply(x@reductions, function(reduction) {
     if (is.matrix(reduction)) {
       reduction[i, , drop = FALSE]
     } else {
       reduction
     }
   })
-  new.interested.bands = lapply(x@interested.bands, function(bands) {
+  
+  # 更新 interested.bands
+  new.interested.bands <- lapply(x@interested.bands, function(bands) {
     if (is.matrix(bands)) {
       bands[i, , drop = FALSE]
     } else {
       bands
     }
   })
-  new_obj <- new("Ramanome", wavenumber = new.wavenumber, datasets = new.datasets, meta.data=new.meta.data,
-                 reductions=new.reductions, interested.bands=new.interested.bands )
+  
+  # 创建新的 Ramanome 对象
+  new_obj <- new("Ramanome",
+                 wavenumber = new.wavenumber,
+                 datasets = new.datasets,
+                 meta.data = new.meta.data,
+                 reductions = new.reductions,
+                 interested.bands = new.interested.bands)
+  
   return(new_obj)
 })
 
