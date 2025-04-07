@@ -158,7 +158,7 @@ setMethod("[", "Ramanome", function(x, i, j, ..., drop = TRUE) {
   
   # 更新 reductions
   new.reductions <- lapply(x@reductions, function(reduction) {
-    if (is.matrix(reduction)) {
+    if (!is.null(reduction)) {
       reduction[i, , drop = FALSE]
     } else {
       reduction
@@ -167,7 +167,7 @@ setMethod("[", "Ramanome", function(x, i, j, ..., drop = TRUE) {
   
   # 更新 interested.bands
   new.interested.bands <- lapply(x@interested.bands, function(bands) {
-    if (is.matrix(bands)) {
+    if (is.null(bands)) {
       bands[i, , drop = FALSE]
     } else {
       bands

@@ -568,7 +568,12 @@ Raman.Markers.Rbcs <- function(
 #' Calculates the correlations between each column of a dataset X and a target variable y by traversing all possible single and paired markers.
 #'
 #' @param object A Ramanome object.
+#' @param group A factor vector (should be the same length as the cell number in the object), as the target variable. default is object$group.
+#' @param paired Whether to consider paired markers, e.g. wave1 / wave2. Default is FALSE
 #' @param min.cor The minimum correlation threshold. Defaults to 0.8.
+#' @param by_average Whether to average the spectra of each group. Default is FALSE. if TRUE, the spectra will be execute baseline correction in peak regions to remove the baseline caused by the local, adjacent peak signal.
+#' @param min.range The minimum wavenumber range of the bands when bubble method considering them as a peak (see 'by_average'). Default is 30.
+#' @param extract_num Whether to extract numeric values from the group column. Default is TRUE. If else, the correlations will be calculated based on the group factor level.
 #' @return A list containing the high correlation elements and their corresponding correlations with the target variable, containing two data frames: 'correlations_singular' for single markers (group ~ wave) and 'combination_correlations_two' for paired markers (group ~ wave1 / wave2).
 #' 
 #' @export Raman.Markers.Correlations
@@ -583,16 +588,24 @@ Raman.Markers.Rbcs <- function(
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' options(mc.cores = 2)
 #' cor_markers <- Raman.Markers.Correlations(preprocessing.cutoff(data_processed, 800, 1300), min.cor = 0.6)
-Raman.Markers.Correlations <- function(object, min.cor=0.8) {
-  X <- as.data.frame(get.nearest.dataset(object))
-  waves <- colnames(X)
-  y <- as.numeric(object@meta.data$group)
+Raman.Markers.Correlations <- function(object,group=object$group, paired = FALSE,
+min.cor=0.8, by_average = FALSE, min.range = 30,  extract_num = TRUE) {
+  if(by_average){
+    aver_spec <- average_spectra(get.nearest.dataset(object), group, min.range)
+    X <- as.data.frame(aver_spec$means)
+    group <- aver_spec$group
+  }else{
+    X <- as.data.frame(get.nearest.dataset(object))
+  }
+  waves <- object@wavenumber
+  y <- if(extract_num) as.numeric(gsub("[^0-9]", "", group)) else as.numeric(group)
   
   correlations <- sapply(X, function(col) cor(col, y, use = "complete.obs"))
   
   cat('Finding singular markers ... \n')
   high_cor_elements <- which(abs(correlations) > min.cor)
   
+  if(paired){
   combinations_two <- expand.grid(col1 = waves, col2 = waves) %>% dplyr::filter(col1 != col2)
   
   numCores <- detectCores() - 1
@@ -614,11 +627,37 @@ Raman.Markers.Correlations <- function(object, min.cor=0.8) {
   }))
   # 停止并行计算
   stopCluster(cl)
+  }else{
+    combination_correlations_two <- NULL
+  }
   
   list(
-    correlations_singular = if(length(high_cor_elements) == 0) NA else data.frame(wave=waves[high_cor_elements], corrlations = correlations[high_cor_elements]),
+    correlations_singular = if(length(high_cor_elements) == 0) NA else data.frame(wave=object@wavenumber[high_cor_elements], corrlations = correlations[high_cor_elements]),
     combination_correlations_two = if(length(combination_correlations_two) == 0) NA else combination_correlations_two
   )
+}
+
+
+#' Average spectra of each group
+#'
+#' This function averages the spectra of each group in a Ramanome object.
+#'
+#' @param matrix A matrix of Raman spectra.
+#' @param group A factor indicating the grouping variable.
+#' @param min.range The minimum wavenumber range of the bands when bubble method considering them as a peak. 
+#' @noRd
+average_spectra <- function(matrix, group, min.range ){
+  means <- aggregate(matrix, by = list(group), mean)
+  group <- means[, 1]
+  means <- as.matrix(means[, -1])
+  bands <- apply(means, 1, function(x)bubblefill(x,min_bubble_widths = min.range)$bands)
+  bands <- bands[[which.max(sapply(bands,length))]]
+  bands[[1]][colnames(means)[2]] <- 1
+  bands[[length(bands)]][colnames(means)[ncol(means)]] <- ncol(means)
+  corre_means <- lapply(bands,function(x)polyfit(means[,c(x[1]:x[2])], degree = 2 )$corrected)
+  corre_means <- do.call(cbind, corre_means)
+  colnames(corre_means) <- colnames(means)
+  return(list(means = corre_means, group = group))
 }
 
 #' Find Markers Using receiver operator characteristic (ROC) curve
@@ -687,3 +726,5 @@ Raman.Markers.Roc <- function(object, threshold = 0.75, paired = FALSE, batch_si
   
   return(markers_all)
 }
+
+

@@ -11,6 +11,7 @@
 #' @param tol The tolerance for convergence of the iterative fitting process.
 #' @param rep The maximum number of iterations to perform.
 #' @return A list containing the baseline and the corrected spectra.
+#' @noRd
 polyfit <- function (spectra, t, degree = 4, tol = 0.001, rep = 100)
 {
   dimnames(spectra) <- NULL
@@ -83,6 +84,7 @@ grow_bubble <- function(spectrum, alignment = "center") {
 #' @param baseline A vector of baseline values.
 #' @param bubble A vector of bubble values.
 #' @return A vector of the larger values
+#' @noRd
 
 keep_largest <- function(baseline, bubble) {
   for (i in 1:length(baseline)) {
@@ -103,6 +105,7 @@ keep_largest <- function(baseline, bubble) {
 #' @param baseline A numeric vector representing the baseline of the spectrum.
 #' @param min_bubble_widths A numeric value or vector specifying the minimum width of the bubbles.
 #' @return A list containing the adjusted baseline and the bounds of each bubble.
+#' @noRd
 bubbleloop <- function(spectrum, baseline, min_bubble_widths) {
   range_cue <- list(c(1, length(spectrum)))
   bounds <- list()
@@ -160,6 +163,7 @@ bubbleloop <- function(spectrum, baseline, min_bubble_widths) {
 #'   If a vector, it should be of the same length as the spectrum, specifying the minimum width for each point.
 #' @return A list containing the corrected spectrum (raman), the peak locations (peaks), and the band boundaries (bands).
 #' @importFrom prospectr savitzkyGolay
+#' @noRd 
 
 bubblefill <- function(spectrum, min_bubble_widths = 50) {
   if(is.null(names(spectrum))) xaxis <- as.numeric(colnames(spectrum)) else xaxis <- as.numeric(names(spectrum))

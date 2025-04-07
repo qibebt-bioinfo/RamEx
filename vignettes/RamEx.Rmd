@@ -39,6 +39,7 @@ Spectral pretreatment will make the spectrum clearer, containing smoothing, base
 Mean spectra will display their effects.
 Here the results of each step will be kept in the Ramanome for better debugging, and 'plot' exhibit the final dataset.
 ```{r}
+
 RamEx_data <- RamEx_data %>% Preprocessing.Smooth.Sg %>% Preprocessing.Baseline.Polyfit %>% Preprocessing.Normalize(.,'ch') 
 plot(RamEx_data)  
 ```
