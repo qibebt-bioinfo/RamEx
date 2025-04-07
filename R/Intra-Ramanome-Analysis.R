@@ -162,7 +162,6 @@ vectorize_dm_rcorr <- function(dm, group = NULL, duplicate = TRUE) {
 #' @param a_degree A dataframe containing the degree information.
 #' @param a_SumCorr A dataframe containing the sum correlation information.
 #' @param a_MeanCorr A dataframe containing the mean correlation information.
-#' @param main_title The main title for the plot.
 #' @param Pos_Edge Logical indicating whether to include positive edges.
 #' @param Neg_Edge Logical indicating whether to include negative edges.
 #' @param Threshold The threshold value for considering edges as statistically significant.
@@ -178,7 +177,6 @@ Plot_global_chordDiagram_rpvalue <- function(
     a_degree = NULL,
     a_SumCorr = NULL,
     a_MeanCorr = NULL,
-    main_title = NULL,
     Pos_Edge = FALSE,
     Neg_Edge = FALSE,
     Threshold = 0.6,
@@ -204,7 +202,7 @@ Plot_global_chordDiagram_rpvalue <- function(
 
   par(mar = c(1, 1, 1, 1))
   circos.clear()
-  circos.par("start.degree" = 90)
+  circos.par("start.degree" = 90, "points.overflow.warning" = FALSE)
   raw_wn <- as.numeric(str_replace_all(colnames(Corr_mat), "[A-Z]", ""))
   circos.initialize("a", xlim = c(raw_wn[1] - 1, raw_wn[length(raw_wn)] + 0.1 * (raw_wn[length(raw_wn)] - raw_wn[1]))) # 'a' just means there is one sector
 
@@ -511,7 +509,7 @@ Intraramanome.Analysis.Irca.Global.draw <- function(dataset, group, threshold = 
   corr_matrix[cor_list[[3]] > 0.05] <- 0
   rownames(corr_matrix) <- colnames(corr_matrix)
   
-  cat('It may take a while to save the plot, please be patient.\n')
+  cat('It may take a while to drawing the plot, please be patient.\n')
   Plot_global_chordDiagram_rpvalue(corr_matrix,Neg_Edge = TRUE,Threshold = threshold)
   corr_matrix[!upper.tri(corr_matrix, diag = TRUE)] <- 0
   locs <- which(corr_matrix < -threshold, arr.ind = TRUE)
@@ -596,7 +594,7 @@ Intraramanome.Analysis.Irca.Local.draw <- function(dataset, bands_ann, threshold
 Intraramanome.Analysis.Irca.Global <- function(object, threshold = 0.6, show = TRUE, save = FALSE) {
   dataset <- get.nearest.dataset(object)
   waves <- object@wavenumber
-  IRCA.interests <- lapply(unique(object@meta.data$group), function(x) {
+  IRCA.interests <- lapply(levels(object@meta.data$group), function(x) {
     temp_data <- dataset[object@meta.data$group == x,]
     if (save) {
       jpeg(
@@ -607,11 +605,12 @@ Intraramanome.Analysis.Irca.Global <- function(object, threshold = 0.6, show = T
         res = 200
       )
       cat('Saving global IRCA to the current working directory: ', getwd(), '\n')
-      interests <- Intraramanome.Analysis.Irca.Global.draw(temp_data, x, threshold)
+      title(x, line = 0.2, adj = 0.1, cex.main = 1.2, font.main = 2)
       dev.off()
     } 
     if (show) {
       interests <- Intraramanome.Analysis.Irca.Global.draw(temp_data, x, threshold)
+      title(x, line = 0.2, adj = 0.1, cex.main = 1.2, font.main = 2)
     }
     if (!save & !show) {
       interests <- Intraramanome.Analysis.Irca.Global.cal(temp_data, x, threshold)
@@ -649,7 +648,7 @@ Intraramanome.Analysis.Irca.Local <- function(object, bands_ann, threshold = 0.6
   locs <- unlist(lapply(as.numeric(bands_ann$Wave_num), function(x)which.min(abs(object@wavenumber - x))))
   bands_ann$Wave_num <- waves[locs]
   dataset <- dataset[, waves %in% bands_ann$Wave_num]
-  lapply(unique(object@meta.data$group), function(x) {
+  invisible(lapply(levels(object@meta.data$group), function(x) {
     temp_data <- dataset[object@meta.data$group == x,]
     if (save) {
       cat('Saving local IRCA to the current working directory: ', getwd(), '\n')
@@ -662,13 +661,15 @@ Intraramanome.Analysis.Irca.Local <- function(object, bands_ann, threshold = 0.6
       type = 'png'
     )
       Intraramanome.Analysis.Irca.Local.draw(temp_data, bands_ann, threshold)
+      title(x, line = 0.15, adj = 0.1, cex.main = 1.2, font.main = 2)
       grDevices::dev.off()
     }
     if (show) {
       Intraramanome.Analysis.Irca.Local.draw(temp_data, bands_ann, threshold)
+      title(x, line = 0.15, adj = 0.1, cex.main = 1.2, font.main = 2)
     }
 
-  })
+  }))
 }
 
 

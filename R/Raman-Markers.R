@@ -625,7 +625,6 @@ min.cor=0.8, by_average = FALSE, min.range = 30,  extract_num = TRUE) {
       NULL
     }
   }))
-  # 停止并行计算
   stopCluster(cl)
   }else{
     combination_correlations_two <- NULL
