@@ -8,22 +8,29 @@ Plot.reductions(
   object,
   reduction = "UMAP",
   dims = c(1, 2),
-  group = object$group,
-  cols = RamEx.colors,
+  color = object$group,
+  cols = NULL,
   point_size = 1,
-  point_alpha = 0.5
+  point_alpha = 0.5,
+  quantile_range = c(0.05, 0.95)
 )
 }
 \arguments{
 \item{object}{A Ramanome object}
 
-\item{reduction}{Name of the reduction to plot (default: "UMAP")}
+\item{reduction}{Name of the reduction to plot (default: "UMAP"). This must be one of 'PCA', 'UMAP', 'PCoA', 'tSNE'}
 
-\item{cols}{Optional color palette for groups}
+\item{dims}{Dimensions to plot (default: c(1,2))}
+
+\item{color}{Group information or intensity values to fill the points}
+
+\item{cols}{Optional color palette for drawing.}
 
 \item{point_size}{Size of points (default: 1)}
 
 \item{point_alpha}{Transparency of points (default: 0.5)}
+
+\item{quantile_range}{Range of quantiles for color scaling when given a continuous values as 'color'(default: c(0.05, 0.95))}
 }
 \value{
 A ggplot object
