@@ -92,7 +92,7 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,n_pc=10, thres
     cat('Processing resolution:', resolution, '\n')
     
     louvain_clusters <- cluster_louvain(g, resolution = resolution)  #这里好像可以改成leiden聚类，但是我没试过
-    clusters <- membership(louvain_clusters)
+    clusters <- as.factor(membership(louvain_clusters))
     
     leaved_clusters <- which(table(clusters) > min.sample)
     clusters_index <- clusters %in% leaved_clusters
@@ -174,6 +174,7 @@ Phenotype.Analysis.Kmeans <- function(object, k, n_pc=10) {
 #' The function also plots the resulting dendrogram.
 #'
 #' @param object A Ramanome object.
+#' @param show Whether to plot the dendrogram.
 #' @return The hierarchical clustering fit object.
 #' @export Phenotype.Analysis.Hca
 #' @importFrom stats hclust
@@ -184,16 +185,17 @@ Phenotype.Analysis.Kmeans <- function(object, k, n_pc=10) {
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' clusters_hca <- Phenotype.Analysis.Hca(data_processed)
 
-Phenotype.Analysis.Hca <- function(object) {
-  dataset <- object@datasets$normalized.data
+Phenotype.Analysis.Hca <- function(object, show = FALSE) {
+  dataset <- get.nearest.dataset(object)
   distance.matrix <- vegdist(dataset, method = "euclidean")
   fit.average <- hclust(distance.matrix, method="average")
-  plot(
+  if(show){
+    plot(
     fit.average,
     hang=-1,
     cex=.8,
     main="Vaerage Linkage Clustering"
-  )
+  )}
   return(fit.average)
 }
 
