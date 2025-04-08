@@ -339,13 +339,11 @@ time.series <- function(object, reduction = 'UMAP') {
 #' @importFrom ggplot2 theme_bw
 #' @importFrom ggforce geom_mark_hull
 #' @importFrom dplyr filter
-#' @importFrom scales hue_pal
 #' @importFrom ggplot2 scale_fill_manual
 #' @importFrom ggplot2 scale_color_manual
 
 cluster.color <- function(data, group) {
-  ncluster <- length(unique(data$cluster))
-  colors <- scales::hue_pal(direction = -1)(ncluster)
+  colors <- RamEx.colors
   names <- names(data)
 
   ggplot(data, aes_string(names[1], names[2])) +
@@ -390,7 +388,6 @@ single <- function(spec, x) {
 #' @param dir_path The directory path where the Raman data is located.
 #' @return NULL. The function processes the input text files and saves new text files in the same directory
 #'         with modified names based on the grouping of the data. The original input files are removed.
-#' @importFrom purrr map
 #' @importFrom data.table fread
 #' @importFrom data.table fwrite
 #' @importFrom dplyr %>%
@@ -408,7 +405,7 @@ save.renishaw <- function(dir_path) {
     filename <- filenames[j] %>% gsub('.txt', '', .)
     spec <- fread(filenames[j], header = FALSE, sep = "\t")
     groups <- base::unique(paste(spec$V1, spec$V2))
-    aa <- purrr::map(as.list(groups), single, spec = spec)
+    aa <- lapply(as.list(groups), single, spec = spec)
     names(aa) <- seq_along(aa)
     for (i in seq_along(aa)) {
       fwrite(

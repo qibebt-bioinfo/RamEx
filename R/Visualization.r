@@ -1,5 +1,7 @@
 #' Plot Heatmap of Markers
 #'
+#' @importFrom pheatmap pheatmap
+#' @importFrom grDevices colorRampPalette
 #' @param object A Ramanome object
 #' @param markers A list of markers (wave numbers)
 #' @param group group information to show the heatmap and marker intensities

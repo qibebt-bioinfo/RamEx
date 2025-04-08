@@ -56,6 +56,7 @@ Feature.Reduction.Pca <- function(object, show = TRUE, save=FALSE, n_pc = 2) {
 #'
 #' @param object A Ramanome object containing the dataset and metadata.
 #' @param PCA Optional. A numeric value indicating the number of principal components to use. Defaults to 20 (if NULL,raw data matrix will be used to generate t-SNE plot).
+#' @param n_pc The number of t-SNE components to save. Defaults to 2.
 #' @param perplexity Controls the balance between local and global structure in the t-SNE algorithm. Typical values range from 5 to 50, with higher values preserving more global structure.
 #' @param theta A speed-up parameter for approximate computation (Barnes-Hut algorithm). It ranges from 0 to 1, where smaller values yield more precise results but at higher computational cost (default is 0.5)
 #' @param max_iter Controls the balance between local and global structure in the t-SNE algorithm. Typical values range from 5 to 50, with higher values preserving more global structure.
@@ -75,7 +76,7 @@ Feature.Reduction.Pca <- function(object, show = TRUE, save=FALSE, n_pc = 2) {
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' data.reduction.tsne <- Feature.Reduction.Tsne(data_processed, show=TRUE, save = FALSE)
-Feature.Reduction.Tsne <- function(object, PCA=20, perplexity=5, theta=0.5, max_iter=1000,show = TRUE, save=FALSE, seed=42) {
+Feature.Reduction.Tsne <- function(object, PCA=20, n_pc = 2, perplexity=5, theta=0.5, max_iter=1000,show = TRUE, save=FALSE, seed=42) {
   set.seed(seed)
   if (!is.null(PCA)) {
     if (is.null(object@reductions$PCA)) {object <- Feature.Reduction.Pca(object, n_pc =PCA, show = FALSE)} 
@@ -87,13 +88,13 @@ Feature.Reduction.Tsne <- function(object, PCA=20, perplexity=5, theta=0.5, max_
   
   data.red <- data.frame(Rtsne::Rtsne(
     dataset,
-    dims = 2,
+    dims = n_pc,
     perplexity = perplexity,
     theta = theta,
     verbose = FALSE,
     max_iter = max_iter
   )$Y)
-  colnames(data.red) <- c("tSNE 1", "tSNE 2")
+  colnames(data.red) <- paste0("tSNE ", 1:n_pc)
   object@reductions$tSNE <- data.red
   
   if (show){
@@ -129,6 +130,7 @@ Feature.Reduction.Tsne <- function(object, PCA=20, perplexity=5, theta=0.5, max_
 #'
 #' @param object A Ramanome object containing the dataset.
 #' @param PCA A numeric value indicating the number of principal components to use. Defaults to 20 (if NULL,raw data matrix will be used to generate UMAP plot). 
+#' @param n_pc The number of UMAP components to save. Defaults to 2.
 #' @param n_neighbors Controls the balance between local and global structure in UMAP. Higher values capture more global structure, while lower values focus on local details (typical range: 5–50).
 #' @param min.dist Determines the minimum distance between points in the embedding. Lower values (e.g., 0.1) produce tighter clusters, while higher values (e.g., 0.5) allow more spread.
 #' @param spread Scales the effective scale of points in the embedding. Works with min.dist to control cluster density—higher values spread points apart, while lower values compress them.
@@ -152,7 +154,7 @@ Feature.Reduction.Tsne <- function(object, PCA=20, perplexity=5, theta=0.5, max_
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' data.reduction.umap <- Feature.Reduction.Umap(data_processed, show=TRUE, save = FALSE)
 #'
-Feature.Reduction.Umap <- function(object, PCA=20, n_neighbors=30, min.dist=0.01,spread=1, show = TRUE, save=FALSE, seed=42) {
+Feature.Reduction.Umap <- function(object, PCA=20, n_pc = 2, n_neighbors=30, min.dist=0.01,spread=1, show = TRUE, save=FALSE, seed=42) {
   set.seed(seed)
   if (!is.null(PCA)) {
     if (is.null(object@reductions$PCA) ) {object <- Feature.Reduction.Pca(object, n_pc =PCA, show = FALSE)} 
@@ -162,9 +164,9 @@ Feature.Reduction.Umap <- function(object, PCA=20, n_neighbors=30, min.dist=0.01
     dataset <- get.nearest.dataset(object)
   }
 
-  data.red <- data.frame(uwot::umap(dataset, scale = FALSE,  n_threads = detectCores(),
+  data.red <- data.frame(uwot::umap(dataset, scale = FALSE, n_components = n_pc, n_threads = detectCores(),
   n_neighbors = n_neighbors, min_dist=min.dist, spread=spread, a=0.9922, b=1.112, metric = 'cosine',seed=seed))
-  colnames(data.red) <- c("UMAP 1", "UMAP 2")
+  colnames(data.red) <- paste0("UMAP ", 1:n_pc)
   
   object@reductions$UMAP <- data.red
   
@@ -201,32 +203,34 @@ Feature.Reduction.Umap <- function(object, PCA=20, n_neighbors=30, min.dist=0.01
 #' The plot can also be saved as a PNG file if specified.
 #'
 #' @param object A Ramanome object containing the dataset and metadata.
+#' @param PCA A numeric value indicating the number of principal components to use. Defaults to 20 (if NULL,raw data matrix will be used to generate PCoA plot). 
+#' @param n_pc The number of PCoA components to save. Defaults to 2.
+#' @param distance The distance method to use. Defaults to "euclidean". Other methods see ?stats::dist.
 #' @param show A logical value indicating whether to draw the PCoA plot. Defaults to TRUE.
 #' @param save A logical value indicating whether to save the plot as a PNG file. Defaults to FALSE.
 #' @return The updated Ramanome object with the PCoA results appended to the `reductions` slot.
 #' @export Feature.Reduction.Pcoa
-#' @importFrom vegan vegdist
-#' @importFrom stats aov
+#' @importFrom stats dist
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
 #' @importFrom ggplot2 labs
 #' @importFrom ggplot2 ggsave
-#' @importFrom ade4 dudi.pco
 #' @examples
 #' data(RamEx_data)
-#' data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-#' data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-#' data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-#' data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-#' qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-#' data_cleaned <- data_normalized[qc_icod$quality,]
-#' data.reduction.pcoa <- Feature.Reduction.Pcoa(data_cleaned, show=TRUE, save = FALSE)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' data.reduction.pcoa <- Feature.Reduction.Pcoa(data_processed, show=TRUE, save = FALSE)
 
-Feature.Reduction.Pcoa <- function(object, show = TRUE, save=FALSE) {
-  dataset <- get.nearest.dataset(object)
-  distance.matrix <- vegdist(dataset, method = "euclidean")
-  data.red <- data.frame(dudi.pco(distance.matrix, scannf = FALSE, nf=2)$li)
-  names(data.red) <- c('PCoA 1', 'PCoA 2')
+Feature.Reduction.Pcoa <- function(object, PCA=20, n_pc = 2, distance = "euclidean", show = TRUE, save=FALSE) {
+  if (!is.null(PCA)) {
+    if (is.null(object@reductions$PCA) ) {object <- Feature.Reduction.Pca(object, n_pc =PCA, show = FALSE)} 
+    if (ncol(object@reductions$PCA) < PCA) {object <- Feature.Reduction.Pca(object, n_pc =PCA, show = FALSE)}
+    dataset <- object@reductions$PCA}
+  else {
+    dataset <- get.nearest.dataset(object)
+  }
+  distance.matrix <- stats::dist(dataset, method = distance)
+  data.red <- data.frame(cmdscale(distance.matrix, k = n_pc))
+  names(data.red) <- paste0('PCoA ', 1:n_pc)
   
   object@reductions$PCoA <- data.red
   if (show){

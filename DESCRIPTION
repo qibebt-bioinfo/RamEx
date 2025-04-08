@@ -13,13 +13,15 @@ Encoding: UTF-8
 RoxygenNote: 7.3.2
 Depends: R (>= 3.5.0)
 Imports:
-   MASS, RColorBrewer, Rcpp, RcppParallel, circlize, pls, mclust, MLmetrics, Matrix, NMF, parallel, Rtsne, cowplot, data.table, dbscan,  dplyr, e1071, fastICA, foreach, ggforce, ggplot2, grDevices, graphics, ica, igraph, mdatools, methods, pheatmap, irlba, prospectr, purrr, randomForest, rlist, scales, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, proxy, reshape2,  RcppAnnoy, ade4, corr2D, robustbase
+   MASS, RColorBrewer, Rcpp, RcppParallel, circlize, pls, mclust, MLmetrics, Matrix, parallel, Rtsne, cowplot, data.table, 
+   dbscan,  dplyr, e1071, ggforce, ggplot2, grDevices, graphics, ica, igraph, mdatools, pheatmap, irlba, prospectr,
+   randomForest, rlist, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, reshape2, RcppAnnoy, corr2D, robustbase
 Suggests:
-    testthat,knitr,gpuR, Biobase
+    testthat,knitr,gpuR
 LinkingTo:
     Rcpp, RcppParallel
 biocViews: Visualization, Clustering, Software
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2025-04-02
+Packaged: 2025-04-08

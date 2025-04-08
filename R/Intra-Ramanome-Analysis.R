@@ -1,7 +1,6 @@
 #' Calculate Mahalanobis distance for every observation
 #'
 #' This function calculates the Mahalanobis distance for every observation in the given data matrix.
-#' @importFrom proxy as.matrix
 #' @param data The input data matrix.
 #'
 #' @return A vector containing the Mahalanobis distance for each observation.
@@ -55,7 +54,6 @@ outliers_maha_chisquare <- function(data, p = 0.1) {
 #' This function calculates Pearson's and Spearman's correlation coefficients for a given data frame.
 #' The function uses the `rcorr` function from the Hmisc package to perform the correlation analysis.
 #' @importFrom Hmisc rcorr
-#' @importFrom proxy as.matrix
 #' @param df A data frame.
 #' @return A list containing the correlation matrix, p-values, and the number of observations used for each correlation.
 #' @noRd 
@@ -345,7 +343,6 @@ Plot_global_chordDiagram_rpvalue <- function(
 #'   \item{Sector highlights}{Visual grouping of related variables}
 #'   The function has no explicit return value as it generates the plot directly.
 #'
-#' @import RColorBrewer
 #' @import circlize
 #' @importFrom graphics par
 #' @importFrom graphics plot
@@ -356,7 +353,8 @@ Plot_local_chordDiagram_rpvalue <- function(
     Pos_Edge = FALSE,
     Neg_Edge = FALSE,
     Threshold = 0.6,
-    bands_ann = NULL
+    bands_ann = NULL,
+    colours = RamEx.colors
 ) {
   # Compute correlation matrix and p-values
   Corr_mat <- rcorr_df(x)[[1]] # r
@@ -369,18 +367,6 @@ Plot_local_chordDiagram_rpvalue <- function(
 
   # Set non-significant correlations to a value greater than 1
   Corr_mat[which(seq_along(Corr_mat) %in% which(Corr_mat_pvalue < 0.05) == FALSE)] <- 1.1
-
-  # Define color palette
-  colours <- c(
-    brewer.pal(8, "Dark2"),
-    brewer.pal(9, "Set1"),
-    brewer.pal(9, "Pastel1"),
-    brewer.pal(12, "Paired"),
-    brewer.pal(8, "Set2"),
-    brewer.pal(12, "Set3"),
-    brewer.pal(8, "Accent"),
-    brewer.pal(8, "Pastel2")
-  )
 
   # Determine color scale depending on the edge type
   if (Pos_Edge & Neg_Edge) {
@@ -662,7 +648,7 @@ Intraramanome.Analysis.Irca.Local <- function(object, bands_ann, threshold = 0.6
     )
       Intraramanome.Analysis.Irca.Local.draw(temp_data, bands_ann, threshold)
       title(x, line = 0.15, adj = 0.1, cex.main = 1.2, font.main = 2)
-      grDevices::dev.off()
+      dev.off()
     }
     if (show) {
       Intraramanome.Analysis.Irca.Local.draw(temp_data, bands_ann, threshold)
