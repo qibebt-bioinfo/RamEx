@@ -673,6 +673,6 @@ Intraramanome.Analysis.Irca.Local <- function(object, bands_ann, threshold = 0.6
 Intraramanome.Analysis.2Dcos <- function(object) {
   data <- get.nearest.dataset(object)
   twod <- corr2d(data)
-  plot_corr2d(twod, Legend = FALSE)
+  invisible(plot_corr2d(twod, Legend = FALSE))
   return(twod)
 }

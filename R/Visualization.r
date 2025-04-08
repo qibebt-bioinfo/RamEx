@@ -190,30 +190,58 @@ assign_variable <- function(data, group){
 #' Plot Scatter Plot from Reductions
 #'
 #' @param object A Ramanome object
-#' @param reduction Name of the reduction to plot (default: "UMAP")
-#' @param cols Optional color palette for groups
+#' @param reduction Name of the reduction to plot (default: "UMAP"). This must be one of 'PCA', 'UMAP', 'PCoA', 'tSNE'
+#' @param dims Dimensions to plot (default: c(1,2))
+#' @param color Group information or intensity values to fill the points
+#' @param cols Optional color palette for drawing.
 #' @param point_size Size of points (default: 1)
 #' @param point_alpha Transparency of points (default: 0.5)
+#' @param quantile_range Range of quantiles for color scaling when given a continuous values as 'color'(default: c(0.05, 0.95))
 #' @return A ggplot object
 #' @export
-Plot.reductions <- function(object, reduction = "UMAP", dims=c(1,2), group = object$group, cols=RamEx.colors,
-                        point_size = 1, point_alpha = 0.5) {
-  plot_data <- object@reductions[[reduction]][,dims]
-  plot_data$group <- group
-  names <- colnames(plot_data)[1:2]
-  
-  p <- ggplot(plot_data, aes(
-    x = get(names[1]),
-    y = get(names[2]),
-    color = group,
-    fill = group
-  )) +
-    geom_point(size = point_size, alpha = point_alpha) +
-    theme_classic()
-  
-  return(p)
-}
+Plot.reductions <- function(object, reduction = "UMAP", dims = c(1,2), color = object$group, 
+                        cols = NULL, point_size = 1, point_alpha = 0.5,
+                        quantile_range = c(0.05, 0.95)) {
+    plot_data <- object@reductions[[reduction]][,dims]
+    plot_data$group <- color
+    names <- colnames(plot_data)[1:2]
+    
+    if (is.numeric(color) && length(unique(color)) > 10) {
+        if (is.null(cols)) {
+            cols <- colorRampPalette(c("#F7F650FF", '#51C56AFF', "#2D708EFF"))(100)
+        }
+        
+        p <- ggplot(plot_data, aes(
+            x = get(names[1]),
+            y = get(names[2]),
+            color = color
+        )) +
+            geom_point(size = point_size, alpha = point_alpha) +
+            scale_color_gradientn(
+                colors = cols,
+                limits = quantile(color, quantile_range),
+                oob = scales::squish
+            ) +
+            theme_classic()
+    } else {
 
+        if (is.null(cols)) {
+            cols <- RamEx.colors
+        }
+        
+        p <- ggplot(plot_data, aes(
+            x = get(names[1]),
+            y = get(names[2]),
+            color = color,
+            fill = color
+        )) +
+            geom_point(size = point_size, alpha = point_alpha) +
+            scale_color_manual(values = cols) +
+            theme_classic()
+    }
+    
+    return(p)
+}
 
 #' Plot histogram of group distributions
 #'
@@ -225,10 +253,7 @@ Plot.reductions <- function(object, reduction = "UMAP", dims=c(1,2), group = obj
 #' @param curve_type Type of curve for the alluvium (default: "sine")
 #' @return A ggplot object
 #' @export
-Plot.Cluster.Distribution <- function(group_1, group_2, cols = RamEx.colors, 
-                                    width = 0.9, alpha = 0.5, 
-                                    curve_type = "sine") {
-    # 计算比例
+Plot.Distribution <- function(group_1, group_2, cols = RamEx.colors, width = 0.9) {
     plot_data <- data.frame(
         table(group_1, group_2) / 
         rowSums(table(group_1, group_2))
@@ -242,18 +267,10 @@ Plot.Cluster.Distribution <- function(group_1, group_2, cols = RamEx.colors,
     p <- ggplot(plot_data, aes(
         x = Group_1,
         y = Prop,
-        fill = Group_2,
-        stratum = Group_2,
-        alluvium = Group_2
+        fill = Group_2
     )) +
-        geom_stratum(width = width, color = 'white') +
-        geom_alluvium(
-            alpha = alpha,
-            width = width,
-            curve_type = curve_type
-        ) +
+        geom_bar(stat = "identity", position = "stack", width = width) +
         scale_fill_manual(values = cols) +
-        scale_color_manual(values = cols) +
         theme_classic() +
         labs(
             x = "Time",
