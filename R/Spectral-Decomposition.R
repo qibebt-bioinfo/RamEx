@@ -59,27 +59,51 @@ Spectral.Decomposition.Ica <- function(object, n_comp=2, seed=42) {
 #' Non-negative Matrix Factorization (NMF)
 #'
 #' A matrix factorization method that approximates a data matrix as the product of two non-negative matrices, ensuring interpretability through non-negativity constraints.
-#'
+#' Lee & Seung's algorithm is used to implement NMF.
 #' @param object A Ramanome object.
 #' @param ncomp The number of components to retain in the NMF decomposition.
 #' @param seed The seed for the random number generator.
 #' @return A list containing:
 #' \item{basis}{The basis matrix of the NMF decomposition (n_cell x n_comp).} 
 #' \item{coef}{The coefficient matrix of the NMF decomposition (n_comp x n_wavelength).}
+#' \item{error}{The reconstruction error of the NMF decomposition.}
 #' while the reconstructed matrix is the product of the basis and coefficient matrices.
 #' @export Spectral.Decomposition.Nmf
-#' @importFrom NMF nmf
 #' @examples
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' decom_nmf <- Spectral.Decomposition.Nmf(data_processed)
 
 
-Spectral.Decomposition.Nmf <- function(object, n_comp=2, seed=42) {
+Spectral.Decomposition.Nmf <- function(object, n_comp=2, seed=42, max_iter = 100, tol = 1e-4, verbose = FALSE) {
   dataset <- get.nearest.dataset(object)
   dataset[dataset<0] <- 0
-  dataset <- dataset[rowSums(dataset) > 0, ]
-  dataset <- dataset[, colSums(dataset) > 0]
-  res <- nmf(dataset, n_comp, method="ns", seed=seed)
-  return(list(basis=res@fit@W, coef=res@fit@H))
+  decomposition <- nmf_lee(dataset, n_comp, max_iter = max_iter, tol = tol, seed = seed, verbose = verbose)
+  return(list(basis=decomposition$W, coef=decomposition$H, error=decomposition$error))
 }
+
+nmf_lee <- function(X, rank, max_iter = 100, tol = 1e-4, seed = 42, verbose = FALSE) {  
+  if (any(X < 0)) stop("Input matrix X must be non-negative.")  
+  
+  m <- nrow(X)  
+  n <- ncol(X) 
+  k <- rank     
+  
+  set.seed(seed)  
+  W <- matrix(runif(m * k, min = 0, max = 1), nrow = m, ncol = k)  
+  H <- matrix(runif(k * n, min = 0, max = 1), nrow = k, ncol = n)  
+  
+  for (i in 1:max_iter) {  
+    WH <- W %*% H  
+    
+    H <- H * (t(W) %*% X) / (t(W) %*% WH + 1e-9)  
+    W <- W * (X %*% t(H)) / (W %*% H %*% t(H) + 1e-9)  
+    error <- norm(X - WH, "F")  
+    
+    if (verbose) cat("Iteration:", i, "Reconstruction Error:", error, "\n")  
+    
+    if (error < tol) break  
+  }  
+  
+  list(W = W, H = H, error = error)  
+}  
