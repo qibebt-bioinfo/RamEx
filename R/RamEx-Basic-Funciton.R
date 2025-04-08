@@ -100,6 +100,7 @@ spec.mean.draw <- function(object, gap=0) {
 #' @param data A matrix or data frame containing the spectral data, colnames are wavenumbers.
 #' @param group Factor indicating the group for each row in the data.
 #' @param gap A numeric value representing the vertical gap between the mean lines of different groups.
+#' @param col A vector of colors for each group. If NULL, the default colors will be used.
 #' @return A ggplot2 plot
 #' @importFrom ggplot2 ggplot aes geom_ribbon geom_line labs scale_x_continuous theme
 #' @export mean.spec
@@ -108,9 +109,12 @@ spec.mean.draw <- function(object, gap=0) {
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' mean.spec(data_processed@datasets$normalized.data, data_processed@meta.data$group)
 
-mean.spec <- function(data, group, gap = 0.3) {
+mean.spec <- function(data, group, gap = 0.3, col=NULL) {
   levels <- levels(group)
   group <- as.character(group)
+  if(is.null(col)){
+    col <- RamEx.colors
+  }
   print(levels)
   data <- as.matrix(data)
   spec_mean <- aggregate(data, by = list(group), mean)
@@ -165,6 +169,8 @@ mean.spec <- function(data, group, gap = 0.3) {
       expand = c(0, 0),
       breaks = c(500,1000,1500,2000, 2500,3000,3500)
     ) +
+    scale_color_manual(values = col) +  
+    scale_fill_manual(values = col) +
     theme_classic()
 
   return(plot)

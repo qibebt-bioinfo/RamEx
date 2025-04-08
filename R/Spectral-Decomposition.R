@@ -25,6 +25,7 @@ Spectral.Decomposition.Mcrals<- function(object, n_comp=2, seed=42) {
     constraint("angle", params = list(weight = 0.05)),
     constraint("norm", params = list(type = "length"))
   ) )
+  row.names(mcrals$resspec) <- object@wavenumber
   results <- list(components=mcrals$resspec, concentration=mcrals$rescont)
   return(results)
 }
