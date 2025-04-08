@@ -4,10 +4,23 @@
 \alias{Feature.Reduction.Pcoa}
 \title{Perform Principal Coordinate Analysis (PCoA) and Plot Results}
 \usage{
-Feature.Reduction.Pcoa(object, show = TRUE, save = FALSE)
+Feature.Reduction.Pcoa(
+  object,
+  PCA = 20,
+  n_pc = 2,
+  distance = "euclidean",
+  show = TRUE,
+  save = FALSE
+)
 }
 \arguments{
 \item{object}{A Ramanome object containing the dataset and metadata.}
+
+\item{PCA}{A numeric value indicating the number of principal components to use. Defaults to 20 (if NULL,raw data matrix will be used to generate PCoA plot).}
+
+\item{n_pc}{The number of PCoA components to save. Defaults to 2.}
+
+\item{distance}{The distance method to use. Defaults to "euclidean". Other methods see ?stats::dist.}
 
 \item{show}{A logical value indicating whether to draw the PCoA plot. Defaults to TRUE.}
 
@@ -25,11 +38,6 @@ The plot can also be saved as a PNG file if specified.
 }
 \examples{
 data(RamEx_data)
-data_smoothed <- Preprocessing.Smooth.Sg(RamEx_data)
-data_baseline <- Preprocessing.Baseline.Polyfit(data_smoothed)
-data_baseline_bubble <- Preprocessing.Baseline.Bubble(data_smoothed)
-data_normalized <- Preprocessing.Normalize(data_baseline, "ch")
-qc_icod <- Qualitycontrol.ICOD(data_normalized@datasets$normalized.data,var_tol = 0.4)
-data_cleaned <- data_normalized[qc_icod$quality,]
-data.reduction.pcoa <- Feature.Reduction.Pcoa(data_cleaned, show=TRUE, save = FALSE)
+data_processed <- Preprocessing.OneStep(RamEx_data)
+data.reduction.pcoa <- Feature.Reduction.Pcoa(data_processed, show=TRUE, save = FALSE)
 }

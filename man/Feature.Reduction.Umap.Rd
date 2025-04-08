@@ -7,6 +7,7 @@
 Feature.Reduction.Umap(
   object,
   PCA = 20,
+  n_pc = 2,
   n_neighbors = 30,
   min.dist = 0.01,
   spread = 1,
@@ -19,6 +20,8 @@ Feature.Reduction.Umap(
 \item{object}{A Ramanome object containing the dataset.}
 
 \item{PCA}{A numeric value indicating the number of principal components to use. Defaults to 20 (if NULL,raw data matrix will be used to generate UMAP plot).}
+
+\item{n_pc}{The number of UMAP components to save. Defaults to 2.}
 
 \item{n_neighbors}{Controls the balance between local and global structure in UMAP. Higher values capture more global structure, while lower values focus on local details (typical range: 5–50).}
 

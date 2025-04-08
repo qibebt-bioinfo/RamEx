@@ -7,6 +7,7 @@
 Feature.Reduction.Tsne(
   object,
   PCA = 20,
+  n_pc = 2,
   perplexity = 5,
   theta = 0.5,
   max_iter = 1000,
@@ -19,6 +20,8 @@ Feature.Reduction.Tsne(
 \item{object}{A Ramanome object containing the dataset and metadata.}
 
 \item{PCA}{Optional. A numeric value indicating the number of principal components to use. Defaults to 20 (if NULL,raw data matrix will be used to generate t-SNE plot).}
+
+\item{n_pc}{The number of t-SNE components to save. Defaults to 2.}
 
 \item{perplexity}{Controls the balance between local and global structure in the t-SNE algorithm. Typical values range from 5 to 50, with higher values preserving more global structure.}
 

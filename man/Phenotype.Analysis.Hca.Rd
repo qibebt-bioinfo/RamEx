@@ -4,10 +4,12 @@
 \alias{Phenotype.Analysis.Hca}
 \title{Hierarchical Clustering Analysis (HCA)}
 \usage{
-Phenotype.Analysis.Hca(object)
+Phenotype.Analysis.Hca(object, show = FALSE)
 }
 \arguments{
 \item{object}{A Ramanome object.}
+
+\item{show}{Whether to plot the dendrogram.}
 }
 \value{
 The hierarchical clustering fit object.

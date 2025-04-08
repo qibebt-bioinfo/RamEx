@@ -4,12 +4,30 @@
 \alias{Raman.Markers.Correlations}
 \title{Compute Correlations with a Target Variable}
 \usage{
-Raman.Markers.Correlations(object, min.cor = 0.8)
+Raman.Markers.Correlations(
+  object,
+  group = object$group,
+  paired = FALSE,
+  min.cor = 0.8,
+  by_average = FALSE,
+  min.range = 30,
+  extract_num = TRUE
+)
 }
 \arguments{
 \item{object}{A Ramanome object.}
 
+\item{group}{A factor vector (should be the same length as the cell number in the object), as the target variable. default is object$group.}
+
+\item{paired}{Whether to consider paired markers, e.g. wave1 / wave2. Default is FALSE}
+
 \item{min.cor}{The minimum correlation threshold. Defaults to 0.8.}
+
+\item{by_average}{Whether to average the spectra of each group. Default is FALSE. if TRUE, the spectra will be execute baseline correction in peak regions to remove the baseline caused by the local, adjacent peak signal.}
+
+\item{min.range}{The minimum wavenumber range of the bands when bubble method considering them as a peak (see 'by_average'). Default is 30.}
+
+\item{extract_num}{Whether to extract numeric values from the group column. Default is TRUE. If else, the correlations will be calculated based on the group factor level.}
 }
 \value{
 A list containing the high correlation elements and their corresponding correlations with the target variable, containing two data frames: 'correlations_singular' for single markers (group ~ wave) and 'combination_correlations_two' for paired markers (group ~ wave1 / wave2).

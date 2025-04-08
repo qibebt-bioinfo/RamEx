@@ -4,7 +4,7 @@
 \alias{mean.spec}
 \title{Calculate Mean and Standard Deviation of Spectral Data by Group and Plot}
 \usage{
-\method{mean}{spec}(data, group, gap = 0.3)
+\method{mean}{spec}(data, group, gap = 0.3, col = NULL)
 }
 \arguments{
 \item{data}{A matrix or data frame containing the spectral data, colnames are wavenumbers.}
@@ -12,6 +12,8 @@
 \item{group}{Factor indicating the group for each row in the data.}
 
 \item{gap}{A numeric value representing the vertical gap between the mean lines of different groups.}
+
+\item{col}{A vector of colors for each group. If NULL, the default colors will be used.}
 }
 \value{
 A ggplot2 plot
