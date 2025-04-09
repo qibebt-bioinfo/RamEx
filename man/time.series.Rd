@@ -4,10 +4,12 @@
 \alias{time.series}
 \title{Generate time series plots for Raman data}
 \usage{
-\method{time}{series}(object, reduction = "UMAP")
+\method{time}{series}(object, cluster, reduction = "UMAP")
 }
 \arguments{
 \item{object}{A Ramanome object.}
+
+\item{cluster}{clusters assignments}
 
 \item{reduction}{The reduction method to use (default is "UMAP").}
 }
