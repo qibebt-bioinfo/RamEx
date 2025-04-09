@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/qibebt-bioinfo/RamEx">
-    <img src="https://ramex-1257170263.cos.ap-guangzhou.myqcloud.com/RamEx-logo.jpg" alt="RamEx logo"  width="300">
+    <img src="doc/RamEx-LOGO.jpg" alt="RamEx logo" width="300">
   </a>
 </p>
 
@@ -8,7 +8,7 @@
 
 ## Key features
 
-![Overview of RamEx](https://ramex-1257170263.cos.ap-guangzhou.myqcloud.com/RamEx-pipeline.jpg)
+![Overview of RamEx](doc/OverView.jpg)
 - **Reliability** achieved via stringent statistical control
 - **Robustness** achieved via flexible modelling of the data and automatic parameter selection
 - **Reproducibility** promoted by thorough recording of all analysis steps
