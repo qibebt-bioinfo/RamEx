@@ -631,8 +631,8 @@ min.cor=0.8, by_average = FALSE, min.range = 30,  extract_num = TRUE) {
   }
   
   list(
-    correlations_singular = if(length(high_cor_elements) == 0) NA else data.frame(wave=object@wavenumber[high_cor_elements], corrlations = correlations[high_cor_elements]),
-    combination_correlations_two = if(length(combination_correlations_two) == 0) NA else combination_correlations_two
+    markers_singular = if(length(high_cor_elements) == 0) NA else data.frame(wave=object@wavenumber[high_cor_elements], corrlations = correlations[high_cor_elements]),
+    markers_paired = if(length(combination_correlations_two) == 0) NA else combination_correlations_two
   )
 }
 
@@ -711,7 +711,7 @@ Raman.Markers.Roc <- function(object, threshold = 0.75, paired = FALSE, batch_si
   raman_markers$wave <- wave
   raman_markers <- reshape2::melt(raman_markers, id.var='wave', variable.name = 'group', value.name = 'AUC')
   
-  markers_all <- list(markers_single = subset(raman_markers, AUC > threshold) )
+  markers_all <- list(markers_singular = subset(raman_markers, AUC > threshold) )
   
   if(paired){
     cat('Finding paired markers ... \n')

@@ -88,11 +88,11 @@ Plot.Markers.Spectrum <- function(object, markers, gap = 0.6, cols = c('#F18656'
         mean = colMeans(get.nearest.dataset(object))
     )
     
-    markers_single <- markers$correlations_singular$wave
-    markers_paired <- markers$correlations_paired
+    markers_singular <- markers$markers_singular$wave
+    markers_paired <- markers$markers_paired
 
-    mean_spectrum$markers_single <- mean_spectrum$mean
-    mean_spectrum$markers_single[!mean_spectrum$wave %in% markers_single] <- NA
+    mean_spectrum$markers_singular <- mean_spectrum$mean
+    mean_spectrum$markers_singular[!mean_spectrum$wave %in% markers_singular] <- NA
     
     if (!is.null(markers_paired) && !all(is.na(markers_paired))) {
         markers_paired <- as.vector(as.matrix(markers_paired))
@@ -101,7 +101,7 @@ Plot.Markers.Spectrum <- function(object, markers, gap = 0.6, cols = c('#F18656'
         mean_spectrum$markers_paired[!mean_spectrum$wave %in% markers_paired] <- NA
         plot_data <- reshape2::melt(mean_spectrum, id.vars = c("wave", "mean"))
         plot_data$variable <- factor(plot_data$variable, 
-                                   levels = c("markers_single", "markers_paired"))
+                                   levels = c("markers_singular", "markers_paired"))
 
         plot_data$mean <- plot_data$mean + gap * (2 - as.numeric(plot_data$variable))
         plot_data$value <- plot_data$value + gap * (2 - as.numeric(plot_data$variable))
@@ -110,7 +110,7 @@ Plot.Markers.Spectrum <- function(object, markers, gap = 0.6, cols = c('#F18656'
             wave = mean_spectrum$wave,
             mean = mean_spectrum$mean,
             value = mean_spectrum$markers_single,
-            variable = "markers_single"
+            variable = "markers_singular"
         )
     }
     

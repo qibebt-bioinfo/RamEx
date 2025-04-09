@@ -17,7 +17,10 @@ Imports:
    dbscan,  dplyr, e1071, ggforce, ggplot2, grDevices, graphics, ica, igraph, mdatools, pheatmap, irlba, prospectr,
    randomForest, rlist, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, reshape2, RcppAnnoy, corr2D, robustbase
 Suggests:
-    testthat,knitr,gpuR
+    testthat,
+    knitr,
+    rmarkdown,
+    covr
 LinkingTo:
     Rcpp, RcppParallel
 biocViews: Visualization, Clustering, Software
