@@ -15,13 +15,11 @@ Plot.Markers.Spectrum(
 \arguments{
 \item{object}{A Ramanome object}
 
+\item{markers}{list object obtained from 'Raman markers' module.}
+
 \item{gap}{Vertical gap between spectra (default: 0.6)}
 
 \item{cols}{Color palette for markers (default: c('#F18656','#397FC7'))}
-
-\item{markers_single}{A list of single markers (wave numbers)}
-
-\item{markers_paired}{A list of paired markers (wave numbers) or NULL/NA}
 }
 \value{
 A ggplot object

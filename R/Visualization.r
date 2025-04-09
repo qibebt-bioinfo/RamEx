@@ -76,8 +76,7 @@ Plot.Heatmap.Markers <- function(object, markers, group=object$group,
 #' Mark the Ramanome Markers on Average Spectrum
 #'
 #' @param object A Ramanome object
-#' @param markers_single A list of single markers (wave numbers)
-#' @param markers_paired A list of paired markers (wave numbers) or NULL/NA
+#' @param markers list object obtained from 'Raman markers' module.
 #' @param gap Vertical gap between spectra (default: 0.6)
 #' @param cols Color palette for markers (default: c('#F18656','#397FC7'))
 #' @return A ggplot object
@@ -109,7 +108,7 @@ Plot.Markers.Spectrum <- function(object, markers, gap = 0.6, cols = c('#F18656'
         plot_data <- data.frame(
             wave = mean_spectrum$wave,
             mean = mean_spectrum$mean,
-            value = mean_spectrum$markers_single,
+            value = mean_spectrum$markers_singular,
             variable = "markers_singular"
         )
     }
