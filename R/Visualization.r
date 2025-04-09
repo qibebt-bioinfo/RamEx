@@ -221,6 +221,7 @@ Plot.reductions <- function(object, reduction = "UMAP", dims = c(1,2), color = o
                 limits = quantile(color, quantile_range),
                 oob = scales::squish
             ) +
+            labs(x = names[1], y = names[2],color = 'Group') +
             theme_classic()
     } else {
 
@@ -236,6 +237,7 @@ Plot.reductions <- function(object, reduction = "UMAP", dims = c(1,2), color = o
         )) +
             geom_point(size = point_size, alpha = point_alpha) +
             scale_color_manual(values = cols) +
+            labs(x = names[1], y = names[2],color = 'Group') +
             theme_classic()
     }
     
@@ -272,9 +274,9 @@ Plot.Distribution <- function(group_1, group_2, cols = RamEx.colors, width = 0.9
         scale_fill_manual(values = cols) +
         theme_classic() +
         labs(
-            x = "Time",
+            x = "Group_1",
             y = "Proportion",
-            fill = "Cluster"
+            fill = "Group_2"
         )
     
     return(p)

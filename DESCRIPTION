@@ -14,13 +14,10 @@ RoxygenNote: 7.3.2
 Depends: R (>= 3.5.0)
 Imports:
    MASS, RColorBrewer, Rcpp, RcppParallel, circlize, pls, mclust, MLmetrics, Matrix, parallel, Rtsne, cowplot, data.table, 
-   dbscan,  dplyr, e1071, ggforce, ggplot2, grDevices, graphics, ica, igraph, mdatools, pheatmap, irlba, prospectr,
+   dplyr, e1071, ggforce, ggplot2, grDevices, graphics, ica, igraph, mdatools, pheatmap, irlba, prospectr,
    randomForest, rlist, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, reshape2, RcppAnnoy, corr2D, robustbase
 Suggests:
-    testthat,
-    knitr,
-    rmarkdown,
-    covr
+    testthat,knitr,gpuR
 LinkingTo:
     Rcpp, RcppParallel
 biocViews: Visualization, Clustering, Software

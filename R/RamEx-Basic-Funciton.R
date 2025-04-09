@@ -290,21 +290,21 @@ confirm.select <- function(object, waves) {
 #' This function generates time series plots for Raman data using a specified reduction method (e.g., UMAP).
 #'
 #' @param object A Ramanome object.
+#' @param cluster clusters assignments 
 #' @param reduction The reduction method to use (default is "UMAP").
 #'
 #' @return A cowplot object containing multiple plots arranged in a grid, with each plot showing the time series
 #'         visualization for a different group in the dataset. The function also saves the plot as a PNG file
 #'         named 'Time.series_[reduction].png'.
-#' @importFrom dbscan dbscan
 #' @importFrom stats quantile
 #' @importFrom cowplot plot_grid
 #' @importFrom ggplot2 ggsave
 
 
-time.series <- function(object, reduction = 'UMAP') {
+time.series <- function(object, cluster, reduction = 'UMAP') {
   dataset <- get.nearest.dataset(object)
   groups <- unique(object@meta.data$group)
-  clusters <- paste('Cluster_', dbscan::dbscan(dataset, eps = quantile(dist(dataset), 0.01))$cluster)
+  clusters <- paste('Cluster_', cluster)
   data.red <- data.frame(
     object@reductions[[reduction]],
     group = object@meta.data$group,
