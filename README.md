@@ -5,6 +5,9 @@
 </p>
 
 ## *RamEx*: An R package for high-throughput microbial ramanome analyses with accurate quality assessment
+![GitHub R package version](https://img.shields.io/github/r-package/v/qibebt-bioinfo/RamEx)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/qibebt-bioinfo/RamEx/total)
+
 
 ## Key features
 
@@ -223,7 +226,18 @@ He Y,,Huang S,,,Zhang P,,Ji Y, Xu J,, 2021. Intra-Ramanome Correlation Analysis 
 **Visualisation** of ramanome-->
 
 
-
+### Citation
+If you use this package, please cite:
+```bibtex
+@article{zhang2025ramex,
+  title={RamEx: An R package for high-throughput microbial ramanome analyses with accurate quality assessment},
+  author={Zhang, Yanmei and Jing, Gongchao and Chen, Rongze and Gong, Yanhai and Li, Yuandong and Wang, Yongshun and Wang, Xixian and Zhang, Jia and Mao, Yuli and He, Yuehui and others},
+  journal={bioRxiv},
+  pages={2025--03},
+  year={2025},
+  publisher={Cold Spring Harbor Laboratory}
+}
+```
 
 ### Contact
 Please post any questions, feedback, comments or suggestions on the [GitHub Discussion board](https://github.com/qibebt-bioinfo) (alternatively can create a GitHub issue) or email SCC.
