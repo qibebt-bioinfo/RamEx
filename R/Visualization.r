@@ -13,12 +13,12 @@
 #' @return A heatmap plot
 #' @export
 Plot.Heatmap.Markers <- function(object, markers, group=object$group,
-                            scale = "row", show_legend = TRUE,
+                            scale = "row", show_legend = TRUE, cluster_cols = FALSE, cluster_rows = TRUE,
                             show_rownames = FALSE, show_colnames = TRUE,
                             wave_gap_threshold = 20) {
     data_after <- Feature.Reduction.Intensity(object, as.list(markers))
     markers_intensity <- data.frame(
-        group = data_after@meta.data$group,
+        group = group,
         data_after@interested.bands
     )
     markers_intensity <- aggregate(
@@ -34,16 +34,31 @@ Plot.Heatmap.Markers <- function(object, markers, group=object$group,
     
     wave_diff <- diff(waves_sorted)
     split_points <- which(wave_diff > wave_gap_threshold)
+    if(length(split_points) < 3){
+        p <- pheatmap(
+        t(markers_intensity[,-1]),
+        cluster_cols = FALSE,
+        cluster_rows = TRUE,
+        legend = show_legend,
+        scale = scale,
+        clustering_distance_rows = "correlation" )
+        wave_order <- p$tree_row$order
+        waves_sorted <- waves[wave_order]
 
-    groups <- cut(1:length(waves_sorted), c(0, split_points, length(waves_sorted)))
-    
-    group_ranges <- tapply(waves_sorted, groups, function(x) {
-        paste0(round(min(x), 0), "~", round(max(x), 0))
-    })
-    
-    bands_ann <- data.frame(
+        group_ranges <- merge_wave_numbers(waves_sorted, wave_gap_threshold)
+        bands_ann <- data.frame(
+            bands = factor(group_ranges$assignments, levels = unique(group_ranges$assignments), labels = group_ranges$intervals)
+        )
+    } else {
+        groups <- cut(1:length(waves_sorted), c(0, split_points, length(waves_sorted)))
+        group_ranges <- tapply(waves_sorted, groups, function(x) {
+            paste0(round(min(x), 0), "~", round(max(x), 0))
+        })
+        bands_ann <- data.frame(
         bands = factor(groups, levels = levels(groups), labels = group_ranges)[order(wave_order)]
     )
+    }
+    
     row.names(bands_ann) <- colnames(markers_intensity[,-1])[wave_order]
     
     n_groups <- length(unique(bands_ann$bands))
@@ -66,11 +81,11 @@ Plot.Heatmap.Markers <- function(object, markers, group=object$group,
         clustering_distance_rows = "correlation",
         treeheight_row = 0,
         density.info = "none",
-        annotation_row = bands_ann,
-        annotation_colors = annotation_colors
+        annotation_row = bands_ann
     )
     return(p)
 }
+
 
 #' Mark the Ramanome Markers on Average Spectrum
 #' Mark the Ramanome Markers on Average Spectrum
@@ -289,3 +304,75 @@ RamEx.colors <- c('#64B5F6FF','#FF7080FF','#6BD76BFF','#8888FFFF',
                   '#F18656','#397FC7','#999999', '#B41BBC',
                   '#1790a3', '#DF6182', '#f4c61f', '#B07836',
                   '#2b6584', '#A1CC44', '#F88E1B', '#1bf8c8')
+
+
+#' Merge wave numbers into groups based on the gap threshold
+#' @noRd 
+merge_wave_numbers <- function(wave_numbers, gap_threshold = 20) {
+    groups <- list()  
+    current_group <- c(wave_numbers[1])  
+
+    for (i in 2:length(wave_numbers)) {  
+        if (abs(wave_numbers[i] - tail(current_group, 1)) <= gap_threshold) {  
+            current_group <- c(current_group, wave_numbers[i])  
+        } else {  
+            groups <- append(groups, list(current_group))  
+            current_group <- c(wave_numbers[i])  
+        }  
+    }  
+    groups <- append(groups, list(current_group))  
+
+    merged_groups <- merge_groups(groups, gap_threshold)  
+
+    group_intervals <- sapply(merged_groups, function(group) {  
+      if (length(group) > 1) {  
+        paste(round(min(group), 0), round(max(group), 0), sep = "~")  
+      } else {  
+        as.character(group)  
+      }  
+    })  
+
+    group_assignments <- rep(NA, length(wave_numbers))  
+    group_number <- 1    
+
+    for (i in seq_along(merged_groups)) {  
+      for (value in merged_groups[[i]]) {  
+        group_assignments[which(wave_numbers == value)[1]] <- group_number  
+      }  
+      group_number <- group_number + 1  
+    }  
+    return(list(assignments = group_assignments, intervals = group_intervals))
+}
+
+#' Merge groups based on the gap threshold
+#' @noRd 
+merge_groups <- function(groups, gap_threshold) {  
+  merged <- list(groups[[1]])  
+  
+  for (i in 2:length(groups)) {  
+    current_group <- groups[[i]]  
+    merged_last <- tail(merged, 1)[[1]]  
+    
+    if (any(abs(outer(merged_last, current_group, `-`)) <= gap_threshold)) {  
+      merged[[length(merged)]] <- c(merged_last, current_group)  
+    } else {  
+      merged <- append(merged, list(current_group))  
+    }  
+  }  
+  
+  further_merge_needed <- FALSE  
+  for (i in 2:length(merged)) {  
+    prev_group <- merged[[i - 1]]  
+    curr_group <- merged[[i]]  
+    if (any(abs(outer(prev_group, curr_group, `-`)) <= gap_threshold)) {  
+      further_merge_needed <- TRUE  
+      break  
+    }  
+  }  
+  
+  if (further_merge_needed) {  
+    return(merge_groups(merged, gap_threshold))  
+  } else {  
+    return(merged)  
+  }  
+}  

@@ -10,6 +10,8 @@ Plot.Heatmap.Markers(
   group = object$group,
   scale = "row",
   show_legend = TRUE,
+  cluster_cols = FALSE,
+  cluster_rows = TRUE,
   show_rownames = FALSE,
   show_colnames = TRUE,
   wave_gap_threshold = 20
