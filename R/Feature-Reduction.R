@@ -26,25 +26,16 @@ Feature.Reduction.Pca <- function(object, show = TRUE, save=FALSE, n_pc = 2) {
   names(data.red) <- paste0('PC ', 1:n_pc)
   
   object@reductions$PCA <- data.red
-  if (show){
-    names <- colnames(data.red)
-    plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
-      geom_point(alpha = 0.5) +
-      labs(x = names[1], y = names[2],color = 'Group') +
-      theme_classic()
-    print(plot)
-  }
   
-  if (save) {
-    if(is.null(plot)){
-      names <- colnames(data.red)
-      plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
-        geom_point(alpha = 0.5) +
-        labs(x = names[1], y = names[2],color = 'Group') +
-        theme_classic()
+  if (show | save){
+    p <- Plot.reductions(object, show = FALSE,reduction = "PCA", point_size = ifelse(nrow(data.red) > 10000, 0.5, 1), point_alpha = 0.5)
+    if(show){
+      print(p)
     }
-    cat('Saving PCA plot to the current working directory: ', getwd(), '\n')
-    ggsave(paste("Reduction.pca.png"), plot, width = 8, height = 6)
+    if(save){
+      cat('Saving PCA plot to the current working directory: ', getwd(), '\n')
+      ggsave(paste("Reduction.pca.png"), p, width = 8, height = 6)
+    }
   }
   
   return(object)
@@ -97,25 +88,15 @@ Feature.Reduction.Tsne <- function(object, PCA=20, n_pc = 2, perplexity=5, theta
   colnames(data.red) <- paste0("tSNE ", 1:n_pc)
   object@reductions$tSNE <- data.red
   
-  if (show){
-    names <- colnames(data.red)
-    plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
-      geom_point(alpha = 0.5) +
-      labs(x = names[1], y = names[2],color = 'Group') +
-      theme_classic()
-    print(plot)
-  }
-  
-  if (save) {
-    if(is.null(plot)){
-      names <- colnames(data.red)
-      plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
-        geom_point(alpha = 0.5) +
-        labs(x = names[1], y = names[2],color = 'Group') +
-        theme_classic()
+  if (show | save){
+    p <- Plot.reductions(object, show = FALSE,reduction = "tSNE", point_size = ifelse(nrow(data.red) > 10000, 0.5, 1), point_alpha = 0.5)
+    if(show){
+      print(p)
     }
-    cat('Saving t-SNE plot to the current working directory: ', getwd(), '\n')
-    ggsave(paste("Reduction.tsne.png"), plot, width = 8, height = 6)
+    if(save){
+      cat('Saving t-SNE plot to the current working directory: ', getwd(), '\n')
+      ggsave(paste("Reduction.tsne.png"), p, width = 8, height = 6)
+    }
   }
   
   return(object)
@@ -170,25 +151,15 @@ Feature.Reduction.Umap <- function(object, PCA=20, n_pc = 2, n_neighbors=30, min
   
   object@reductions$UMAP <- data.red
   
-  if(show){
-    names <- colnames(data.red)
-    plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
-      geom_point(alpha = 0.5) +
-      labs(x = names[1], y = names[2],color = 'Group') +
-      theme_classic()
-    print(plot)
-  }
-  
-  if (save) {
-    if(is.null(plot)){
-      names <- colnames(data.red)
-      plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
-        geom_point(alpha = 0.5) +
-        labs(x = names[1], y = names[2],color = 'Group') +
-        theme_classic()
+  if(show | save){
+    p <- Plot.reductions(object, show = FALSE,reduction = "UMAP", point_size = ifelse(nrow(data.red) > 10000, 0.5, 1), point_alpha = 0.5)
+    if(show){
+      print(p)
     }
-    cat('Saving UMAP plot to the current working directory: ', getwd(), '\n')
-    ggsave(paste("Reduction.umap.png"), plot, width = 8, height = 6)
+    if(save){
+      cat('Saving UMAP plot to the current working directory: ', getwd(), '\n')
+      ggsave(paste("Reduction.umap.png"), p, width = 8, height = 6)
+    }
   }
   return(object)
 }
@@ -233,25 +204,15 @@ Feature.Reduction.Pcoa <- function(object, PCA=20, n_pc = 2, distance = "euclide
   names(data.red) <- paste0('PCoA ', 1:n_pc)
   
   object@reductions$PCoA <- data.red
-  if (show){
-    names <- colnames(data.red)
-    plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
-      geom_point(alpha = 0.5) +
-      labs(x = names[1], y = names[2],color = 'Group') +
-      theme_classic()
-    print(plot)
-  }
-  
-  if (save) {
-    if(is.null(plot)){
-      names <- colnames(data.red)
-      plot <- ggplot(data.red, aes(get(names[1]), get(names[2]), color = as.factor(object@meta.data$group))) +
-        geom_point(alpha = 0.5) +
-        labs(x = names[1], y = names[2],color = 'Group') +
-        theme_classic()
+  if (show | save){
+    p <- Plot.reductions(object, show = FALSE,reduction = "PCoA", point_size = ifelse(nrow(data.red) > 10000, 0.5, 1), point_alpha = 0.5)
+    if(show){
+      print(p)
     }
-    cat('Saving PCoA plot to the current working directory: ', getwd(), '\n')
-    ggsave(paste("Reduction.pcoa.png"), plot, width = 8, height = 6)
+    if(save){
+      cat('Saving PCoA plot to the current working directory: ', getwd(), '\n')
+      ggsave(paste("Reduction.pcoa.png"), p, width = 8, height = 6)
+    }
   }
   
   return(object)
