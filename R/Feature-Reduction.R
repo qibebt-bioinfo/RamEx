@@ -28,7 +28,7 @@ Feature.Reduction.Pca <- function(object, show = TRUE, save=FALSE, n_pc = 2) {
   object@reductions$PCA <- data.red
   
   if (show | save){
-    p <- Plot.reductions(object, show = FALSE,reduction = "PCA", point_size = ifelse(nrow(data.red) > 10000, 0.5, 1), point_alpha = 0.5)
+    p <- Plot.reductions(object, reduction = "PCA", point_size = ifelse(nrow(data.red) > 10000, 0.5, 1), point_alpha = 0.5)
     if(show){
       print(p)
     }
@@ -89,7 +89,7 @@ Feature.Reduction.Tsne <- function(object, PCA=20, n_pc = 2, perplexity=5, theta
   object@reductions$tSNE <- data.red
   
   if (show | save){
-    p <- Plot.reductions(object, show = FALSE,reduction = "tSNE", point_size = ifelse(nrow(data.red) > 10000, 0.5, 1), point_alpha = 0.5)
+    p <- Plot.reductions(object, reduction = "tSNE", point_size = ifelse(nrow(data.red) > 10000, 0.5, 1), point_alpha = 0.5)
     if(show){
       print(p)
     }
@@ -152,7 +152,7 @@ Feature.Reduction.Umap <- function(object, PCA=20, n_pc = 2, n_neighbors=30, min
   object@reductions$UMAP <- data.red
   
   if(show | save){
-    p <- Plot.reductions(object, show = FALSE,reduction = "UMAP", point_size = ifelse(nrow(data.red) > 10000, 0.5, 1), point_alpha = 0.5)
+    p <- Plot.reductions(object, reduction = "UMAP", point_size = ifelse(nrow(data.red) > 10000, 0.5, 1), point_alpha = 0.5)
     if(show){
       print(p)
     }
@@ -205,7 +205,7 @@ Feature.Reduction.Pcoa <- function(object, PCA=20, n_pc = 2, distance = "euclide
   
   object@reductions$PCoA <- data.red
   if (show | save){
-    p <- Plot.reductions(object, show = FALSE,reduction = "PCoA", point_size = ifelse(nrow(data.red) > 10000, 0.5, 1), point_alpha = 0.5)
+    p <- Plot.reductions(object, reduction = "PCoA", point_size = ifelse(nrow(data.red) > 10000, 0.5, 1), point_alpha = 0.5)
     if(show){
       print(p)
     }

@@ -354,7 +354,7 @@ Plot_local_chordDiagram_rpvalue <- function(
     Neg_Edge = FALSE,
     Threshold = 0.6,
     bands_ann = NULL,
-    colours = RamEx.colors
+    colours = RamEx.color(length(unique(bands_ann$Group)))
 ) {
   # Compute correlation matrix and p-values
   Corr_mat <- rcorr_df(x)[[1]] # r

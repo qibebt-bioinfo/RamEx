@@ -62,7 +62,7 @@ Plot.Heatmap.Markers <- function(object, markers, group=object$group,
     row.names(bands_ann) <- colnames(markers_intensity[,-1])[wave_order]
     
     n_groups <- length(unique(bands_ann$bands))
-    annotation_colors <- RamEx.colors[1:n_groups]
+    annotation_colors <- RamEx.color(n_groups)
     names(annotation_colors) <- unique(bands_ann$bands)
     annotation_colors <- list(bands = annotation_colors)
     
@@ -153,12 +153,7 @@ Plot.ViolinBox <- function(data, group, cols = NULL, violin_width = 0.75, box_wi
     data <- assign_variable(data, group)
     
     if(is.null(cols)){
-        cols <- RamEx.colors
-    }
-    
-    if(length(cols) < length(unique(data$variable))){
-        warning("The number of colors is not equal to the number of groups")
-        cols <- cols[c(1:length(unique(data$variable) -1 )) %% length(cols) +1]
+        cols <- RamEx.color(length(unique(data$variable)))      
     }
     
     p <- ggplot(data, aes(x = group, y = value, fill = variable)) +
@@ -239,16 +234,15 @@ Plot.reductions <- function(object, reduction = "UMAP", dims = c(1,2), color = o
             labs(x = names[1], y = names[2],color = 'Group') +
             theme_classic()
     } else {
-
+        n_groups <- length(unique(color))
         if (is.null(cols)) {
-            cols <- RamEx.colors
+            cols <- RamEx.color(n_groups)
         }
         
         p <- ggplot(plot_data, aes(
             x = get(names[1]),
             y = get(names[2]),
-            color = color,
-            fill = color
+            color = color
         )) +
             geom_point(size = point_size, alpha = point_alpha) +
             scale_color_manual(values = cols) +
@@ -269,7 +263,7 @@ Plot.reductions <- function(object, reduction = "UMAP", dims = c(1,2), color = o
 #' @param curve_type Type of curve for the alluvium (default: "sine")
 #' @return A ggplot object
 #' @export
-Plot.Distribution <- function(group_1, group_2, cols = RamEx.colors, width = 0.9) {
+Plot.Distribution <- function(group_1, group_2, cols = NULL, width = 0.9) {
     plot_data <- data.frame(
         table(group_1, group_2) / 
         rowSums(table(group_1, group_2))
@@ -277,7 +271,7 @@ Plot.Distribution <- function(group_1, group_2, cols = RamEx.colors, width = 0.9
     colnames(plot_data) <- c('Group_1', 'Group_2', 'Prop')
     
     if (is.null(cols)) {
-        cols <- RamEx.colors
+        cols <- RamEx.color(length(unique(plot_data$Group_2)))
     }
     
     p <- ggplot(plot_data, aes(
@@ -299,11 +293,24 @@ Plot.Distribution <- function(group_1, group_2, cols = RamEx.colors, width = 0.9
 
 
 
-#' export RamEx.colors
-RamEx.colors <- c('#64B5F6FF','#FF7080FF','#6BD76BFF','#8888FFFF', 
+#' Get RamEx colors
+#'
+#' @param n Number of colors to return
+#' @return A vector of colors
+#' @export
+RamEx.color <- function(n) {
+    colors <- c('#64B5F6FF','#FF7080FF','#6BD76BFF','#8888FFFF', 
                   '#F18656','#397FC7','#999999', '#B41BBC',
                   '#1790a3', '#DF6182', '#f4c61f', '#B07836',
                   '#2b6584', '#A1CC44', '#F88E1B', '#1bf8c8')
+    if (n <= 16) {
+        return(colors[1:n])
+    } else {
+        return(colorRampPalette(c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", 
+                                "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", 
+                                "#bcbd22", "#17becf"))(n))
+    }
+}
 
 
 #' Merge wave numbers into groups based on the gap threshold

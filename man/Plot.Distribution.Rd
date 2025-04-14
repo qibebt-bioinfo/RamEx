@@ -4,7 +4,7 @@
 \alias{Plot.Distribution}
 \title{Plot histogram of group distributions}
 \usage{
-Plot.Distribution(group_1, group_2, cols = RamEx.colors, width = 0.9)
+Plot.Distribution(group_1, group_2, cols = NULL, width = 0.9)
 }
 \arguments{
 \item{group_1}{A vector of group assignments}

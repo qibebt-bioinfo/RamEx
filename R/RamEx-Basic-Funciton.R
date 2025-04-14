@@ -113,7 +113,7 @@ mean.spec <- function(data, group, gap = 0.3, col=NULL) {
   levels <- levels(group)
   group <- as.character(group)
   if(is.null(col)){
-    col <- RamEx.colors
+    col <- RamEx.color(length(levels))
   }
   print(levels)
   data <- as.matrix(data)
@@ -343,7 +343,7 @@ time.series <- function(object, cluster, reduction = 'UMAP') {
 #' @importFrom ggplot2 scale_color_manual
 
 cluster.color <- function(data, group) {
-  colors <- RamEx.colors
+  colors <- RamEx.color(length(unique(data$cluster)))
   names <- names(data)
 
   ggplot(data, aes_string(names[1], names[2])) +
