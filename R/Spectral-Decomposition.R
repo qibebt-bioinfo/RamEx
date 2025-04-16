@@ -51,6 +51,7 @@ Spectral.Decomposition.Mcrals<- function(object, n_comp=2, seed=42) {
 Spectral.Decomposition.Ica <- function(object, n_comp=2, seed=42) {
   set.seed(seed)
   ica.result <- icafast(get.nearest.dataset(object), n_comp)
+  row.names(ica.result$M) <- object@wavenumber
   return(ica.result)
 }
 
