@@ -26,7 +26,7 @@
 #' #options(mc.cores = 2)
 #' #clusters_Louvaincluster <- Phenotype.Analysis.Louvaincluster(object = data_processed, resolutions = c(0.8))
 
-Phenotype.Analysis.Louvaincluster <- function(object, resolutions,n_pc=10, threshold=0.001, k=30, n_tree=50, seed=42) {
+Phenotype.Analysis.Louvaincluster <- function(object, resolutions,n_pc=10, threshold=0.001, k=30, n_tree=50, n_cores=detectCores() - 4,seed=42) {
   set.seed(seed)
   if (!is.null(object@reductions$PCA)) {
     if(ncol(object@reductions$PCA) < n_pc) {
@@ -55,7 +55,7 @@ Phenotype.Analysis.Louvaincluster <- function(object, resolutions,n_pc=10, thres
   nearest_neighbors <- t(sapply(0:(n-1), function(i) ann_index$getNNsByItem(i, k)))
   
   # parallel calculating
-  num_cores <- detectCores() - 2
+  num_cores <- n_cores
   cl <- makeCluster(num_cores)
   
   clusterExport(cl, list("matrix", "nearest_neighbors", "n", 'k'), envir = environment())
