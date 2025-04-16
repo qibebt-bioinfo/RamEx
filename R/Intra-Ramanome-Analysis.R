@@ -583,6 +583,7 @@ Intraramanome.Analysis.Irca.Global <- function(object, threshold = 0.6, show = T
   IRCA.interests <- lapply(levels(object@meta.data$group), function(x) {
     temp_data <- dataset[object@meta.data$group == x,]
     if (save) {
+      cat('Saving global IRCA to the current working directory: ', getwd(), '\n')
       jpeg(
         filename = paste0('IRCA_global_negative_', x, '.jpeg'),
         width = 800,
@@ -590,7 +591,7 @@ Intraramanome.Analysis.Irca.Global <- function(object, threshold = 0.6, show = T
         quality = 100,
         res = 200
       )
-      cat('Saving global IRCA to the current working directory: ', getwd(), '\n')
+      interests <- Intraramanome.Analysis.Irca.Global.draw(temp_data, x, threshold)
       title(x, line = 0.2, adj = 0.1, cex.main = 1.2, font.main = 2)
       dev.off()
     } 
@@ -598,7 +599,7 @@ Intraramanome.Analysis.Irca.Global <- function(object, threshold = 0.6, show = T
       interests <- Intraramanome.Analysis.Irca.Global.draw(temp_data, x, threshold)
       title(x, line = 0.2, adj = 0.1, cex.main = 1.2, font.main = 2)
     }
-    if (!save & !show) {
+    if (!show && !save) {
       interests <- Intraramanome.Analysis.Irca.Global.cal(temp_data, x, threshold)
     }
     return(interests)
