@@ -5,6 +5,8 @@
 #' @param train The training Ramanome object
 #' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).
 #' @param n_comp The number of latent components that the PLS model extract from the training data to model the response variable
+#' @param show Whether to show the plot of the regression results (Prediction vs True)
+#' @param save Whether to save the plot of the results (default path: getwd())
 #' @param seed The seed for the random number generator
 #' 
 #' @return A list containing:
@@ -19,7 +21,7 @@
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' quan_pls <- Quantification.Pls(data_processed)
-Quantification.Pls <- function(train, test = NULL,n_comp = 8, seed = 42) {
+Quantification.Pls <- function(train, test = NULL,n_comp = 8, show = TRUE, save = FALSE, seed = 42) {
   set.seed(seed)
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
@@ -39,8 +41,19 @@ Quantification.Pls <- function(train, test = NULL,n_comp = 8, seed = 42) {
     label_val <- as.numeric(str_extract(label_val, "\\d+"))
   }
 
-  pls_model <- plsr(label_train ~ data_train, ncomp = n_comp, scale = TRUE, validation = "none")
+  pls_model <- plsr(label_train ~ data_train, ncomp = n_comp, scale = TRUE, validation = data_val)
   pre_result <- predict(pls_model, data_val, ncomp = n_comp)
+  if(show | save){
+    p1 <- Plot.scatter(label_train, predict(pls_model, data_train, ncomp = n_comp), cols = label_train)
+    p2 <- Plot.scatter(label_val, pre_result, cols = label_val)
+    if(show){print(p1)
+      print(p2)}  
+    if(save){
+      cat('Saving plot to the current working directory: ', getwd(), '\n')
+      ggsave('Quantification_Pls_Train.png', p1, width = 10, height = 10)
+      ggsave('Quantification_Pls_Test.png', p2, width = 10, height = 10)
+    }
+  }
   if (is.null(test)) return(list(model=pls_model)) else return(list(model=pls_model, pred_test = pre_result))
 }
 
@@ -50,6 +63,8 @@ Quantification.Pls <- function(train, test = NULL,n_comp = 8, seed = 42) {
 #' @param train The training data object
 #' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).
 #' @param n_pc The number of principal components that the PCA model extract for further MLR model building. Feature extraction is recommended to reduce the multicollinearity among predictors.
+#' @param show Whether to show the plot of the regression results (Prediction vs True)
+#' @param save Whether to save the plot of the results (default path: getwd())
 #' @param seed The seed for the random number generator
 #' 
 #' @return A list containing:
@@ -65,7 +80,7 @@ Quantification.Pls <- function(train, test = NULL,n_comp = 8, seed = 42) {
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' quan_mlr <- Quantification.Mlr(data_processed)
-Quantification.Mlr <- function(train, test = NULL, n_pc = 20, seed = 42) {
+Quantification.Mlr <- function(train, test = NULL, n_pc = 20,show = TRUE, save = FALSE, seed = 42) {
   set.seed(seed)
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
@@ -92,6 +107,17 @@ Quantification.Mlr <- function(train, test = NULL, n_pc = 20, seed = 42) {
   
   mlr_model <- lm(label_train~ ., data = data_20)
   pre_result <- predict(mlr_model, test_20)
+  if(show | save){
+    p1 <- Plot.scatter(label_train, predict(mlr_model, data_20), cols = label_train)
+    p2 <- Plot.scatter(label_val, pre_result, cols = label_val)
+    if(show){print(p1)
+      print(p2)}  
+    if(save){
+      cat('Saving plot to the current working directory: ', getwd(), '\n')
+      ggsave('Quantification_Mlr_Train.png', p1, width = 10, height = 10)
+      ggsave('Quantification_Mlr_Test.png', p2, width = 10, height = 10)
+    }
+  }
   pca_params <- list(
     center = data.pca$center,
     scale = data.pca$scale,
@@ -106,6 +132,8 @@ Quantification.Mlr <- function(train, test = NULL, n_pc = 20, seed = 42) {
 #' @param train The training data object
 #' @param test The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).
 #' @param n_pc The number of principal components that the PCA model extract for further GLM model building. Feature extraction is recommended to reduce the multicollinearity among predictors.
+#' @param show Whether to show the plot of the regression results (Prediction vs True)
+#' @param save Whether to save the plot of the results (default path: getwd())
 #' @param seed The seed for the random number generator
 #' 
 #' @return A list containing:
@@ -121,7 +149,7 @@ Quantification.Mlr <- function(train, test = NULL, n_pc = 20, seed = 42) {
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' quan_glm <- Quantification.Glm(data_processed)
-Quantification.Glm <- function(train, test = NULL, n_pc = 20, seed = 42) {
+Quantification.Glm <- function(train, test = NULL, n_pc = 20, show = TRUE, save = FALSE, seed = 42) {
   set.seed(seed)
   if (is.null(test)) {
     data_set <- get.nearest.dataset(train)
@@ -153,6 +181,17 @@ Quantification.Glm <- function(train, test = NULL, n_pc = 20, seed = 42) {
     scale = data.pca$scale,
     rotation = data.pca$rotation[, 1:n_pc]
   )
+  if(show | save){
+    p1 <- Plot.scatter(label_train, predict(glm_model, data_20), cols = label_train)
+    p2 <- Plot.scatter(label_val, pre_result, cols = label_val)
+    if(show){print(p1)
+      print(p2)}  
+    if(save){
+      cat('Saving plot to the current working directory: ', getwd(), '\n')
+      ggsave('Quantification_Glm_Train.png', p1, width = 10, height = 10)
+      ggsave('Quantification_Glm_Test.png', p2, width = 10, height = 10)
+    }
+  }
   if (is.null(test)) return(list(model=glm_model, pca_params = pca_params)) else return(list(model=glm_model, pred_test = pre_result, pca_params = pca_params))
 }
 

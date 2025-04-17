@@ -297,7 +297,24 @@ Plot.Distribution <- function(group_1, group_2, cols = NULL, width = 0.9) {
     return(p)
 }
 
-
+#' Plot scatter plot
+#'
+#' @param x A vector of x values
+#' @param y A vector of y values
+#' @param cols Optional color palette for points
+#' @param point_size Size of points (default: 1)
+#' @param point_alpha Transparency of points (default: 0.5)
+#' @return A ggplot object
+#' @export
+Plot.scatter <- function(x, y, cols = NULL, point_size = 1, point_alpha = 0.5) {
+    plot_data <- data.frame( x, y)
+    p <- ggplot(plot_data, aes(x = x, y = y, color = cols, fill = cols)) +
+        geom_point(size = point_size, alpha = point_alpha) +
+        scale_color_continuous(low = '#bebef1', high = '#0449a9') +
+        scale_fill_continuous(low = '#bebef1', high = '#0449a9') +
+        theme_classic()
+    return(p)
+}
 
 #' Get RamEx colors
 #'
