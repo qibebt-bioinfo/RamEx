@@ -14,8 +14,8 @@
 #' @export
 Plot.Heatmap.Markers <- function(object, markers, group=object$group,
                             scale = "row", show_legend = TRUE, cluster_cols = FALSE, cluster_rows = TRUE,
-                            show_rownames = FALSE, show_colnames = TRUE,
-                            wave_gap_threshold = 20) {
+                            show_rownames = FALSE, show_colnames = TRUE, show = TRUE, save = FALSE,
+                            wave_gap_threshold = 20, width = 10, height = 10) {
     data_after <- Feature.Reduction.Intensity(object, as.list(markers))
     markers_intensity <- data.frame(
         group = group,
@@ -34,6 +34,7 @@ Plot.Heatmap.Markers <- function(object, markers, group=object$group,
     
     wave_diff <- diff(waves_sorted)
     split_points <- which(wave_diff > wave_gap_threshold)
+    if(save){cat('Saving heatmap to the current working directory: ', getwd(), '\n')}
     if(length(split_points) < 3){
         p <- pheatmap(
         t(markers_intensity[,-1]),
@@ -41,7 +42,8 @@ Plot.Heatmap.Markers <- function(object, markers, group=object$group,
         cluster_rows = TRUE,
         legend = show_legend,
         scale = scale,
-        clustering_distance_rows = "correlation" )
+        clustering_distance_rows = "correlation",
+        silent = TRUE)
         wave_order <- p$tree_row$order
         waves_sorted <- waves[wave_order]
 
@@ -81,7 +83,11 @@ Plot.Heatmap.Markers <- function(object, markers, group=object$group,
         clustering_distance_rows = "correlation",
         treeheight_row = 0,
         density.info = "none",
-        annotation_row = bands_ann
+        annotation_row = bands_ann,
+        silent = !show,
+        filename = ifelse(save, 'Raman_Markers_heatmap.png', NA),
+        width = width,
+        height = height
     )
     return(p)
 }
