@@ -14,7 +14,11 @@ Plot.Heatmap.Markers(
   cluster_rows = TRUE,
   show_rownames = FALSE,
   show_colnames = TRUE,
-  wave_gap_threshold = 20
+  show = TRUE,
+  save = FALSE,
+  wave_gap_threshold = 20,
+  width = 10,
+  height = 10
 )
 }
 \arguments{

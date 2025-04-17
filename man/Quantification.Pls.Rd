@@ -4,7 +4,14 @@
 \alias{Quantification.Pls}
 \title{Partial Least Squares (PLS)}
 \usage{
-Quantification.Pls(train, test = NULL, n_comp = 8, seed = 42)
+Quantification.Pls(
+  train,
+  test = NULL,
+  n_comp = 8,
+  show = TRUE,
+  save = FALSE,
+  seed = 42
+)
 }
 \arguments{
 \item{train}{The training Ramanome object}
@@ -12,6 +19,10 @@ Quantification.Pls(train, test = NULL, n_comp = 8, seed = 42)
 \item{test}{The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).}
 
 \item{n_comp}{The number of latent components that the PLS model extract from the training data to model the response variable}
+
+\item{show}{Whether to show the plot of the regression results (Prediction vs True)}
+
+\item{save}{Whether to save the plot of the results (default path: getwd())}
 
 \item{seed}{The seed for the random number generator}
 }

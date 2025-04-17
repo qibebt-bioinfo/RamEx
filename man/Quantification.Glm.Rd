@@ -5,7 +5,14 @@
 \title{Generalized linear model (GLM)
 Extends linear regression by allowing response variables to follow non-normal distributions via link functions.}
 \usage{
-Quantification.Glm(train, test = NULL, n_pc = 20, seed = 42)
+Quantification.Glm(
+  train,
+  test = NULL,
+  n_pc = 20,
+  show = TRUE,
+  save = FALSE,
+  seed = 42
+)
 }
 \arguments{
 \item{train}{The training data object}
@@ -13,6 +20,10 @@ Quantification.Glm(train, test = NULL, n_pc = 20, seed = 42)
 \item{test}{The test data object (optional). If not provided, the function will perform a stratified cross-validation (Training : Test = 7 : 3).}
 
 \item{n_pc}{The number of principal components that the PCA model extract for further GLM model building. Feature extraction is recommended to reduce the multicollinearity among predictors.}
+
+\item{show}{Whether to show the plot of the regression results (Prediction vs True)}
+
+\item{save}{Whether to save the plot of the results (default path: getwd())}
 
 \item{seed}{The seed for the random number generator}
 }
