@@ -41,7 +41,7 @@ Quantification.Pls <- function(train, test = NULL,n_comp = 8, show = TRUE, save 
     label_val <- as.numeric(str_extract(label_val, "\\d+"))
   }
 
-  pls_model <- plsr(label_train ~ data_train, ncomp = n_comp, scale = TRUE, validation = data_val)
+  pls_model <- plsr(label_train ~ data_train, ncomp = n_comp, scale = TRUE, validation = 'none')
   pre_result <- predict(pls_model, data_val, ncomp = n_comp)
   if(show | save){
     p1 <- Plot.scatter(label_train, predict(pls_model, data_train, ncomp = n_comp), cols = label_train)
