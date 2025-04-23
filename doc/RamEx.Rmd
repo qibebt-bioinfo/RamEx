@@ -9,13 +9,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
-
 Ramanome Explorer (RamEx, Fig.1) is a R package for comprehensive and efficient analysis and comparison of ramanomes.
 By providing simple-to-use modules for computational tasks that otherwise would require substantial programming experience and algorithmic skills, RamEx should greatly facilitate the computational mining of ramanomes.
 
@@ -23,9 +16,10 @@ More complete information about how to use RamEx can be found in the [github](ht
 
 ##Installaiton
 ```{r}
-library(devtools)
-install_github("qibebt-bioinfo/RamEx")
+# library(devtools)
+# install_github("qibebt-bioinfo/RamEx")
 ```
+
 ##Getting Started
 # Data Loading
 Raman spectra are respectively tracked in single txt files, and their meta info is recorded in the file name.
@@ -35,6 +29,7 @@ library(dplyr)
 data(RamEx_data)
 options(mc.cores = 2)
 ```
+
 # Pretreatment
 SSpectral pretreatment will make the spectrum clearer, containing smoothing, baseline removal, normalization and truncation.
 Mean spectra will display their effects.
@@ -43,6 +38,7 @@ Here the results of each step will be kept in the Ramanome for better debugging,
 RamEx_data <- RamEx_data %>% Preprocessing.Smooth.Sg %>% Preprocessing.Baseline.Polyfit %>% Preprocessing.Normalize(.,'ch') 
 plot(RamEx_data)  
 ```
+
 # Quality control
 Remove the samples with low quality or abnormal spectral acquisition. ICOD method is recommended to perform quality control (QC). Each method will return a logical vector, indicating the quality of each cell sample.
 ```{r}
@@ -78,6 +74,7 @@ ROC_markers <- Raman.Markers.Roc(Preprocessing.Cutoff(data_cleaned, 1400, 1500),
 cor_markers <- Raman.Markers.Correlations(Preprocessing.Cutoff(data_cleaned, 1400, 1500), min.cor = 0.6) 
 RBCS.markers <- Raman.Markers.Rbcs(data_cleaned, threshold = 0.003, show = T) 
 ```
+
 # IRCA
 Observe the single-cell heterogeneity within the Ramanome/microbial community and to elucidate intracellular metabolite conversions.
 - Global IRCA.
@@ -98,6 +95,7 @@ Captures both synchronous (simultaneous changes) and asynchronous (sequential ch
 ```{r}
 data_cos <- Intraramanome.Analysis.2Dcos(data_cleaned) 
 ```
+
 # Phenotype analysis
 RamEx provides four types of phenotype analysis: Louvain clustering, K-means clustering, Gaussian mixture model and hierarchical clustering.
 ```{r}
