@@ -676,6 +676,7 @@ Intraramanome.Analysis.2Dcos <- function(object, n_cores = 10) {
   data <- get.nearest.dataset(object)
   max_cores <- detectCores() - 2
   if(n_cores <= max_cores) {
+    on.exit(options(mc.cores = max_cores+2))
     options(mc.cores = n_cores)
     twod <- corr2d(data)
     invisible(plot_corr2d(twod, Legend = FALSE))
