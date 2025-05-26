@@ -494,8 +494,19 @@ gpupre_spike_matrix <- function(all_data, device = NULL, sharpen=33) {
 #' @examples
 #' data(RamEx_data)
 #' data_spike <- Preprocessing.Spike(RamEx_data,"CPU")
+#' @note For Windows users: GPU acceleration requires proper installation of OpenCL SDK and GPU drivers.
+#' If you encounter issues with gpuR installation, please refer to the package documentation
+#' or use CPU mode instead.
 Preprocessing.Spike <- function(object, device='CPU', sharpen=33){
   data <- get.nearest.dataset(object)
+  if (device == "GPU") {
+    if (!requireNamespace("gpuR", quietly = TRUE)) {
+        stop("gpuR package is required for GPU acceleration. Please install it first.")
+    }
+    if (.Platform$OS.type == "windows") {
+        warning("GPU acceleration on Windows may require additional setup. Please ensure OpenCL is properly configured.")
+    }
+}
   pre.data <- gpupre_spike_matrix(data, device, sharpen)
   object@datasets$spike.data <- pre.data
   return(object)
