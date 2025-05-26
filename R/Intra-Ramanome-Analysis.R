@@ -664,6 +664,7 @@ Intraramanome.Analysis.Irca.Local <- function(object, bands_ann, threshold = 0.6
 #' Captures both synchronous (simultaneous changes) and asynchronous (sequential changes) relationships, providing detailed insights into spectral changes
 #'
 #' @param object A Ramanome object.
+#' @param n_cores The number of cores to use for parallel calculation. Default is 10.
 #' @return synchronous and asynchronous correlation spectra result
 #' @export Intraramanome.Analysis.2Dcos
 #' @import corr2D
@@ -671,9 +672,15 @@ Intraramanome.Analysis.Irca.Local <- function(object, bands_ann, threshold = 0.6
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' corr_2d <- Intraramanome.Analysis.2Dcos(data_processed)
-Intraramanome.Analysis.2Dcos <- function(object) {
+Intraramanome.Analysis.2Dcos <- function(object, n_cores = 10) {
   data <- get.nearest.dataset(object)
-  twod <- corr2d(data)
-  invisible(plot_corr2d(twod, Legend = FALSE))
-  return(twod)
+  max_cores <- detectCores() - 2
+  if(n_cores <= max_cores) {
+    options(mc.cores = n_cores)
+    twod <- corr2d(data)
+    invisible(plot_corr2d(twod, Legend = FALSE))
+    return(twod)
+  } else {
+    stop('The number of cores ', n_cores, ' over the maximum number of cores ', max_cores, ', please set a smaller number')
+  }
 }

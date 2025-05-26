@@ -100,6 +100,9 @@ setMethod("names", "Ramanome", function(x) {
 #' # Display object information
 #' show(raman_obj)
 #' @export
+setGeneric("show")
+
+#' @export
 setMethod(
   f = "show",
   signature = "Ramanome",
@@ -202,7 +205,9 @@ setMethod("length", "Ramanome", function(x) {
 #' @param y The second Ramanome object
 #' @return A new Ramanome object containing the combined data from both input objects
 #' @export
+setGeneric("rbind2")
 
+#' @export
 setMethod("rbind2", signature(x = "Ramanome", y = "Ramanome"),
           function(x, y) {
             Ramanome(wavenumber = x@wavenumber ,

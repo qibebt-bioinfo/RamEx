@@ -19,6 +19,11 @@ The Ramanome object with cosmic rays removed spectra, named as "spike.data" in t
 \description{
 recognize the cosmic rays by a sharp convolution kernel and replace them with the average of the neighboring pixels
 }
+\note{
+For Windows users: GPU acceleration requires proper installation of OpenCL SDK and GPU drivers.
+If you encounter issues with gpuR installation, please refer to the package documentation
+or use CPU mode instead.
+}
 \examples{
 data(RamEx_data)
 data_spike <- Preprocessing.Spike(RamEx_data,"CPU")

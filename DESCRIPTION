@@ -1,6 +1,6 @@
 Package: RamEx
 Type: Package
-Title: Provide Comprehensive and Efficient Analysis and Comparison of Ramanomes.
+Title: Provide Comprehensive and Efficient Analysis and Comparison of Ramanomes
 Version: 1.0.0
 Authors@R: 
     c(

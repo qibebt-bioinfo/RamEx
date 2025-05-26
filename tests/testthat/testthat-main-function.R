@@ -124,6 +124,6 @@ test_that("UMAP plot generation works correctly", {
   cleaned_obj <- Qualitycontrol.ICOD(normalized_obj, var_tol = 0.4)
   cleaned_obj <- normalized_obj[cleaned_obj$quality,] 
   pca_obj <- Feature.Reduction.Pca(cleaned_obj, show = FALSE, save = FALSE)
-  umap_obj <- Feature.Reduction.Umap(pca_obj, draw = TRUE, save = TRUE)
+  umap_obj <- Feature.Reduction.Umap(pca_obj, show = TRUE, save = TRUE)
   expect_true(file.exists("Reduction.umap.png"))
 })
