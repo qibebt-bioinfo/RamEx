@@ -176,7 +176,7 @@ RamEx also offers an online version. Please visit (http://ramex.single-cell.cn).
   - For more information on OpenCL on Linux, refer to the [POCL documentation](https://github.com/pocl/pocl).
 - Windows:
   - Intel and AMD provide detailed installation guides for their OpenCL SDKs. Follow the instructions specific to your hardware:
-    - [Intel OpenCL SDK](https://www.intel.com/content/www/us/en/developer/tools/opencl-sdk.html)
+    - [Intel OpenCL SDK](https://www.intel.com/content/www/us/en/developer/tools/overview.html)
     - [AMD OpenCL SDK](https://github.com/GPUOpen-LibrariesAndSDKs/OCL-SDK/releases)
 - macOS:
   - macOS users can leverage Homebrew for a seamless installation experience also refer to the [POCL documentation](https://github.com/pocl/pocl).

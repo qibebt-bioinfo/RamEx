@@ -55,7 +55,7 @@ Preprocessing.Baseline.Polyfit <- function(object, order_1 = 1, order_2 = 6) {
     
   } else if (wave_min <= 1100) {
     baseline1 <- spc.fit.poly.below(spc_data, spc_data, poly.order = order_1)
-    corrected <- fit - baseline
+    corrected <- spc_data - baseline
   } else if (wave_min > 1100 & wave_max > 2600) {
     support_idx <- which(wavenumber == wave_min |
                           wavenumber >= 1790 & wavenumber <= 2065 | 
@@ -63,12 +63,12 @@ Preprocessing.Baseline.Polyfit <- function(object, order_1 = 1, order_2 = 6) {
                           wavenumber == wavenumber[which.min(abs(wavenumber - 2783))] | 
                           wavenumber == wave_max)
     baseline <- spc.fit.poly(spc_data[, support_idx, drop = FALSE], spc_data, poly.order = order_2)
-    corrected <- fit - baseline
+    corrected <- spc_data - baseline
     message(paste0("The Ramanome contains ", nrow(corrected), " spectra"))
     
   } else {
     baseline1 <- spc.fit.poly.below(spc_data, spc_data, poly.order = order_1)
-    corrected <- fit - baseline
+    corrected <- spc_data - baseline
   }
   
   corrected <- corrected[, !duplicated(colnames(corrected), fromLast = FALSE), drop = FALSE]
