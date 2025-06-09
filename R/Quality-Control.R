@@ -527,7 +527,6 @@ Qualitycontrol.ICOD <- function(object, var_tol=0.5, max_iterations=100, kernel 
   for (inter in 1:max_iterations){
     new_group <- as.numeric(group)
     index_good <- group == 1
-    start_time <- Sys.time()
     peaks <- bubblefill(colMeans(matrix[index_good,]),min_bubble_widths = floor(100/resolution))$peaks
     q <- apply(matrix[index_good,peaks],2,quantile)
     IQR <- q[4,]-q[2,]

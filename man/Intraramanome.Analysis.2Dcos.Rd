@@ -5,10 +5,12 @@
 \title{2D Correlation Spectroscopy Analysis (2D-COS)
 Captures both synchronous (simultaneous changes) and asynchronous (sequential changes) relationships, providing detailed insights into spectral changes}
 \usage{
-Intraramanome.Analysis.2Dcos(object)
+Intraramanome.Analysis.2Dcos(object, n_cores = 10)
 }
 \arguments{
 \item{object}{A Ramanome object.}
+
+\item{n_cores}{The number of cores to use for parallel calculation. Default is 10.}
 }
 \value{
 synchronous and asynchronous correlation spectra result
