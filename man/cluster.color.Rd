@@ -4,7 +4,7 @@
 \alias{cluster.color}
 \title{Generate a color-coded plot for cluster visualization}
 \usage{
-cluster.color(data, group)
+\method{cluster}{color}(data, group)
 }
 \arguments{
 \item{data}{A data frame containing the dataset.}

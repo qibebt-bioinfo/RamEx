@@ -226,15 +226,11 @@ convolve_custom <- function(vec, kernel) {
 #' @importFrom stats mahalanobis
 #' @noRd
 
-outliers_mcdEst <- function(x,index_good,
+outliers_mcdEst <- function(data,
                             h = .75, # fraction of data we wanna keep
                             # to compute the MCD (between 0 and 1)
-                            alpha = .01,
-                            na.rm = TRUE){
+                            alpha = .01){
   
-  if (na.rm == TRUE ) {
-    data <- na.omit(x)
-  } else {data <- x}
   
   for (i in seq_len(ncol(data))){
     if(inherits(data[,i],c("numeric","integer")) == FALSE)
@@ -244,7 +240,7 @@ outliers_mcdEst <- function(x,index_good,
   #Creating covariance matrix for Minimum Covariance Determinant
   # by default, use the "best" method = exhaustive method
   # output <- fastMCD(data, h=0)
-  output <- covFastMCD(data[index_good,], alpha = 0.6, m=10, l=1, delta = 0.05)
+  output <- covFastMCD(data, alpha = 0.6, m=10, l=1, delta = 0.05)
   
   cutoff <- (qchisq(p = 1-alpha, df = ncol(data)))
   
@@ -260,9 +256,6 @@ outliers_mcdEst <- function(x,index_good,
     coordinates[,k] <- data[,k][dist > cutoff]
   }
   
-  
-  # print results
-  meth <- "Minimum Covariance Determinant estimator"
   
   # Return results in list()
   invisible(
@@ -348,11 +341,6 @@ covFastMCD <- function(x, alpha, m, l, delta) {
   final_sets <- list()
   final_scatter <- list()
   
-  list_sets <- list()
-  S_final <- list()
-  sigma <- list()
-  center <- list()
-  
   # Iterate over the number of initial subsets
   for (i in 1:m) {
     # Randomly select p + 1 observations to form the initial subset
@@ -435,7 +423,6 @@ covFastMCD <- function(x, alpha, m, l, delta) {
       idx_new <- d_sqr_current$ix[1:h]
       
       # Update subset with new indices
-      subset_old <- subset_current
       subset_current <- x[idx_new, ]
       center_new <- apply(subset_current, 2, mean)
       scatter_new <- ((h - 1) / h) * var(subset_current)
@@ -527,7 +514,6 @@ Qualitycontrol.ICOD <- function(object, var_tol=0.5, max_iterations=100, kernel 
   for (inter in 1:max_iterations){
     new_group <- as.numeric(group)
     index_good <- group == 1
-    start_time <- Sys.time()
     peaks <- bubblefill(colMeans(matrix[index_good,]),min_bubble_widths = floor(100/resolution))$peaks
     q <- apply(matrix[index_good,peaks],2,quantile)
     IQR <- q[4,]-q[2,]
@@ -614,9 +600,9 @@ calculate_hotellings_t2 <- function(m1, m2, signif = 0.05) {
 #' @export
 Qualitycontrol.T2 <- function(object, signif = 0.05){
     x <- get.nearest.dataset(object)
-    out_na <- which(is.na(rowSums(x)))
+    out_na <- is.na(rowSums(x))
     pred_outliers <- rep(TRUE, nrow(x))
-    if(length(out_na)!=0)pred_outliers[out_na,] <- FALSE
+    if(any(out_na))pred_outliers[out_na] <- FALSE
     n_out <- 0
     temp_outliers <- pred_outliers
     i <- 1
@@ -655,18 +641,18 @@ Qualitycontrol.T2 <- function(object, signif = 0.05){
 Qualitycontrol.Dis <- function(object, max.dis=1){
   x <- get.nearest.dataset(object)
   pred_outliers <- rep(TRUE, nrow(x))
-  out_na <- which(is.na(rowSums(x)))
-  if(length(out_na)!=0)pred_outliers[out_na,] <- FALSE
+  out_na <- is.na(rowSums(x))
+  if(any(out_na))pred_outliers[out_na] <- FALSE
   n_out <- length(pred_outliers[!pred_outliers])
   mean_spec <- colMeans(x[pred_outliers,])
   dis_matrix <- apply(x, 1, function(row) sqrt(sum((row - mean_spec)^2)))
-  temp.dis <- quantile(dis_matrix, probs = 0.9)
+  temp.dis <- quantile(dis_matrix, probs = 0.9, na.rm = TRUE)
   while(TRUE){
     pred_outliers[dis_matrix>max(temp.dis, max.dis)] <- FALSE
     mean_spec <- colMeans(x[pred_outliers,])
     dis_matrix <- apply(x, 1, function(row) sqrt(sum((row - mean_spec)^2)))
     if(n_out==length(pred_outliers[!pred_outliers]))  {temp.dis <- temp.dis*0.95;pred_outliers[dis_matrix>max(temp.dis, max.dis)] <- FALSE}
-    else{temp.dis <- quantile(dis_matrix, probs = 0.9)}
+    else{temp.dis <- quantile(dis_matrix, probs = 0.9, na.rm = TRUE)}
     n_out <- length(pred_outliers[!pred_outliers])
     if(all(dis_matrix[pred_outliers]<max.dis))
       break
@@ -692,14 +678,14 @@ Qualitycontrol.Dis <- function(object, max.dis=1){
 #' qc_mcd <- Qualitycontrol.Mcd(RamEx_data)
 
 
-Qualitycontrol.Mcd <- function(object,h = .5,alpha = .01, na.rm = TRUE){
+Qualitycontrol.Mcd <- function(object,h = .5,alpha = .01){
   x <- get.nearest.dataset(object)
   pred_outliers <- rep(TRUE, nrow(x))
-  out_na <- which(is.na(rowSums(x)))
+  out_na <- is.na(rowSums(x))
   dis <- rep(NA, nrow(x))
-  if(length(out_na)!=0)pred_outliers[out_na,] <- FALSE
+  if(any(out_na))pred_outliers[out_na] <- FALSE
   x <- prcomp_irlba(x[pred_outliers,], n = 20, center = TRUE, scale. = TRUE)$x[,1:5]
-  out <- outliers_mcdEst(x,pred_outliers,h,alpha,na.rm)
+  out <- outliers_mcdEst(x,h,alpha)
   dis[pred_outliers] <- out$dist_from_center
   pred_outliers[pred_outliers][out$outliers_pos] <- FALSE
   return(data.frame(quality=pred_outliers, Distance = dis))

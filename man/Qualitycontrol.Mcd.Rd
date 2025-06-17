@@ -4,7 +4,7 @@
 \alias{Qualitycontrol.Mcd}
 \title{Detect outliers using the Minimum Covariance Determinant (MCD) method}
 \usage{
-Qualitycontrol.Mcd(object, h = 0.5, alpha = 0.01, na.rm = TRUE)
+Qualitycontrol.Mcd(object, h = 0.5, alpha = 0.01)
 }
 \arguments{
 \item{object}{Ramanome Object}
