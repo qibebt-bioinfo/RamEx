@@ -32,5 +32,5 @@ Each group/sample will get their own marker list.
 \examples{
 data(RamEx_data)
 data_processed <- Preprocessing.OneStep(RamEx_data)
-ROC_markers <- Raman.Markers.Roc(preprocessing.cutoff(data_processed, 800, 1300), threshold = 0.75, paired = FALSE, batch_size = 1000)
+Markers_ROC <- Raman.Markers.Roc(preprocessing.cutoff(data_processed, 800, 1300), threshold = 0.75, paired = FALSE, batch_size = 1000)
 }

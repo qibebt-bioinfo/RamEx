@@ -39,5 +39,5 @@ Calculates the correlations between each column of a dataset X and a target vari
 data(RamEx_data)
 data_processed <- Preprocessing.OneStep(RamEx_data)
 options(mc.cores = 2)
-cor_markers <- Raman.Markers.Correlations(preprocessing.cutoff(data_processed, 800, 1300), min.cor = 0.6)
+Markers_corr <- Raman.Markers.Correlations(preprocessing.cutoff(data_processed, 800, 1300), min.cor = 0.6)
 }

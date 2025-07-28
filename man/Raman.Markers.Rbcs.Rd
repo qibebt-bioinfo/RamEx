@@ -51,5 +51,5 @@ Teng L., Wang X.,  Wang X.,  Gou H.,  Ren L., & Wang T., 2016. Label-free, rapid
 \examples{
 data(RamEx_data)
 data_processed <- Preprocessing.OneStep(RamEx_data)
-RBCS.markers <- Raman.Markers.Rbcs(data_processed, threshold = 0.003, show = TRUE)
+Markers_RBCS <- Raman.Markers.Rbcs(data_processed, threshold = 0.003, show = TRUE)
 }

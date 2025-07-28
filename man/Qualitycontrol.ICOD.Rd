@@ -6,7 +6,7 @@
 \usage{
 Qualitycontrol.ICOD(
   object,
-  var_tol = 0.5,
+  var_tol = 1,
   max_iterations = 100,
   kernel = c(1, 1, 1)
 )
