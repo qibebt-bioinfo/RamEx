@@ -504,7 +504,7 @@ covFastMCD <- function(x, alpha, m, l, delta) {
 #' data(RamEx_data)
 #' qc_icod <- Qualitycontrol.ICOD(RamEx_data)
 
-Qualitycontrol.ICOD <- function(object, var_tol=0.5, max_iterations=100, kernel = c(1,1,1)){
+Qualitycontrol.ICOD <- function(object, var_tol=1, max_iterations=100, kernel = c(1,1,1)){
   matrix <- get.nearest.dataset(object)
   resolution <- (max(as.numeric(colnames(matrix))) - min(as.numeric(colnames(matrix))))/ncol(matrix)
   group <- rep(1, nrow(matrix))

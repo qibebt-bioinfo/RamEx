@@ -490,7 +490,7 @@ BetweenGroup.test <- function(data, group, p.adj.method = "bonferroni", paired =
 #' @examples
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
-#' RBCS.markers <- Raman.Markers.Rbcs(data_processed, threshold = 0.003, show = TRUE)
+#' Markers_RBCS <- Raman.Markers.Rbcs(data_processed, threshold = 0.003, show = TRUE)
 
 
 Raman.Markers.Rbcs <- function(
@@ -587,7 +587,7 @@ Raman.Markers.Rbcs <- function(
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' options(mc.cores = 2)
-#' cor_markers <- Raman.Markers.Correlations(preprocessing.cutoff(data_processed, 800, 1300), min.cor = 0.6)
+#' Markers_corr <- Raman.Markers.Correlations(preprocessing.cutoff(data_processed, 800, 1300), min.cor = 0.6)
 Raman.Markers.Correlations <- function(object,group=object$group, paired = FALSE,
 min.cor=0.8, by_average = FALSE, min.range = 30,  extract_num = TRUE) {
   if(by_average){
@@ -688,7 +688,7 @@ average_spectra <- function(matrix, group, min.range ){
 #' @examples
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
-#' ROC_markers <- Raman.Markers.Roc(preprocessing.cutoff(data_processed, 800, 1300), threshold = 0.75, paired = FALSE, batch_size = 1000)
+#' Markers_ROC <- Raman.Markers.Roc(preprocessing.cutoff(data_processed, 800, 1300), threshold = 0.75, paired = FALSE, batch_size = 1000)
 Raman.Markers.Roc <- function(object, threshold = 0.75, paired = FALSE, batch_size = 1000){
   matrix <- get.nearest.dataset(object)
   group <- object@meta.data$group
@@ -726,4 +726,60 @@ Raman.Markers.Roc <- function(object, threshold = 0.75, paired = FALSE, batch_si
   return(markers_all)
 }
 
-
+#' Find Markers Using Discriminant Analysis of Principal Components (DAPC)
+#'
+#' DAPC is a statistical method for classifying groups and identifying features that discriminate between them.
+#' Principal Component Analysis (PCA) is firstly used to reduce data dimensionality and remove correlations among variables.
+#' Then for each group, a one-vs-rest Linear Discriminant Analysis (LDA) is performed on the selected PCs to find the linear combinations that best separate the predefined groups.
+#' And the loadings are back-projected to the original feature space to trace variable importance. The top N features most important for discriminating each group are returned.
+#' 
+#' @param object A Ramanome object.
+#' @param n_pc  Integer. The number of principal components to retain for LDA. Default is 20.
+#' @param top_n Integer. For each group, how many top variables to return according to absolute importance. Default is 100.
+#' @return A data frame with the following columns:
+#' \describe{
+#'   \item{group}{The group label being discriminated}
+#'   \item{wave}{The wavelength}
+#'   \item{importance}{The calculated importance (projected LDA coefficient)}
+#' }
+#' Features of each group are sorted descendingly by absolute importance, and only the top N are reported.
+#' @details
+#' For each unique group label, a one-vs-rest LDA is trained on the PCA-reduced data, 
+#' then the LDA coefficients are reconstructed back into the original feature space to rank feature importances.
+#' @export Raman.Markers.DAPC
+#' @importFrom irlba prcomp_irlba
+#' @importFrom MASS lda
+#' @examples
+#' data(RamEx_data)
+#' data_processed <- Preprocessing.OneStep(RamEx_data)
+#' Markers_DAPC <- Raman.Markers.DAPC(preprocessing.cutoff(data_processed, 800, 1300), n_pc = 15, top_n = 40)
+Raman.Markers.DAPC <- function(object, n_pc = 20, top_n = 100) {
+  dat <- get.nearest.dataset(object)
+  group <- object@meta.data$group
+  # Step 1. PCA
+  pca_res <- prcomp_irlba(dat, n = n_pc, center = TRUE, scale. = TRUE)
+  X_pca <- pca_res$x[, 1:n_pc, drop=FALSE]
+  out_list <- list()
+  grp_all <- unique(group)
+  
+  for (g in grp_all) {
+    # Step 2. One-vs-rest LDA
+    y_bin <- factor(ifelse(group == g, as.character(g), "Other"))
+    lda_res <- MASS::lda(X_pca, grouping = y_bin)
+    # Step 3. Trace back the contribution of the original variable
+    # lda_res$scaling: n_pc x 1
+    coeffs_raw <- pca_res$rotation[, 1:n_pc, drop=FALSE] %*% as.matrix(lda_res$scaling)
+    rownames(coeffs_raw) <- colnames(dat)
+    # Step 4. Sort & Extract the top variable
+    idx <- order(abs(coeffs_raw[,1]), decreasing=TRUE)[1:top_n]
+    out_list[[as.character(g)]] <- data.frame(
+      group = rep(as.character(g), top_n),
+      wave = rownames(coeffs_raw)[idx],
+      importance = coeffs_raw[idx, 1],
+      stringsAsFactors = FALSE
+    )
+  }
+  out_all <- do.call(rbind, out_list)
+  rownames(out_all) <- NULL
+  return(out_all)
+}
