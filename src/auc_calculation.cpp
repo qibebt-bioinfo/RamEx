@@ -109,25 +109,23 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
   std::vector<int> final_col1, final_col2, final_groups;
   std::vector<double> final_aucs;
 
-  int current_pair = 0;
+  std::vector<std::pair<int,int>> all_pairs;
+  all_pairs.reserve(total_pairs);
+  for (int i = 0; i < n; ++i) {
+    for (int j = i + 1; j < n; ++j) {
+      all_pairs.emplace_back(i, j);
+    }
+  }
 
-  for (int chunk = 0; chunk < num_chunks; chunk++) {
+  for (int chunk = 0; chunk < num_chunks; ++chunk) {
     int start_pair = chunk * batch_size;
-    int end_pair = std::min(total_pairs, start_pair + batch_size);
+    int end_pair   = std::min(total_pairs, start_pair + batch_size);
     int current_batch_size = end_pair - start_pair;
-    IntegerMatrix combinations(current_batch_size, 2);
-    int pair_idx = 0;
 
-    // Generate combinations
-    for (int i = 0; i < n && pair_idx < current_batch_size; i++) {
-      for (int j = i + 1; j < n && pair_idx < current_batch_size; j++) {
-        if (current_pair >= (chunk * batch_size)) {
-          combinations(pair_idx, 0) = i;
-          combinations(pair_idx, 1) = j;
-          pair_idx++;
-        }
-        current_pair++;
-      }
+    IntegerMatrix combinations(current_batch_size, 2);
+    for (int k = 0; k < current_batch_size; ++k) {
+      combinations(k, 0) = all_pairs[start_pair + k].first;
+      combinations(k, 1) = all_pairs[start_pair + k].second;
     }
 
     // Parallel calculation
