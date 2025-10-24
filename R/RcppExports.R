@@ -5,7 +5,7 @@ calculateAUCParallel <- function(matrix, group) {
     .Call('_RamEx_calculateAUCParallel', PACKAGE = 'RamEx', matrix, group)
 }
 
-calculatePairedMarkersAUC <- function(matrix, group, threshold, batch_size = 1000L) {
-    .Call('_RamEx_calculatePairedMarkersAUC', PACKAGE = 'RamEx', matrix, group, threshold, batch_size)
+calculatePairedMarkersAUC <- function(matrix, group, threshold, batch_size = 1000L, n_threads = 0L) {
+    .Call('_RamEx_calculatePairedMarkersAUC', PACKAGE = 'RamEx', matrix, group, threshold, batch_size, n_threads)
 }
 

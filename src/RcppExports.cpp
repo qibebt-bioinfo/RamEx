@@ -23,8 +23,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // calculatePairedMarkersAUC
-DataFrame calculatePairedMarkersAUC(NumericMatrix matrix, IntegerVector group, double threshold, int batch_size);
-RcppExport SEXP _RamEx_calculatePairedMarkersAUC(SEXP matrixSEXP, SEXP groupSEXP, SEXP thresholdSEXP, SEXP batch_sizeSEXP) {
+DataFrame calculatePairedMarkersAUC(NumericMatrix matrix, IntegerVector group, double threshold, int batch_size, int n_threads);
+RcppExport SEXP _RamEx_calculatePairedMarkersAUC(SEXP matrixSEXP, SEXP groupSEXP, SEXP thresholdSEXP, SEXP batch_sizeSEXP, SEXP n_threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -32,14 +32,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type group(groupSEXP);
     Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
     Rcpp::traits::input_parameter< int >::type batch_size(batch_sizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(calculatePairedMarkersAUC(matrix, group, threshold, batch_size));
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(calculatePairedMarkersAUC(matrix, group, threshold, batch_size, n_threads));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_RamEx_calculateAUCParallel", (DL_FUNC) &_RamEx_calculateAUCParallel, 2},
-    {"_RamEx_calculatePairedMarkersAUC", (DL_FUNC) &_RamEx_calculatePairedMarkersAUC, 4},
+    {"_RamEx_calculatePairedMarkersAUC", (DL_FUNC) &_RamEx_calculatePairedMarkersAUC, 5},
     {NULL, NULL, 0}
 };
 
