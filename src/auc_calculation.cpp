@@ -112,20 +112,25 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
   int current_pair = 0;
 
   for (int chunk = 0; chunk < num_chunks; chunk++) {
-    int current_batch_size = std::min(batch_size, total_pairs - current_pair);
+    int start_pair = chunk * batch_size;
+    int end_pair = std::min(total_pairs, start_pair + batch_size);
+    int current_batch_size = end_pair - start_pair;
     IntegerMatrix combinations(current_batch_size, 2);
     int pair_idx = 0;
+    int pair_counter = 0;
 
     // Generate combinations
-    for (int i = 0; i < n && pair_idx < current_batch_size; i++) {
-      for (int j = i + 1; j < n && pair_idx < current_batch_size; j++) {
-        if (current_pair >= (chunk * batch_size)) {
+    for (int i = 0; i < n ; i++) {
+      for (int j = i + 1; j < n ; j++) {
+        if (pair_counter >= start_pair && pair_counter < end_pair) {
           combinations(pair_idx, 0) = i;
           combinations(pair_idx, 1) = j;
           pair_idx++;
         }
-        current_pair++;
+        pair_counter++;
+        if (pair_counter >= end_pair) break;
       }
+      if (pair_counter >= end_pair) break;
     }
 
     // Parallel calculation
