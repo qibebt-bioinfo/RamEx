@@ -3,7 +3,7 @@
 #include <RcppParallel.h>
 #include <algorithm>
 #include <vector>
-#include <unordered_map>
+#include <mutex>
 
 using namespace Rcpp;
 using namespace RcppParallel;
@@ -111,7 +111,8 @@ struct ResultProcessor : public Worker {
   std::vector<int>& final_col2;
   std::vector<int>& final_groups;
   std::vector<double>& final_aucs;
-  tbb::concurrent_vector<std::tuple<int,int,int,double>>& results_vector;
+  std::vector<std::tuple<int,int,int,double>>& results_vector;
+  std::mutex& results_mutex;
 
   ResultProcessor(const IntegerMatrix& combinations,
                   const NumericMatrix& auc_results,
@@ -120,13 +121,15 @@ struct ResultProcessor : public Worker {
                   std::vector<int>& final_col2,
                   std::vector<int>& final_groups,
                   std::vector<double>& final_aucs,
-                  tbb::concurrent_vector<std::tuple<int,int,int,double>>& results_vector)
+                  std::vector<std::tuple<int,int,int,double>>& results_vector,
+                  std::mutex& results_mutex)
     : combinations(combinations), auc_results(auc_results), threshold(threshold),
       final_col1(final_col1), final_col2(final_col2),
       final_groups(final_groups), final_aucs(final_aucs),
-      results_vector(results_vector) {}
+      results_vector(results_vector), results_mutex(results_mutex) {}
 
   void operator()(std::size_t begin, std::size_t end) {
+    std::vector<std::tuple<int,int,int,double>> local_results;
     for (std::size_t i = begin; i < end; i++) {
       for (int g = 0; g < auc_results.ncol(); g++) {
         double auc = auc_results(i, g);
@@ -140,6 +143,8 @@ struct ResultProcessor : public Worker {
         }
       }
     }
+    std::lock_guard<std::mutex> lock(results_mutex);
+    results_vector.insert(results_vector.end(), local_results.begin(), local_results.end());
   }
 };
 
@@ -152,10 +157,9 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
   int total_pairs = (n * (n - 1)) / 2;
   int num_chunks = ceil(total_pairs / (double)batch_size);
 
-  // 使用并发向量存储结果
-  tbb::concurrent_vector<std::tuple<int,int,int,double>> results_vector;
+  std::vector<std::tuple<int,int,int,double>> results_vector;
+  std::mutex results_mutex;
 
-  // 最终结果向量
   std::vector<int> final_col1;
   std::vector<int> final_col2;
   std::vector<int> final_groups;
@@ -169,7 +173,7 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
     IntegerMatrix combinations(current_batch_size, 2);
     int pair_idx = 0;
 
-    // 生成组合（这部分很快，保持串行）
+    // Generate combinations
     for (int i = 0; i < n && pair_idx < current_batch_size; i++) {
       for (int j = i + 1; j < n && pair_idx < current_batch_size; j++) {
         if (current_pair >= (chunk * batch_size)) {
@@ -181,18 +185,16 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
       }
     }
 
-    // 并行计算比值
+    // Parallel calculation
     NumericMatrix ratio_matrix(matrix.nrow(), current_batch_size);
     RatioWorker ratio_worker(matrix, combinations, ratio_matrix);
     parallelFor(0, current_batch_size, ratio_worker);
 
-    // 并行计算AUC
     NumericMatrix auc_results = calculateAUCParallel(ratio_matrix, group);
 
-    // 并行处理结果
     ResultProcessor result_processor(combinations, auc_results, threshold,
                                      final_col1, final_col2, final_groups, final_aucs,
-                                     results_vector);
+                                     results_vector, results_mutex);
     parallelFor(0, current_batch_size, result_processor);
   }
 
