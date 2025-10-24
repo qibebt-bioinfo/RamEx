@@ -11,7 +11,7 @@ Phenotype.Analysis.Louvaincluster(
   threshold = 0.001,
   k = 30,
   n_tree = 50,
-  n_cores = detectCores() - 4,
+  n_cores = 1,
   seed = 42
 )
 }
