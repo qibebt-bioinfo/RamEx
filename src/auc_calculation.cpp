@@ -128,14 +128,6 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
       combinations(k, 1) = all_pairs[start_pair + k].second;
     }
 
-    Rcpp::Rcout << "Chunk " << chunk
-            << " start_pair " << start_pair
-            << " end_pair " << end_pair
-            << " " << combinations(0,0) << "," << combinations(0,1)
-            << " -> " << combinations(current_batch_size-1,0)
-            << "," << combinations(current_batch_size-1,1)
-            << std::endl;
-
     // Parallel calculation
     NumericMatrix ratio_matrix(matrix.nrow(), current_batch_size);
     RatioWorker ratio_worker(matrix, combinations, ratio_matrix);
