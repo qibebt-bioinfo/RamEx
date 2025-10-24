@@ -3,7 +3,6 @@
 #include <RcppParallel.h>
 #include <algorithm>
 #include <vector>
-#include <mutex>
 
 using namespace Rcpp;
 using namespace RcppParallel;
@@ -112,7 +111,6 @@ struct ResultProcessor : public Worker {
   std::vector<int>& final_groups;
   std::vector<double>& final_aucs;
   std::vector<std::tuple<int,int,int,double>>& results_vector;
-  std::mutex& results_mutex;
 
   ResultProcessor(const IntegerMatrix& combinations,
                   const NumericMatrix& auc_results,
@@ -121,15 +119,18 @@ struct ResultProcessor : public Worker {
                   std::vector<int>& final_col2,
                   std::vector<int>& final_groups,
                   std::vector<double>& final_aucs,
-                  std::vector<std::tuple<int,int,int,double>>& results_vector,
-                  std::mutex& results_mutex)
+                  std::vector<std::tuple<int,int,int,double>>& results_vector)
     : combinations(combinations), auc_results(auc_results), threshold(threshold),
       final_col1(final_col1), final_col2(final_col2),
       final_groups(final_groups), final_aucs(final_aucs),
-      results_vector(results_vector), results_mutex(results_mutex) {}
+      results_vector(results_vector) {}
 
   void operator()(std::size_t begin, std::size_t end) {
-    std::vector<std::tuple<int,int,int,double>> local_results;
+    int thread_id = RcppParallel::defaultNumThreads() > 1 ?
+      RcppParallel::currentThreadIndex() : 0;
+    
+    auto& local_results = results_vector[thread_id];
+
     for (std::size_t i = begin; i < end; i++) {
       for (int g = 0; g < auc_results.ncol(); g++) {
         double auc = auc_results(i, g);
@@ -143,8 +144,6 @@ struct ResultProcessor : public Worker {
         }
       }
     }
-    std::lock_guard<std::mutex> lock(results_mutex);
-    results_vector.insert(results_vector.end(), local_results.begin(), local_results.end());
   }
 };
 
@@ -157,12 +156,10 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
   int total_pairs = (n * (n - 1)) / 2;
   int num_chunks = ceil(total_pairs / (double)batch_size);
 
-  std::vector<std::tuple<int,int,int,double>> results_vector;
-  std::mutex results_mutex;
+  int n_threads = RcppParallel::defaultNumThreads();
+  std::vector<std::vector<std::tuple<int,int,int,double>>> results_vector(n_threads);
 
-  std::vector<int> final_col1;
-  std::vector<int> final_col2;
-  std::vector<int> final_groups;
+  std::vector<int> final_col1, final_col2, final_groups;
   std::vector<double> final_aucs;
 
   int current_pair = 0;
@@ -194,17 +191,19 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
 
     ResultProcessor result_processor(combinations, auc_results, threshold,
                                      final_col1, final_col2, final_groups, final_aucs,
-                                     results_vector, results_mutex);
+                                     results_vector);
     parallelFor(0, current_batch_size, result_processor);
   }
 
-  // 将并发向量的结果转移到最终向量
-  for (const auto& result : results_vector) {
-    final_col1.push_back(std::get<0>(result));
-    final_col2.push_back(std::get<1>(result));
-    final_groups.push_back(std::get<2>(result));
-    final_aucs.push_back(std::get<3>(result));
+  for (const auto& local_results : results_vector){
+    for (const auto& result : local_results) {
+      final_col1.push_back(std::get<0>(result));
+      final_col2.push_back(std::get<1>(result));
+      final_groups.push_back(std::get<2>(result));
+      final_aucs.push_back(std::get<3>(result));
+    }
   }
+
 
   return DataFrame::create(
     Named("col1") = wrap(final_col1),
