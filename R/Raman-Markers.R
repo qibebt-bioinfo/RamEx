@@ -716,7 +716,6 @@ Raman.Markers.Roc <- function(object, threshold = 0.75, paired = FALSE, batch_si
   if(paired){
     cat('Finding paired markers ... \n')
     cat('This may take a while, please be patient ... \n')
-    print(ifelse(is.null(n_threads),0,n_threads))
     raman_markers <- calculatePairedMarkersAUC(matrix, group, threshold = threshold, batch_size = batch_size, n_threads = ifelse(is.null(n_threads),0,n_threads))
     raman_markers$col1 <- wave[raman_markers$col1]
     raman_markers$col2 <- wave[raman_markers$col2]
