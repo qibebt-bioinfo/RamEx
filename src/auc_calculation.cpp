@@ -3,6 +3,7 @@
 #include <RcppParallel.h>
 #include <algorithm>
 #include <vector>
+#include <thread> 
 
 using namespace Rcpp;
 using namespace RcppParallel;
@@ -95,8 +96,7 @@ struct RatioWorker : public Worker {
   void operator()(std::size_t begin, std::size_t end) {
     for (std::size_t i = begin; i < end; i++) {
       for (int j = 0; j < matrix.nrow(); j++) {
-        ratio_matrix(j, i) = matrix(j, combinations(i, 0)) /
-          matrix(j, combinations(i, 1));
+        ratio_matrix(j, i) = matrix(j, combinations(i, 0)) /  matrix(j, combinations(i, 1));
       }
     }
   }
@@ -106,44 +106,38 @@ struct ResultProcessor : public Worker {
   const IntegerMatrix& combinations;
   const NumericMatrix& auc_results;
   const double threshold;
-  std::vector<int>& final_col1;
-  std::vector<int>& final_col2;
-  std::vector<int>& final_groups;
-  std::vector<double>& final_aucs;
-  std::vector<std::tuple<int,int,int,double>>& results_vector;
+  std::vector<std::vector<std::tuple<int,int,int,double>>>& results_vector;
 
   ResultProcessor(const IntegerMatrix& combinations,
                   const NumericMatrix& auc_results,
                   const double threshold,
-                  std::vector<int>& final_col1,
-                  std::vector<int>& final_col2,
-                  std::vector<int>& final_groups,
-                  std::vector<double>& final_aucs,
-                  std::vector<std::tuple<int,int,int,double>>& results_vector)
+                  std::vector<std::vector<std::tuple<int,int,int,double>>>& results_vector)
     : combinations(combinations), auc_results(auc_results), threshold(threshold),
-      final_col1(final_col1), final_col2(final_col2),
-      final_groups(final_groups), final_aucs(final_aucs),
       results_vector(results_vector) {}
 
   void operator()(std::size_t begin, std::size_t end) {
-    int thread_id = RcppParallel::defaultNumThreads() > 1 ?
-      RcppParallel::currentThreadIndex() : 0;
+    std::vector<std::tuple<int,int,int,double>> local_results;
+    local_results.reserve(end - begin);
     
-    auto& local_results = results_vector[thread_id];
-
     for (std::size_t i = begin; i < end; i++) {
       for (int g = 0; g < auc_results.ncol(); g++) {
         double auc = auc_results(i, g);
         if (auc > threshold) {
-          results_vector.push_back(std::make_tuple(
+          local_results.emplace_back(
               combinations(i, 0) + 1,
               combinations(i, 1) + 1,
               g + 1,
               auc
-          ));
+          );
         }
       }
     }
+    static thread_local int thread_id = -1;
+    if (thread_id == -1)
+      thread_id = std::hash<std::thread::id>{}(std::this_thread::get_id()) % results_vector.size();
+
+    auto& bucket = results_vector[thread_id];
+    bucket.insert(bucket.end(), local_results.begin(), local_results.end());
   }
 };
 
@@ -156,7 +150,7 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
   int total_pairs = (n * (n - 1)) / 2;
   int num_chunks = ceil(total_pairs / (double)batch_size);
 
-  int n_threads = RcppParallel::defaultNumThreads();
+  int n_threads = std::max(1u, std::thread::hardware_concurrency());
   std::vector<std::vector<std::tuple<int,int,int,double>>> results_vector(n_threads);
 
   std::vector<int> final_col1, final_col2, final_groups;
@@ -165,7 +159,6 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
   int current_pair = 0;
 
   for (int chunk = 0; chunk < num_chunks; chunk++) {
-
     int current_batch_size = std::min(batch_size, total_pairs - current_pair);
     IntegerMatrix combinations(current_batch_size, 2);
     int pair_idx = 0;
@@ -189,9 +182,7 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
 
     NumericMatrix auc_results = calculateAUCParallel(ratio_matrix, group);
 
-    ResultProcessor result_processor(combinations, auc_results, threshold,
-                                     final_col1, final_col2, final_groups, final_aucs,
-                                     results_vector);
+    ResultProcessor result_processor(combinations, auc_results, threshold, results_vector);
     parallelFor(0, current_batch_size, result_processor);
   }
 
