@@ -11,14 +11,15 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // calculateAUCParallel
-NumericMatrix calculateAUCParallel(NumericMatrix matrix, IntegerVector group);
-RcppExport SEXP _RamEx_calculateAUCParallel(SEXP matrixSEXP, SEXP groupSEXP) {
+NumericMatrix calculateAUCParallel(const NumericMatrix matrix, const IntegerVector group, int n_threads);
+RcppExport SEXP _RamEx_calculateAUCParallel(SEXP matrixSEXP, SEXP groupSEXP, SEXP n_threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type matrix(matrixSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type group(groupSEXP);
-    rcpp_result_gen = Rcpp::wrap(calculateAUCParallel(matrix, group));
+    Rcpp::traits::input_parameter< const NumericMatrix >::type matrix(matrixSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type group(groupSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(calculateAUCParallel(matrix, group, n_threads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -39,7 +40,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_RamEx_calculateAUCParallel", (DL_FUNC) &_RamEx_calculateAUCParallel, 2},
+    {"_RamEx_calculateAUCParallel", (DL_FUNC) &_RamEx_calculateAUCParallel, 3},
     {"_RamEx_calculatePairedMarkersAUC", (DL_FUNC) &_RamEx_calculatePairedMarkersAUC, 5},
     {NULL, NULL, 0}
 };

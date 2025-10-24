@@ -8,81 +8,6 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
-// Structure to store prediction scores and actual labels
-struct Prediction {
-  double score;
-  int label;
-};
-
-// Comparison function for sorting
-bool comparePredictions(const Prediction &a, const Prediction &b) {
-  return a.score > b.score;
-}
-
-// Worker for calculating AUC
-struct AUCWorker : public Worker {
-  const RMatrix<double> matrix;
-  const RVector<int> group;
-  RMatrix<double> aucResults;
-  int numGroups;
-
-  AUCWorker(const NumericMatrix matrix, const IntegerVector group, NumericMatrix aucResults, int numGroups)
-    : matrix(matrix), group(group), aucResults(aucResults), numGroups(numGroups) {}
-
-  void operator()(std::size_t begin, std::size_t end) {
-    for (std::size_t i = begin; i < end; ++i) {
-      std::vector<Prediction> predictions(matrix.nrow());
-      for (std::size_t j = 0; j < matrix.nrow(); ++j) {
-        predictions[j] = {matrix(j, i), group[j]};
-      }
-
-      std::sort(predictions.begin(), predictions.end(), comparePredictions);
-
-      // Calculate AUC for each group
-      for (int g = 0; g < numGroups; ++g) {
-        double auc = 0.0;
-        int numPositives = 0;
-        int numNegatives = 0;
-        double cumulativePositives = 0.0;
-
-        for (const auto &pred : predictions) {
-          if (pred.label == g) {
-            numPositives++;
-          } else {
-            numNegatives++;
-          }
-        }
-
-        if (numPositives > 0 && numNegatives > 0) {
-          for (const auto &pred : predictions) {
-            if (pred.label == g) {
-              cumulativePositives+=1.0;
-            } else {
-              auc += cumulativePositives/numPositives;
-            }
-          }
-
-          auc /= numNegatives;
-        }  else{
-          auc = 0.0;
-        }
-        aucResults(i, g) = auc;
-      }
-    }
-  }
-};
-
-// [[Rcpp::export]]
-NumericMatrix calculateAUCParallel(NumericMatrix matrix, IntegerVector group) {
-  int minLabel = Rcpp::min(group);
-  IntegerVector adjustedGroup = group - minLabel;
-  int numGroups = Rcpp::max(adjustedGroup) + 1; // Assuming adjustedGroup labels are 0-indexed
-  NumericMatrix aucResults(matrix.ncol(), numGroups);
-  AUCWorker worker(matrix, adjustedGroup, aucResults, numGroups);
-  parallelFor(0, matrix.ncol(), worker);
-  return aucResults;
-}
-
 struct RatioWorker : public Worker {
   const NumericMatrix& matrix;
   const IntegerMatrix& combinations;
@@ -102,44 +27,74 @@ struct RatioWorker : public Worker {
   }
 };
 
-struct ResultProcessor : public Worker {
-  const IntegerMatrix& combinations;
-  const NumericMatrix& auc_results;
-  const double threshold;
-  std::vector<std::vector<std::tuple<int,int,int,double>>>& results_vector;
 
-  ResultProcessor(const IntegerMatrix& combinations,
-                  const NumericMatrix& auc_results,
-                  const double threshold,
-                  std::vector<std::vector<std::tuple<int,int,int,double>>>& results_vector)
-    : combinations(combinations), auc_results(auc_results), threshold(threshold),
-      results_vector(results_vector) {}
+// Worker for calculating AUC
+struct AUCWorker : public Worker {
+  const RMatrix<double> matrix;
+  const RVector<int> group;
+  RMatrix<double> aucResults;
+  const int numGroups;
+
+  AUCWorker(const NumericMatrix matrix, const IntegerVector group, NumericMatrix aucResults, int numGroups)
+    : matrix(matrix), group(group), aucResults(aucResults), numGroups(numGroups) {}
 
   void operator()(std::size_t begin, std::size_t end) {
-    std::vector<std::tuple<int,int,int,double>> local_results;
-    local_results.reserve(end - begin);
-    
-    for (std::size_t i = begin; i < end; i++) {
-      for (int g = 0; g < auc_results.ncol(); g++) {
-        double auc = auc_results(i, g);
-        if (auc > threshold) {
-          local_results.emplace_back(
-              combinations(i, 0) + 1,
-              combinations(i, 1) + 1,
-              g + 1,
-              auc
-          );
+    size_t nSamples = matrix.nrow();
+    std::vector<std::pair<double, int>> temp(nSamples);
+    std::vector<size_t> rank_index(nSamples);
+    std::vector<double> ranks(nSamples);
+
+    for (std::size_t col = begin; col < end; ++col) {
+      for (std::size_t i = 0; i < nSamples; ++i) {
+        temp[i].first = matrix(i, col);
+        temp[i].second = group[i];
+      }
+      std::iota(rank_index.begin(), rank_index.end(), 0);
+      std::sort(rank_index.begin(), rank_index.end(),
+                [&](size_t a,size_t b){ return temp[a].first > temp[b].first; });
+      
+      for (size_t r = 0; r < nSamples; ++r)
+        ranks[rank_index[r]] = r + 1; 
+
+      // Calculate AUC for each group
+      for (int g = 0; g < numGroups; ++g) {
+        double pos_sum = 0.0;
+        int pos_count = 0;
+        int neg_count = 0;
+
+        for (size_t i = 0; i < nSamples; ++i) {
+          if (temp[i].second == g) {
+            pos_sum += ranks[i];
+            pos_count++;
+          } else {
+            neg_count++;
+          }
         }
+
+        double auc = 0.0;
+        if (pos_count > 0 && neg_count > 0) {
+          auc = (pos_sum - (pos_count * (pos_count + 1)) / 2.0) /
+                (pos_count * (double)neg_count);
+        } 
+        aucResults(col, g) = auc;
       }
     }
-    static thread_local int thread_id = -1;
-    if (thread_id == -1)
-      thread_id = std::hash<std::thread::id>{}(std::this_thread::get_id()) % results_vector.size();
-
-    auto& bucket = results_vector[thread_id];
-    bucket.insert(bucket.end(), local_results.begin(), local_results.end());
   }
 };
+
+// [[Rcpp::export]]
+NumericMatrix calculateAUCParallel(const NumericMatrix matrix, const IntegerVector group, int n_threads = 0) {
+  int minLabel = Rcpp::min(group);
+  IntegerVector adjustedGroup = group - minLabel;
+  int numGroups = Rcpp::max(adjustedGroup) + 1; // Assuming adjustedGroup labels are 0-indexed
+  NumericMatrix aucResults(matrix.ncol(), numGroups);
+  if (n_threads <= 0)
+    n_threads = std::max(1u, std::thread::hardware_concurrency()-4);
+
+  AUCWorker worker(matrix, adjustedGroup, aucResults, numGroups);
+  parallelFor(0, matrix.ncol(), worker, matrix.ncol() / n_threads);
+  return aucResults;
+}
 
 // [[Rcpp::export]]
 DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
@@ -150,11 +105,6 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
   int n = matrix.ncol();
   int total_pairs = (n * (n - 1)) / 2;
   int num_chunks = ceil(total_pairs / (double)batch_size);
-
-  if (n_threads <= 0) {
-    n_threads = std::max(1u, std::thread::hardware_concurrency() - 4);
-  }
-  std::vector<std::vector<std::tuple<int,int,int,double>>> results_vector(n_threads);
 
   std::vector<int> final_col1, final_col2, final_groups;
   std::vector<double> final_aucs;
@@ -181,23 +131,22 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
     // Parallel calculation
     NumericMatrix ratio_matrix(matrix.nrow(), current_batch_size);
     RatioWorker ratio_worker(matrix, combinations, ratio_matrix);
-    parallelFor(0, current_batch_size, ratio_worker);
+    ratio_worker(0, current_batch_size);
 
-    NumericMatrix auc_results = calculateAUCParallel(ratio_matrix, group);
+    NumericMatrix auc_results = calculateAUCParallel(ratio_matrix, group, n_threads);
 
-    ResultProcessor result_processor(combinations, auc_results, threshold, results_vector);
-    parallelFor(0, current_batch_size, result_processor);
-  }
-
-  for (const auto& local_results : results_vector){
-    for (const auto& result : local_results) {
-      final_col1.push_back(std::get<0>(result));
-      final_col2.push_back(std::get<1>(result));
-      final_groups.push_back(std::get<2>(result));
-      final_aucs.push_back(std::get<3>(result));
+    for (int i = 0; i < current_batch_size; ++i) {
+      for (int g = 0; g < auc_results.ncol(); ++g) {
+        double auc = auc_results(i, g);
+        if (auc > threshold) {
+          final_col1.push_back(combinations(i, 0) + 1);
+          final_col2.push_back(combinations(i, 1) + 1);
+          final_groups.push_back(g + 1);
+          final_aucs.push_back(auc);
+        }
+      }
     }
   }
-
 
   return DataFrame::create(
     Named("col1") = wrap(final_col1),
