@@ -4,7 +4,13 @@
 \alias{Raman.Markers.Roc}
 \title{Find Markers Using receiver operator characteristic (ROC) curve}
 \usage{
-Raman.Markers.Roc(object, threshold = 0.75, paired = FALSE, batch_size = 1000)
+Raman.Markers.Roc(
+  object,
+  threshold = 0.75,
+  paired = FALSE,
+  batch_size = 1000,
+  n_threads = NULL
+)
 }
 \arguments{
 \item{object}{A Ramanome object.}
