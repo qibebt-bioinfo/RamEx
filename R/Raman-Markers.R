@@ -689,7 +689,7 @@ average_spectra <- function(matrix, group, min.range ){
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
 #' Markers_ROC <- Raman.Markers.Roc(preprocessing.cutoff(data_processed, 800, 1300), threshold = 0.75, paired = FALSE, batch_size = 1000)
-Raman.Markers.Roc <- function(object, threshold = 0.75, paired = FALSE, batch_size = 1000){
+Raman.Markers.Roc <- function(object, threshold = 0.75, paired = FALSE, batch_size = 1000, n_threads = NULL){
   matrix <- get.nearest.dataset(object)
   group <- object@meta.data$group
   os_type <- .Platform$OS.type
@@ -716,7 +716,7 @@ Raman.Markers.Roc <- function(object, threshold = 0.75, paired = FALSE, batch_si
   if(paired){
     cat('Finding paired markers ... \n')
     cat('This may take a while, please be patient ... \n')
-    raman_markers <- calculatePairedMarkersAUC(matrix, group, threshold = threshold, batch_size = batch_size)
+    raman_markers <- calculatePairedMarkersAUC(matrix, group, threshold = threshold, batch_size = batch_size, n_threads = ifelse(is.null(n_threads),0,n_threads))
     raman_markers$col1 <- wave[raman_markers$col1]
     raman_markers$col2 <- wave[raman_markers$col2]
     raman_markers$group <- u_group[raman_markers$group]

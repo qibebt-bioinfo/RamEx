@@ -145,12 +145,15 @@ struct ResultProcessor : public Worker {
 DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
                                     IntegerVector group,
                                     double threshold,
-                                    int batch_size = 1000) {
+                                    int batch_size = 1000,
+                                    int n_threads = 0) {
   int n = matrix.ncol();
   int total_pairs = (n * (n - 1)) / 2;
   int num_chunks = ceil(total_pairs / (double)batch_size);
 
-  int n_threads = std::max(1u, std::thread::hardware_concurrency());
+  if (n_threads <= 0) {
+    n_threads = std::max(1u, std::thread::hardware_concurrency() - 4);
+  }
   std::vector<std::vector<std::tuple<int,int,int,double>>> results_vector(n_threads);
 
   std::vector<int> final_col1, final_col2, final_groups;
