@@ -92,7 +92,7 @@ NumericMatrix calculateAUCParallel(const NumericMatrix matrix, const IntegerVect
     n_threads = std::max(1u, std::thread::hardware_concurrency()-4);
 
   AUCWorker worker(matrix, adjustedGroup, aucResults, numGroups);
-  parallelFor(0, matrix.ncol(), worker, matrix.ncol() / n_threads);
+  parallelFor(0, matrix.ncol(), worker, std::max(1, (int)(matrix.ncol() / n_threads + 1)));
   return aucResults;
 }
 
