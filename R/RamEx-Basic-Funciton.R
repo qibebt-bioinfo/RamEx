@@ -184,6 +184,7 @@ mean.spec <- function(data, group, gap = 0.3, col=NULL) {
 #'
 #' @param object A Ramanome object.
 #' @return A matrix or data frame containing the most recently added dataset from the Ramanome object.
+#' @export get.nearest.dataset
 #' @examples
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
