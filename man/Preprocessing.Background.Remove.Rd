@@ -4,12 +4,21 @@
 \alias{Preprocessing.Background.Remove}
 \title{Subtract background spectra from the cell spectra}
 \usage{
-Preprocessing.Background.Remove(object, cell.index, cal_mean = FALSE)
+Preprocessing.Background.Remove(
+  object,
+  cell.index,
+  group_splits = "/|_",
+  cal_mean = FALSE
+)
 }
 \arguments{
 \item{object}{A Ramanome object.}
 
 \item{cell.index}{The index of the cell component in the filenames, where the background spectra are recorded as 'bg' or 'BG'.}
+
+\item{group_splits}{Character.
+Regular expression defining how to split file names for cell/background information.  
+Default is `"/|_"`, meaning both directory `/` and underscore `_` are used as separators.}
 
 \item{cal_mean}{Logical value indicating whether to calculate the mean spectra with in a cell when a cell contains multiple spectra.}
 }

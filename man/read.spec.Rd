@@ -6,32 +6,98 @@
 \usage{
 read.spec(
   data_path,
+  file_type = "txt",
+  sep = NULL,
   group.index = 1,
+  group.names = "Group",
   group.levels = NULL,
+  group_splits = "/|_",
   cutoff = c(500, 3150),
-  interpolation = FALSE
+  interpolation = FALSE,
+  n_cores = 1
 )
 }
 \arguments{
-\item{data_path}{The path to the directory containing the spectral data files.}
+\item{data_path}{Character. 
+Path to the directory containing spectral data files.
+The function searches recursively for files matching the specified extensions (see `file_type`).
+Files named "Metadata" will be ignored.}
 
-\item{group.index}{The index of the group identifier in the filename. Defaults to 1.}
+\item{file_type}{Character vector.
+Specifies which file formats to include.  
+Supported values include: "txt", "csv", "tsv"}
 
-\item{group.levels}{A vector of levels for the group factor. If NULL, levels will be
-determined from the data. Defaults to NULL.}
+\item{group.index}{Integer. 
+Index specifying which split element is used as the group label.
+Splitting is performed according to the pattern set in `group_splits`.}
 
-\item{cutoff}{A numeric vector of two values specifying the wavelength range to
-include. Defaults to c(500, 3150).}
+\item{group.levels}{Character vector. 
+Optional predefined levels for the grouping factors.  
+If `NULL` (default), unique group names will be derived automatically from file names.}
 
-\item{interpolation}{A logical value indicating whether to interpolate the data to
-a uniform wavelength scale. Defaults to FALSE.}
+\item{group_splits}{Character.
+Regular expression defining how to split file paths for group extraction.  
+Default is `"/|_"`, meaning both directory `/` and underscore `_` are used as separators.}
+
+\item{cutoff}{Numeric vector of length 2.
+Defines the wavenumber range (`[min, max]`) used for trimming or interpolation.  
+Default: `c(500, 3150)`.}
+
+\item{interpolation}{Logical.
+If `TRUE`, performs natural spline interpolation across uniformly spaced wavenumbers
+within `cutoff`.  
+If `FALSE`, the spectra are directly truncated to the specified range without interpolation.}
+
+\item{n_cores}{Integer.
+Number of CPU cores to use for parallel reading.  
+If `n_cores > 1`, the function runs in parallel;  
+if `1`, it falls back to single‑core serial processing.  
+Default: `1`.}
 }
 \value{
-A Ramanome object containing the processed spectral data.
+A `Ramanome` object containing:
+\itemize{
+  \item \code{datasets$raw.data} — a numeric matrix of dimension (n_samples × n_wavenumbers)
+  \item \code{wavenumber} — the common wavenumber vector
+  \item \code{meta.data} — a data frame storing group labels and source filenames
+}
 }
 \description{
-This function reads spectral data from text files in a specified directory, applies
-filtering based on wavelength cutoffs, and optionally interpolates the data to
-a uniform wavelength scale. It returns a Ramanome object containing the processed
-data.
+Reads multiple spectral data files from a target directory and automatically
+identifies their structure — whether single spectra, mapping matrices, and coordinate‑based scans —
+and merges them into a unified data matrix.
+}
+\details{
+It optionally performs spline interpolation across the specified
+wavenumber range and constructs a `Ramanome` object containing both
+spectral data and associated metadata (such as file names and group labels).
+
+**Note:**  
+If all files are reported as having `unknown` orientation or structure,
+please verify your file format manually. Such cases may not be supported
+by the automatic reader, and you can instead use
+[build_ramanome_object()] to manually assemble your own `Ramanome` object
+from pre‑processed data matrices.
+
+
+File structure detection rules:
+\itemize{
+  \item **Type 1:** Two columns (wavenumber, intensity)
+  \item **Type 2:** Mapping matrix — first column is wavenumber, remaining columns are multiple spectra
+  \item **Type 3:** Coordinate scan — columns 1–2 are (x, y) positions, column 3 is wavenumber, column 4 is intensity
+}
+ 
+The function automatically determines the file type and extracts the spectra accordingly.
+}
+\examples{
+\dontrun{
+RamanData <- read.spec(
+  data_path = "data/",
+  group.index = 1,
+  cutoff = c(600, 3000),
+  interpolation = TRUE,
+  n_cores = 4
+)
+}
+
 }

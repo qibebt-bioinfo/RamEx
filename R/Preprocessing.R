@@ -319,6 +319,9 @@ Preprocessing.Smooth.Snv <- function(object) {
 #'
 #' @param object A Ramanome object.
 #' @param cell.index The index of the cell component in the filenames, where the background spectra are recorded as 'bg' or 'BG'.
+#' @param group_splits Character.  
+#'   Regular expression defining how to split file names for cell/background information.  
+#'   Default is `"/|_"`, meaning both directory `/` and underscore `_` are used as separators.
 #' @param cal_mean Logical value indicating whether to calculate the mean spectra with in a cell when a cell contains multiple spectra.
 #'
 #' @return A Ramanome object with background-subtracted spectra, named as "sub_data" in the 'datasets' slot
@@ -328,11 +331,11 @@ Preprocessing.Smooth.Snv <- function(object) {
 #' @importFrom rlist list.map
 #' @export Preprocessing.Background.Remove
 
-Preprocessing.Background.Remove <- function(object, cell.index, cal_mean = FALSE) {
+Preprocessing.Background.Remove <- function(object, cell.index, group_splits='/|_', cal_mean = FALSE) {
   
   # Extract group and cell information from filenames
   group <- str_extract(object@meta.data$filenames, pattern = paste0('([^_]*_){', cell.index - 2, '}[^_]*'))
-  cell <- str_split_i(object@meta.data$filenames, pattern = '_', cell.index)
+  cell <- str_split_i(object@meta.data$filenames, pattern = group_splits, cell.index)
   object@meta.data$cell <- cell
   
   if (cal_mean) {
@@ -341,7 +344,7 @@ Preprocessing.Background.Remove <- function(object, cell.index, cal_mean = FALSE
     data.mean <- aggregate(data, by = list(group, cell), mean)
     object@datasets$mean_data <- as.matrix(data.mean[, -c(1, 2)])
     object@meta.data <- data.frame(
-      group = str_split_i(data.mean[, 1], pattern = '_', 1),
+      group = str_split_i(data.mean[, 1], pattern = group_splits, 1),
       filenames = paste(data.mean[, 1], data.mean[, 2], sep = '_'),
       cell = data.mean[, 2]
     )
@@ -369,7 +372,7 @@ Preprocessing.Background.Remove <- function(object, cell.index, cal_mean = FALSE
   object@datasets$sub_data <- data.sub
   filenames <- rownames(data.sub)
   object@meta.data <- data.frame(
-    group = str_split_i(filenames, pattern = '_', 1),
+    group = str_split_i(filenames, pattern = group_splits, 1),
     filenames = filenames
   )
   
