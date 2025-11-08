@@ -39,7 +39,8 @@ install_github("qibebt-bioinfo/RamEx")
 
 ### Getting Started
 #### Data Loading
-Raman spectra are respectively tracked in single txt files, and their meta info is recorded in the file name.
+RamEx reads multiple spectral data files from a target directory and automatically identifies their structure — whether single spectra, mapping matrices, and coordinate‑based scans —
+then merges them into a unified data matrix.
 ```{r}
 library(RamEx)
 library(dplyr)
