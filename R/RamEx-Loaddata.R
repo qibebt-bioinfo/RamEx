@@ -23,6 +23,7 @@ read_spectral_file <- function(filepath, sep, cutoff = c(500, 3150), interpolati
   ext <- tools::file_ext(filepath)
   if(is.null(sep)) sep <- ifelse(ext == "csv", ",", "\t")
   spec <- fread(filepath, header = FALSE, sep = sep)
+  storage.mode(spec) <- "numeric"
   spec <- as.matrix(spec)
   n_cols <- ncol(spec)
   n_rows <- nrow(spec)
