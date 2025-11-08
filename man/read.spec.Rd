@@ -9,7 +9,7 @@ read.spec(
   file_type = "txt",
   sep = NULL,
   group.index = 1,
-  group.names = "group",
+  group.names = "Group",
   group.levels = NULL,
   group_splits = "/|_",
   cutoff = c(500, 3150),

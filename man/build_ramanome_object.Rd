@@ -10,7 +10,7 @@ build_ramanome_object(
   file_infor = NULL,
   meta.data = NULL,
   group.index = 1,
-  group.names = "group_",
+  group.names = "Group",
   group.levels = NULL,
   group_splits = "/|_"
 )
