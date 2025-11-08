@@ -18,38 +18,60 @@
 #' @importFrom data.table fread
 #' @importFrom stats splinefun
 #' @noRd
-read_spectral_file <- function(filepath, cutoff = c(500, 3150), interpolation = FALSE) {
+read_spectral_file <- function(filepath, sep, cutoff = c(500, 3150), interpolation = FALSE) {
   if (is.na(filepath) || filepath == "" || !file.exists(filepath)) return(NULL)
   ext <- tools::file_ext(filepath)
-  spec <- fread(filepath, header = FALSE, sep = ifelse(ext == "csv", ",", "\t"))
+  if(is.null(sep)) sep <- ifelse(ext == "csv", ",", "\t")
+  spec <- fread(filepath, header = FALSE, sep = sep)
+  spec <- as.matrix(spec)
   n_cols <- ncol(spec)
   n_rows <- nrow(spec)
 
-  if (is_wavenumber(as.numeric(spec[,1])) ){
+  col_is_wave <- apply(spec,2, function(cl) is_wavenumber(as.numeric(cl)))
+  if (any(col_is_wave) ){
     orient <- 'col'
   } else if(is_wavenumber(as.numeric(spec[1,])) ){
     spec <- t(spec)
+    col_is_wave <- c(TRUE, rep(FALSE, ncol(spec)-1))
     orient <- 'row'
-  } else {orient <- 'unknown'}
-
-  if (n_cols == 2) {
-    # Type 1 : Single spectrum, col 1 represents wavenumber, col 2 represents intensity 
-    wave <- spec[[1]]
-    inten_mat <- matrix(spec[[2]], nrow = 1)
-
-  } else if (n_cols > 2 && all(!duplicated(spec[[1]]))) {
-    # Type 2 ：Mapping matrix. with col 1 represents wavenumber, others represent intensity of multipul cell
-    wave <- spec[[1]]
-    inten_mat <- t(as.matrix(spec[, -1, with = FALSE]))
-  } else if (n_cols == 4) {
-    # Type 3 ：Mapping matrix. with col 1,2 represent the coordinate information, and col 3 represents wavenumbers, col 4 represents corresponding intensities
-    colnames(spec)[1:4] <- c("x", "y", "wave", "inten")
-    spec_list <- split(spec, list(spec$x, spec$y), drop = TRUE)
-    wave <- spec_list[[1]]$wave
-    inten_mat <- do.call(rbind, lapply(spec_list, function(df) df$inten))
   } else {
-    warning(sprintf("Unrecognized format for file: %s", basename(filepath)))
-    return(NULL)
+    orient <- 'unknown'
+    return(list( orient = orient))}
+
+  if (sum(col_is_wave) == 1){
+    wave_col <- which(col_is_wave)
+    before_cols <- seq_len(wave_col - 1)
+    after_cols  <- seq(from = wave_col + 1, to = ncol(spec))
+    wave <- as.numeric(spec[,wave_col])
+
+    if (length(after_cols) == 1 && length(before_cols) == 0) {
+      # Type 1 : Single spectrum, col 1 represents wavenumber, col 2 represents intensity 
+      inten_mat <- matrix(spec[,after_cols], nrow = 1)
+    } else if (length(after_cols) > 1 && length(before_cols) == 0) {
+      # Type 2 ：Mapping matrix. with col 1 represents wavenumber, others represent intensity of multipul cell
+      inten_mat <- t(as.matrix(spec[, after_cols]))
+    } else if (length(before_cols) > 0 && length(after_cols) == 1) {
+      # Type 3: coordinate scan format
+      coord_names <- paste0("coord", before_cols)
+      spec <- as.data.frame(spec)
+      colnames(spec) <- c(coord_names, "wave", "inten")
+      
+      split_vars <- as.data.frame(spec[, coord_names, drop = FALSE])
+      key_strings <- do.call(paste, c(as.list(split_vars), sep = "_"))
+      spec_list <- split(spec, key_strings, drop = TRUE)
+      wave <- sort(unique(spec$wave))
+
+      inten_mat <- do.call(rbind, lapply(spec_list, function(df) {
+        df <- df[match(wave, df$wave), , drop = FALSE]
+        df$inten
+      }))
+    } else {
+      warning(sprintf("Unrecognized column arrangement in file: %s", basename(filepath)))
+      return(list( orient = 'unknown'))
+    }
+  } else {
+    warning(sprintf("No valid wavenumber column detected in file: %s", basename(filepath)))
+    return(list( orient = 'unknown'))
   }
 
   if (interpolation) {
@@ -62,12 +84,12 @@ read_spectral_file <- function(filepath, cutoff = c(500, 3150), interpolation = 
   } else {
     valid_idx <- which(wave >= cutoff[1] & wave <= cutoff[2])
     wave <- wave[valid_idx]
-    inten_mat <- inten_mat[, valid_idx, drop = FALSE]
+    inten_mat <- inten_mat[, valid_idx]
   }
   
   res <- list(
     wavenumber = wave,
-    intensity = inten_mat
+    intensity = matrix(inten_mat, ncol=length(wave)),
     orient = orient
   )
   
@@ -94,6 +116,12 @@ strip_common_prefix_suffix <- function(strings) {
   
   stripped <- gsub(paste0("^", stringr::fixed(prefix)), "", strings)
   stripped <- gsub(paste0(stringr::fixed(suffix), "$"), "", stripped)
+
+  if (anyDuplicated(stripped)) {
+    dup_counts <- ave(seq_along(stripped), stripped, FUN = seq_along)
+    dup_suffix <- ifelse(dup_counts > 1, paste0("_", dup_counts), "")
+    stripped <- paste0(stripped, dup_suffix)
+  }
   
   stripped
 }
@@ -101,9 +129,12 @@ strip_common_prefix_suffix <- function(strings) {
 #' Judge if a given vector is wavenumber information
 #' @noRd
 is_wavenumber <- function(x) {
-  is_monotonic <- all(diff(x) >= 0) || all(diff(x) <= 0)
+  diffs <- diff(x)
+  sign_diff <- sign(diffs[!is.na(diffs)])
+  monotonic_ratio <- max(mean(sign_diff > 0), mean(sign_diff < 0))
+  is_monotonic <- monotonic_ratio > 0.95
   rng <- range(x, na.rm = TRUE)
-  is_range <- rng[1] > 100 && rng[2] < 6000
+  is_range <- rng[1] > 50 && rng[2] < 6000
   is_monotonic & is_range
 }
 
@@ -205,12 +236,18 @@ print_orient <- function(orient_list, filenames){
 #' }
 #'
 #' @export read.spec
-
+#' @importFrom parallel makeCluster
+#' @importFrom parallel detectCores
+#' @importFrom parallel clusterEvalQ
+#' @importFrom parallel clusterExport
+#' @importFrom parallel parLapply
+#' @importFrom parallel stopCluster
 read.spec <- function(
     data_path, 
     file_type = 'txt', 
+    sep = NULL,
     group.index = 1, 
-    group.names = 'group', 
+    group.names = 'Group', 
     group.levels = NULL, 
     group_splits = '/|_',  
     cutoff = c(500, 3150), 
@@ -230,25 +267,27 @@ read.spec <- function(
     })
     clusterExport(cl, varlist = c( "read_spectral_file"))
     data_list <- parLapply(cl, full_files, function(x) {
-      read_spectral_file(x, cutoff, interpolation)
+      read_spectral_file(x, sep, cutoff, interpolation)
     })
     stopCluster(cl)
   } else{
-    data_list <- lapply( full_files, function(x) {read_spectral_file(x, cutoff, interpolation) })
+    data_list <- lapply( full_files, function(x) {read_spectral_file(x, sep, cutoff, interpolation) })
   }
 
   # Report reading formats within the directory
   orient_list = unlist(lapply(data_list, function(x) x$orient)) 
   print_orient(orient_list, filenames)
+  valid_sample <- orient_list != 'unknown'
+  data_list <- data_list[valid_sample]
+  filenames <- filenames[valid_sample]
 
   # Identify batches by wavenumber
   wave_list = lapply(data_list, function(x) x$wavenumber)
   wave_len <- sapply(wave_list, length)
   unique_lens <- unique(wave_len)
   if (length(unique_lens) > 1) {
-    warning(sprintf('Different wavenumber lengths detected. Returning %d Ramanome objects.'), length(unique_lens) ) 
-    warning('You can choose to change the spectral cutoff range or to make `interpolation` = TRUE, thus merge them into a same matrix')
-    }
+    warning(sprintf('Different wavenumber lengths detected. Returning %d Ramanome objects.', length(unique_lens)) ) 
+  }
 
   inten_list <- lapply(data_list, function(x) x$intensity)
   Ram_list <- list()
@@ -258,8 +297,9 @@ read.spec <- function(
     sub_files <- filenames[idx]
     sub_spec <- inten_list[idx]
     data_mat <- do.call(rbind, sub_spec)
-    rep_spec <- sapply(sub_spec, nrow)
+    rep_spec <- unlist(sapply(sub_spec, nrow))
     filenames_rep <- rep(sub_files, times = rep_spec)
+    
     waves_rep <- rep(sub_waves, times = rep_spec)
     
     wave_keys <- sapply(waves_rep, function(wv) paste(round(wv, 1), collapse = "_"))
@@ -273,11 +313,13 @@ read.spec <- function(
       warning(sprintf('Different batches detected, they were combined into the same matrix by row'),  length(unique_keys)) 
     } else wavenumber <- sub_waves[[1]]
 
-    Ram_object <- build_ramanome_object(data_mat, wavenumber,  filenames = filenames_rep,  meta.data = ifelse(length(unique_keys) > 1, data.frame(batch = batch_idx), NULL), 
+    Ram_object <- build_ramanome_object(data_mat, wavenumber,  file_infor = filenames_rep,
+                                      meta.data = if (length(unique_keys) > 1) data.frame(batch = batch_idx) else NULL, 
                                       group.index = group.index, group.names = group.names, group.levels = group.levels, group_splits = group_splits)
     Ram_list[[paste0('Wave_points_',len_value)]] <- Ram_object
   }
-  return(ifelse(length(unique_lens) > 1, Ram_list, Ram_list[[1]]))
+  
+  return(if(length(unique_lens) > 1) Ram_list else Ram_list[[1]])
 }
 
 #' Build a Ramanome Object from Parsed Spectral Data
@@ -311,13 +353,14 @@ read.spec <- function(
 #' Raman <- build_ramanome_object(raw_mat, wnum, filenames = files)
 #' }
 #' @export build_ramanome_object
+
 build_ramanome_object <- function(
     data_matrix,
     wavenumber,
     file_infor = NULL,
     meta.data = NULL,
     group.index = 1,
-    group.names = "group_",
+    group.names = "Group",
     group.levels = NULL,
     group_splits = "/|_"
 ) {
@@ -329,8 +372,9 @@ build_ramanome_object <- function(
   colnames(data_matrix) <- wavenumber
 
   if (!is.null(file_infor)){
-    split_mat <- str_split(basename(file_infor), pattern = group_splits, simplify = TRUE)[, group.index]
-    group_df <- as.data.frame(split_mat[, group.index, drop = FALSE])
+    split_list <- strsplit(file_infor, split = group_splits)
+    split_mat <- do.call(rbind, split_list)
+    group_df <- as.data.frame(split_mat[, group.index])
 
     if (length(group.names) != len_group && len_group != 1) {
       warning(sprintf("Number of group indices (%d) and names (%d) differ; auto-renaming applied.", len_group, length(group.names)))
@@ -341,7 +385,7 @@ build_ramanome_object <- function(
 
     group <- do.call(paste, c(group_df,sep='_'))
 
-    if (!unique(group) %in% group.levels ){
+    if (!all(unique(group) %in% group.levels) && !is.null(group.levels)){
       undefined <- setdiff(unique(group), group.levels)
       warning(sprintf("Undefined groups detected: %s. 'group.levels' ignored.", undefined))
       group.levels <- NULL
@@ -350,9 +394,9 @@ build_ramanome_object <- function(
     group <- factor(group, levels = group.levels) 
 
     meta.data <- data.frame(group_df, group = group, filenames = file_infor)
-    rownames(data_matrix) <- strip_common_prefix_suffix(meta.data$filename)
+    rownames(data_matrix) <- strip_common_prefix_suffix(meta.data$filenames)
   }
-  if ((!is.null(meta.data)) & (!is.null(file_infor))){
+  if ((!is.null(meta.data_defined)) & (!is.null(file_infor))){
     meta.data <- data.frame(meta.data_defined, meta.data)
   }
   
