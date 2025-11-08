@@ -33,7 +33,7 @@ If supplied, it will override automatically generated grouping information.}
 
 \item{group.levels}{Optional character vector of predefined factor levels.}
 
-\item{group_splits}{Character pattern (regular expression) used for splitting filenames (default: `"/|_"`).}
+\item{group_splits}{Character pattern (regular expression) used for splitting file_infor (default: `"/|_"`).}
 }
 \value{
 A single `Ramanome` object.
@@ -51,6 +51,6 @@ from pre‑processed spectral data, meta.data.
 raw_mat <- matrix(rnorm(10 * 2000), nrow = 10)   # 10 spectra × 2000 wavenumbers
 wnum <- seq(500, 3150, length.out = 2000)
 files <- paste0("Sample_", 1:10)
-Raman <- build_ramanome_object(raw_mat, wnum, filenames = files)
+Raman <- build_ramanome_object(raw_mat, wnum, file_infor = files)
 }
 }

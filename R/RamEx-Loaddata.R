@@ -343,7 +343,7 @@ read.spec <- function(
 #' @param group.index Integer vector specifying which elements from filename splits to use as grouping variables.
 #' @param group.names Character vector giving names to group columns.
 #' @param group.levels Optional character vector of predefined factor levels.
-#' @param group_splits Character pattern (regular expression) used for splitting filenames (default: `"/|_"`).
+#' @param group_splits Character pattern (regular expression) used for splitting file_infor (default: `"/|_"`).
 #'
 #' @return A single `Ramanome` object.
 #' @examples
@@ -352,7 +352,7 @@ read.spec <- function(
 #' raw_mat <- matrix(rnorm(10 * 2000), nrow = 10)   # 10 spectra × 2000 wavenumbers
 #' wnum <- seq(500, 3150, length.out = 2000)
 #' files <- paste0("Sample_", 1:10)
-#' Raman <- build_ramanome_object(raw_mat, wnum, filenames = files)
+#' Raman <- build_ramanome_object(raw_mat, wnum, file_infor = files)
 #' }
 #' @export build_ramanome_object
 
