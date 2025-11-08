@@ -297,6 +297,7 @@ read.spec <- function(
     sub_files <- filenames[idx]
     sub_spec <- inten_list[idx]
     data_mat <- do.call(rbind, sub_spec)
+
     rep_spec <- unlist(sapply(sub_spec, nrow))
     filenames_rep <- rep(sub_files, times = rep_spec)
     
@@ -313,7 +314,7 @@ read.spec <- function(
       warning(sprintf('Different batches detected, they were combined into the same matrix by row'),  length(unique_keys)) 
     } else wavenumber <- sub_waves[[1]]
 
-    Ram_object <- build_ramanome_object(data_mat, wavenumber,  file_infor = filenames_rep,
+    Ram_object <- build_ramanome_object(data_matrix = data_mat, wavenumber = wavenumber,  file_infor = filenames_rep,
                                       meta.data = if (length(unique_keys) > 1) data.frame(batch = batch_idx) else NULL, 
                                       group.index = group.index, group.names = group.names, group.levels = group.levels, group_splits = group_splits)
     Ram_list[[paste0('Wave_points_',len_value)]] <- Ram_object
@@ -400,7 +401,7 @@ build_ramanome_object <- function(
     meta.data <- data.frame(meta.data_defined, meta.data)
   }
   
-  Ramanome <- new("Ramanome", datasets = list(raw.data = data_mat), wavenumber = wavenumber, meta.data = meta.data)
+  Ramanome <- new("Ramanome", datasets = list(raw.data = data_matrix), wavenumber = wavenumber, meta.data = meta.data)
   show(Ramanome)
   return(Ramanome)
 }
