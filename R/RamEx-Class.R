@@ -219,10 +219,24 @@ setMethod("rbind2", signature(x = "Ramanome", y = "Ramanome"),
 #' @return A plot showing mean spectra and the diversity of each group
 #' @export
 setMethod("plot", "Ramanome", function(x, y, ...) {
-  # 获取光谱数据和分组信息
   spectra <- get.nearest.dataset(x)
   groups <- x@meta.data$group
+
+  if (!is.factor(groups)) {
+    warning("`group` column is not a factor; converting to factor automatically.")
+    groups <- as.factor(groups)
+  }
+
+  # Remove invalid factor levels
+  valid_levels <- levels(groups)[levels(groups) %in% unique(groups)]
+  if (length(valid_levels) < length(levels(groups))) {
+    removed_levels <- setdiff(levels(groups), valid_levels)
+    warning(
+      "The following group levels have no corresponding samples and will be removed: ",
+      paste(removed_levels, collapse = ", ")
+    )
+    groups <- factor(groups, levels = valid_levels)
+  }
   
-  # 使用 mean.spec 绘制平均光谱
   mean.spec(spectra, groups, ...)
 })
