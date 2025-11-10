@@ -392,7 +392,7 @@ read.spec <- function(
   
   return(if(length(unique_lens) > 1) Ram_list else Ram_list[[1]])
 }
-
+aa <- read.spec('D:\\Test_load\\Test_5')
 #' Build a Ramanome Object from Parsed Spectral Data
 #'
 #' @description
