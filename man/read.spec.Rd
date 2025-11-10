@@ -27,6 +27,14 @@ Files named "Metadata" will be ignored.}
 Specifies which file formats to include.  
 Supported values include: "txt", "csv", "tsv"}
 
+\item{sep}{The separator between columns.
+If `NULL` (default), the function selects a default according to file type:  
+\itemize{
+  \item For files with the `.csv` extension, the separator defaults to a comma (`,`);
+  \item For all other types (e.g., `.txt`, `.tsv`), the separator defaults to a tab (`"\\t"`).
+}
+Supplying this argument overrides the automatic detection.}
+
 \item{group.index}{Integer. 
 Index specifying which split element is used as the group label.
 Splitting is performed according to the pattern set in `group_splits`.}
@@ -80,11 +88,17 @@ by the automatic reader, and you can instead use
 from pre‑processed data matrices.
 
 
+The parser can automatically interpret and reshape various spectral data layouts.
+Both **row‑wise** and **column‑wise** sample arrangements are supported.  
+
+If additional informational columns appear *before* the wavenumber column
+(for example, spatial coordinates, cell IDs, or other measurement attributes),
+the data are grouped and aggregated by these identifiers prior to combining spectra.
 File structure detection rules:
 \itemize{
   \item **Type 1:** Two columns (wavenumber, intensity)
   \item **Type 2:** Mapping matrix — first column is wavenumber, remaining columns are multiple spectra
-  \item **Type 3:** Coordinate scan — columns 1–2 are (x, y) positions, column 3 is wavenumber, column 4 is intensity
+  \item **Type 3:** Coordinate scan — columns 1–n are (x1, ..., xn) metadata annotations, column n+1 is wavenumber, column n+2 is intensity
 }
  
 The function automatically determines the file type and extracts the spectra accordingly.

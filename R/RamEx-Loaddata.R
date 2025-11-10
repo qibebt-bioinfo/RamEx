@@ -22,7 +22,14 @@ read_spectral_file <- function(filepath, sep, cutoff = c(500, 3150), interpolati
   if (is.na(filepath) || filepath == "" || !file.exists(filepath)) return(NULL)
   ext <- tools::file_ext(filepath)
   if(is.null(sep)) sep <- ifelse(ext == "csv", ",", "\t")
-  spec <- fread(filepath, header = FALSE, sep = sep)
+
+  spec <- tryCatch({
+    data.table::fread(filepath, sep = sep)
+    }, error = function(e){
+      warning(sprintf("Failed to read file: %s\nReason: %s", file, e$message))
+      return(list( orient = 'unknown'))
+    })
+
   spec <- as.matrix(spec)
   storage.mode(spec) <- "numeric"
   n_cols <- ncol(spec)
@@ -154,6 +161,43 @@ print_orient <- function(orient_list, filenames){
   }
 }
 
+#' Get spectral files in given directory
+#' @noRd 
+get_files_from_dir <- function(data_path, file_type){
+  if (!dir.exists(data_path)) {
+    stop(sprintf("Data_path does not exist: '%s'", data_path))
+  }
+
+  pattern <- paste0("\\.(", paste(file_type, collapse = "|"), ")$")
+  filenames <- list.files(data_path, pattern = pattern,  full.names = FALSE,include.dirs = TRUE, recursive = TRUE)
+
+  if (length(filenames) == 0) {
+    stop(sprintf("No files with extension [%s] found in directory: '%s'",
+                 paste(file_type, collapse = ","), data_path))
+  }
+
+  metadata_idx <- grep("Metadata|metadata", filenames, ignore.case = TRUE)
+  if(length(metadata_idx) > 0)filenames <- filenames[-metadata_idx]
+
+  # Check readability
+  full_files <- file.path(data_path, filenames)
+  readable <- sapply(full_files, file.access, mode = 4L) == 0
+  unreadable_files <- filenames[!readable]
+  if (any(!readable)) {
+    warning(sprintf(
+      "The following files cannot be read and will be skipped:\n%s",
+      paste(unreadable_files, collapse = "\n")
+    ))
+    filenames <- filenames[readable]
+  }
+
+  if (length(filenames) == 0) {
+    stop("No readable spectral files found in the specified directory.")
+  }
+
+  return(filenames)
+}
+
 #' Read Spectral Data Files from a Directory
 #'
 #' Reads multiple spectral data files from a target directory and automatically
@@ -179,6 +223,14 @@ print_orient <- function(orient_list, filenames){
 #' @param file_type Character vector.  
 #'   Specifies which file formats to include.  
 #'   Supported values include: "txt", "csv", "tsv"
+#' 
+#' @param sep The separator between columns.
+#'   If `NULL` (default), the function selects a default according to file type:  
+#'   \itemize{
+#'     \item For files with the `.csv` extension, the separator defaults to a comma (`,`);
+#'     \item For all other types (e.g., `.txt`, `.tsv`), the separator defaults to a tab (`"\\t"`).
+#'   }
+#'   Supplying this argument overrides the automatic detection.
 #' 
 #' @param group.index Integer. 
 #'   Index specifying which split element is used as the group label.
@@ -216,11 +268,17 @@ print_orient <- function(orient_list, filenames){
 #' }
 #'
 #' @details
+#' The parser can automatically interpret and reshape various spectral data layouts.
+#' Both **row‑wise** and **column‑wise** sample arrangements are supported.  
+#' 
+#' If additional informational columns appear *before* the wavenumber column
+#' (for example, spatial coordinates, cell IDs, or other measurement attributes),
+#' the data are grouped and aggregated by these identifiers prior to combining spectra.
 #' File structure detection rules:
 #' \itemize{
 #'   \item **Type 1:** Two columns (wavenumber, intensity)
 #'   \item **Type 2:** Mapping matrix — first column is wavenumber, remaining columns are multiple spectra
-#'   \item **Type 3:** Coordinate scan — columns 1–2 are (x, y) positions, column 3 is wavenumber, column 4 is intensity
+#'   \item **Type 3:** Coordinate scan — columns 1–n are (x1, ..., xn) metadata annotations, column n+1 is wavenumber, column n+2 is intensity
 #' }
 #'  
 #' The function automatically determines the file type and extracts the spectra accordingly.
@@ -255,11 +313,9 @@ read.spec <- function(
     interpolation = FALSE, 
     n_cores = 1) {
 
-  pattern <- paste0("\\.(", paste(file_type, collapse = "|"), ")$")
-  filenames <- list.files(data_path, pattern = pattern,  full.names = FALSE,include.dirs = TRUE, recursive = TRUE)
-  if(length(grep('Metadata', filenames)) != 0)filenames <- filenames[-grep('Metadata', filenames)]
-
+  filenames <- get_files_from_dir(data_path, file_type)
   full_files <- file.path(data_path, filenames)
+
   if (n_cores > 1){
     cl <- makeCluster(n_cores)
     clusterEvalQ(cl, {
