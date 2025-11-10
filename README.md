@@ -149,6 +149,14 @@ decom_nmf <- Spectral.Decomposition.Nmf(data_cleaned, n_comp = 2)
 ### Raw data formats
 
 It accommodates data from mainstream instrument manufactures such as Horiba, Renishaw, Thermo Fisher Scientific, WITec, and Bruker. This module efficiently manages single-point data collection, where each spectrum is stored in a separate txt file, as well as mapping data enriched with coordinate information. 
+Specifically, RamEx automatically interpret and reshape various spectral data layouts, supporting both row‑wise and column‑wise sample arrangements.  
+File structure detection rules:
+\itemize{
+  \item **Type 1:** Two columns (wavenumber, intensity)
+  \item **Type 2:** Mapping matrix — first column is wavenumber, remaining columns are multiple spectra
+  \item **Type 3:** Coordinate scan — columns 1–n are (x1, ..., xn) metadata annotations, column n+1 is wavenumber, column n+2 is intensity
+}
+The above applies to the sample of rows as well.
 
 ### Output
 

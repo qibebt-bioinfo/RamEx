@@ -21,14 +21,22 @@
 read_spectral_file <- function(filepath, sep, cutoff = c(500, 3150), interpolation = FALSE) {
   if (is.na(filepath) || filepath == "" || !file.exists(filepath)) return(NULL)
   ext <- tools::file_ext(filepath)
-  if(is.null(sep)) sep <- ifelse(ext == "csv", ",", "\t")
+  if(is.null(sep)) sep <- "auto"
 
   spec <- tryCatch({
-    data.table::fread(filepath, sep = sep)
-    }, error = function(e){
-      warning(sprintf("Failed to read file: %s\nReason: %s", file, e$message))
+    tmp <- try(suppressWarnings(data.table::fread(filepath, sep = sep)), silent = TRUE)
+    if (inherits(tmp, "try-error") || ncol(tmp) == 0 || nrow(tmp) == 0) {
+      warning(sprintf("Failed to read or empty file: %s", filepath))
+      return(list( orient = 'unknown')) }
+    tmp
+    }, error = function(e) {
+      warning(sprintf("Failed to read file: %s\nReason: %s", filepath, e$message))
       return(list( orient = 'unknown'))
     })
+
+  if (is.null(spec) || ncol(spec) == 0) {
+    return(list(orient = 'unknown'))
+  }
 
   spec <- as.matrix(spec)
   storage.mode(spec) <- "numeric"
@@ -36,6 +44,7 @@ read_spectral_file <- function(filepath, sep, cutoff = c(500, 3150), interpolati
   n_rows <- nrow(spec)
 
   col_is_wave <- apply(spec,2, function(cl) is_wavenumber(as.numeric(cl)))
+  row_is_wave <- apply(spec,1, function(cl) is_wavenumber(as.numeric(cl)))
   if (any(col_is_wave) ){
     orient <- 'col'
   } else if(is_wavenumber(as.numeric(spec[1,])) ){
@@ -137,12 +146,21 @@ strip_common_prefix_suffix <- function(strings) {
 #' Judge if a given vector is wavenumber information
 #' @noRd
 is_wavenumber <- function(x) {
+  x <- suppressWarnings(as.numeric(x))
+  if (sum(!is.na(x)) < 5 || mean(!is.na(x)) < 0.9) {
+    return(FALSE)
+  }
   diffs <- diff(x)
+  if (all(is.na(diffs)) || length(diffs) < 1) return(FALSE)
+
   sign_diff <- sign(diffs[!is.na(diffs)])
   monotonic_ratio <- max(mean(sign_diff > 0), mean(sign_diff < 0))
-  is_monotonic <- monotonic_ratio > 0.95
+  is_monotonic <- is.finite(monotonic_ratio) && monotonic_ratio > 0.95
+
   rng <- range(x, na.rm = TRUE)
+  if (any(!is.finite(rng))) return(FALSE)
   is_range <- rng[1] > 50 && rng[2] < 6000
+  
   is_monotonic & is_range
 }
 
@@ -225,12 +243,7 @@ get_files_from_dir <- function(data_path, file_type){
 #'   Supported values include: "txt", "csv", "tsv"
 #' 
 #' @param sep The separator between columns.
-#'   If `NULL` (default), the function selects a default according to file type:  
-#'   \itemize{
-#'     \item For files with the `.csv` extension, the separator defaults to a comma (`,`);
-#'     \item For all other types (e.g., `.txt`, `.tsv`), the separator defaults to a tab (`"\\t"`).
-#'   }
-#'   Supplying this argument overrides the automatic detection.
+#'   If `NULL` (default), the function selects automatically.
 #' 
 #' @param group.index Integer. 
 #'   Index specifying which split element is used as the group label.

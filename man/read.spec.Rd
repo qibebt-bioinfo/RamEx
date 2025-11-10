@@ -28,12 +28,7 @@ Specifies which file formats to include.
 Supported values include: "txt", "csv", "tsv"}
 
 \item{sep}{The separator between columns.
-If `NULL` (default), the function selects a default according to file type:  
-\itemize{
-  \item For files with the `.csv` extension, the separator defaults to a comma (`,`);
-  \item For all other types (e.g., `.txt`, `.tsv`), the separator defaults to a tab (`"\\t"`).
-}
-Supplying this argument overrides the automatic detection.}
+If `NULL` (default), the function selects automatically.}
 
 \item{group.index}{Integer. 
 Index specifying which split element is used as the group label.
