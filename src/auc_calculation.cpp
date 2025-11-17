@@ -41,20 +41,25 @@ struct AUCWorker : public Worker {
   void operator()(std::size_t begin, std::size_t end) {
     size_t nSamples = matrix.nrow();
     std::vector<std::pair<double, int>> temp(nSamples);
-    std::vector<size_t> rank_index(nSamples);
-    std::vector<double> ranks(nSamples);
 
     for (std::size_t col = begin; col < end; ++col) {
       for (std::size_t i = 0; i < nSamples; ++i) {
         temp[i].first = matrix(i, col);
         temp[i].second = group[i];
       }
-      std::iota(rank_index.begin(), rank_index.end(), 0);
-      std::sort(rank_index.begin(), rank_index.end(),
-                [&](size_t a,size_t b){ return temp[a].first < temp[b].first; });
+
+      std::sort(temp.begin(), temp.end(),
+                [](const auto &a, const auto &b){ return a.first > b.first; });
       
-      for (size_t r = 0; r < nSamples; ++r)
-        ranks[rank_index[r]] = r + 1; 
+      std::vector<double> ranks(nSamples);
+      std::size_t i = 0;
+      while (i < nSamples) {
+        std::size_t j = i;
+        while (j + 1 < nSamples && temp[j + 1].first == temp[i].first) j++;
+        double avg_rank = 0.5 * (i + j + 2); 
+        for (std::size_t k = i; k <= j; ++k) ranks[k] = avg_rank;
+        i = j + 1;
+      }
 
       // Calculate AUC for each group
       for (int g = 0; g < numGroups; ++g) {
@@ -62,7 +67,7 @@ struct AUCWorker : public Worker {
         int pos_count = 0;
         int neg_count = 0;
 
-        for (size_t i = 0; i < nSamples; ++i) {
+        for (std::size_t i = 0; i < nSamples; ++i) {
           if (temp[i].second == g) {
             pos_sum += ranks[i];
             pos_count++;
@@ -75,6 +80,7 @@ struct AUCWorker : public Worker {
         if (pos_count > 0 && neg_count > 0) {
           auc = (pos_sum - (pos_count * (pos_count + 1)) / 2.0) /
                 (pos_count * (double)neg_count);
+          auc = std::max(0.0, std::min(1.0, auc));
         } 
         aucResults(col, g) = auc;
       }
