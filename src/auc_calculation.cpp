@@ -78,10 +78,10 @@ struct AUCWorker : public Worker {
 
         double auc = 0.0;
         if (pos_count > 0 && neg_count > 0) {
-          auc = (pos_sum - (pos_count * (pos_count + 1)) / 2.0) /
-                (pos_count * (double)neg_count);
-          if (auc > 1.0) auc = 2.0 - auc;
-          else if (auc < 0.0) auc = -auc;
+          double pos = static_cast<double>(pos_count);
+          double neg = static_cast<double>(neg_count);
+          auc = (pos_sum - (pos * (pos + 1)) / 2.0) /
+                (pos * neg);
         } 
         aucResults(col, g) = auc;
       }
