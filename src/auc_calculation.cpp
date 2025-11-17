@@ -51,7 +51,7 @@ struct AUCWorker : public Worker {
       }
       std::iota(rank_index.begin(), rank_index.end(), 0);
       std::sort(rank_index.begin(), rank_index.end(),
-                [&](size_t a,size_t b){ return temp[a].first > temp[b].first; });
+                [&](size_t a,size_t b){ return temp[a].first < temp[b].first; });
       
       for (size_t r = 0; r < nSamples; ++r)
         ranks[rank_index[r]] = r + 1; 
