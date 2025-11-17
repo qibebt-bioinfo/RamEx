@@ -80,7 +80,8 @@ struct AUCWorker : public Worker {
         if (pos_count > 0 && neg_count > 0) {
           auc = (pos_sum - (pos_count * (pos_count + 1)) / 2.0) /
                 (pos_count * (double)neg_count);
-          auc = std::max(0.0, std::min(1.0, auc));
+          if (auc > 1.0) auc = 2.0 - auc;
+          else if (auc < 0.0) auc = -auc;
         } 
         aucResults(col, g) = auc;
       }
