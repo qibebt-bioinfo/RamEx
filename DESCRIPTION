@@ -1,11 +1,10 @@
 Package: RamEx
 Type: Package
 Title: Provide Comprehensive and Efficient Analysis and Comparison of Ramanomes
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: 
     c(
-        person("Yanmei", "Zhang", email = "zhangyanmei@qibebt.ac.cn", role = c("aut", "cre")),
-        person("Gongchao", "Jing", role = c("aut"), comment = "Co-Author")
+        person("Yanmei", "Zhang", email = "zhangyanmei@qibebt.ac.cn", role = c("aut", "cre"))
     )
 Description: By providing simple-to-use modules for computational tasks that otherwise would require substantial programming experience and algorithmic skills, RamEx should greatly facilitate the computational mining of ramanomes.More complete information about how to use RamEx can be found in the [github]<https://github.com/qibebt-bioinfo/RamEx>, but here you'll find a brief overview of the function and examples to mining of ramanomes.
 License: GPL
@@ -13,15 +12,15 @@ Encoding: UTF-8
 RoxygenNote: 7.3.2
 Depends: R (>= 3.5.0)
 Imports:
-   MASS, RColorBrewer, Rcpp, RcppParallel, circlize, pls, mclust, MLmetrics, Matrix, parallel, Rtsne, cowplot, data.table, 
+   MASS, RColorBrewer, Rcpp, circlize, pls, mclust, MLmetrics, Matrix, parallel, Rtsne, cowplot, data.table, 
    dplyr, e1071, ggforce, ggplot2, grDevices, graphics, ica, igraph, mdatools, pheatmap, irlba, prospectr, methods,
-   randomForest, rlist, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, reshape2, RcppAnnoy, corr2D, robustbase
+   randomForest, rlist, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, reshape2, RcppAnnoy, RcppEigen, corr2D, robustbase
 Suggests:
     testthat,knitr,gpuR (>= 2.0.0)
 LinkingTo:
-    Rcpp, RcppParallel
+    Rcpp, RcppEigen
 biocViews: Visualization, Clustering, Software
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2025-05-26
+Packaged: 2025-11-18

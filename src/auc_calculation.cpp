@@ -1,90 +1,74 @@
-// [[Rcpp::depends(RcppParallel)]]
 #include <Rcpp.h>
-#include <RcppParallel.h>
 #include <algorithm>
 #include <vector>
 #include <thread> 
 
 using namespace Rcpp;
-using namespace RcppParallel;
 
-struct RatioWorker : public Worker {
-  const NumericMatrix& matrix;
-  const IntegerMatrix& combinations;
-  NumericMatrix& ratio_matrix;
-
-  RatioWorker(const NumericMatrix& matrix,
-              const IntegerMatrix& combinations,
-              NumericMatrix& ratio_matrix)
-    : matrix(matrix), combinations(combinations), ratio_matrix(ratio_matrix) {}
-
-  void operator()(std::size_t begin, std::size_t end) {
-    for (std::size_t i = begin; i < end; i++) {
-      for (int j = 0; j < matrix.nrow(); j++) {
-        ratio_matrix(j, i) = matrix(j, combinations(i, 0)) /  matrix(j, combinations(i, 1));
-      }
+static void RatioWorker (const NumericMatrix& matrix,
+                         const IntegerMatrix& combinations,
+                         NumericMatrix& ratio_matrix,
+                         std::size_t begin,
+                         std::size_t end) {
+  for (std::size_t i = begin; i < end; i++) {
+    for (int j = 0; j < matrix.nrow(); j++) {
+      ratio_matrix(j, i) = matrix(j, combinations(i, 0)) /  matrix(j, combinations(i, 1));
     }
   }
 };
 
 
 // Worker for calculating AUC
-struct AUCWorker : public Worker {
-  const RMatrix<double> matrix;
-  const RVector<int> group;
-  RMatrix<double> aucResults;
-  const int numGroups;
+static void AUCWorker (const NumericMatrix& matrix,
+                       const IntegerVector& group,
+                       NumericMatrix& aucResults,
+                       int numGroups,
+                       std::size_t begin,
+                       std::size_t end) {
+  std::size_t nSamples = matrix.nrow();
+  std::vector<std::pair<double, int>> temp(nSamples);
+  std::vector<double> ranks(nSamples);
 
-  AUCWorker(const NumericMatrix matrix, const IntegerVector group, NumericMatrix aucResults, int numGroups)
-    : matrix(matrix), group(group), aucResults(aucResults), numGroups(numGroups) {}
+  for (std::size_t col = begin; col < end; ++col) {
+    for (std::size_t i = 0; i < nSamples; ++i) {
+      temp[i].first = matrix(i, col);
+      temp[i].second = group[i];
+    }
 
-  void operator()(std::size_t begin, std::size_t end) {
-    size_t nSamples = matrix.nrow();
-    std::vector<std::pair<double, int>> temp(nSamples);
+    std::sort(temp.begin(), temp.end(),
+              [](const auto &a, const auto &b){ return a.first > b.first; });
+    
+    std::size_t i = 0;
+    while (i < nSamples) {
+      std::size_t j = i;
+      while (j + 1 < nSamples && temp[j + 1].first == temp[i].first) j++;
+      double avg_rank = 0.5 * (i + j + 2); 
+      for (std::size_t k = i; k <= j; ++k) ranks[k] = avg_rank;
+      i = j + 1;
+    }
 
-    for (std::size_t col = begin; col < end; ++col) {
+    // Calculate AUC for each group
+    for (int g = 0; g < numGroups; ++g) {
+      double pos_sum = 0.0;
+      int pos_count = 0;
+      int neg_count = 0;
+
       for (std::size_t i = 0; i < nSamples; ++i) {
-        temp[i].first = matrix(i, col);
-        temp[i].second = group[i];
-      }
-
-      std::sort(temp.begin(), temp.end(),
-                [](const auto &a, const auto &b){ return a.first > b.first; });
-      
-      std::vector<double> ranks(nSamples);
-      std::size_t i = 0;
-      while (i < nSamples) {
-        std::size_t j = i;
-        while (j + 1 < nSamples && temp[j + 1].first == temp[i].first) j++;
-        double avg_rank = 0.5 * (i + j + 2); 
-        for (std::size_t k = i; k <= j; ++k) ranks[k] = avg_rank;
-        i = j + 1;
-      }
-
-      // Calculate AUC for each group
-      for (int g = 0; g < numGroups; ++g) {
-        double pos_sum = 0.0;
-        int pos_count = 0;
-        int neg_count = 0;
-
-        for (std::size_t i = 0; i < nSamples; ++i) {
-          if (temp[i].second == g) {
-            pos_sum += ranks[i];
-            pos_count++;
-          } else {
-            neg_count++;
-          }
+        if (temp[i].second == g) {
+          pos_sum += ranks[i];
+          pos_count++;
+        } else {
+          neg_count++;
         }
-
-        double auc = 0.0;
-        if (pos_count > 0 && neg_count > 0) {
-          double pos = static_cast<double>(pos_count);
-          double neg = static_cast<double>(neg_count);
-          auc = (pos_sum - (pos * (pos + 1)) / 2.0) /
-                (pos * neg);
-        } 
-        aucResults(col, g) = auc;
       }
+
+      double auc = 0.0;
+      if (pos_count > 0 && neg_count > 0) {
+        double pos = static_cast<double>(pos_count);
+        double neg = static_cast<double>(neg_count);
+        auc = (pos_sum - (pos * (pos + 1)) / 2.0) / (pos * neg);
+      } 
+      aucResults(col, g) = auc;
     }
   }
 };
@@ -98,8 +82,23 @@ NumericMatrix calculateAUCParallel(const NumericMatrix matrix, const IntegerVect
   if (n_threads <= 0)
     n_threads = std::max(1u, std::thread::hardware_concurrency()-4);
 
-  AUCWorker worker(matrix, adjustedGroup, aucResults, numGroups);
-  parallelFor(0, matrix.ncol(), worker, std::max(1, (int)(matrix.ncol() / n_threads + 1)));
+  n_threads = std::min(n_threads, matrix.ncol());
+  std::vector<std::thread> threads;
+  threads.reserve(n_threads);
+  const int block = (matrix.ncol() + n_threads - 1) / n_threads;
+  for (int t = 0; t < n_threads; ++t) {
+    const int startCol = t * block;
+    if (startCol >= matrix.ncol()) break;
+    const int endCol = std::min(matrix.ncol(), startCol + block);
+    threads.emplace_back(AUCWorker,
+                        std::cref(matrix),
+                        std::cref(adjustedGroup),
+                        std::ref(aucResults),
+                        numGroups,
+                        startCol,
+                        endCol);
+  }
+  for (auto& th : threads) th.join();
   return aucResults;
 }
 
@@ -137,8 +136,23 @@ DataFrame calculatePairedMarkersAUC(NumericMatrix matrix,
 
     // Parallel calculation
     NumericMatrix ratio_matrix(matrix.nrow(), current_batch_size);
-    RatioWorker ratio_worker(matrix, combinations, ratio_matrix);
-    ratio_worker(0, current_batch_size);
+    const int ratio_threads = std::max(1, n_threads);
+    const int ratio_block = (current_batch_size + ratio_threads - 1) / ratio_threads;
+    std::vector<std::thread> ratio_threads_vec;
+    ratio_threads_vec.reserve(ratio_threads);
+    for (int t = 0; t < ratio_threads; ++t) {
+      const int startIdx = t * ratio_block;
+      if (startIdx >= current_batch_size) break;
+      const int endIdx = std::min(current_batch_size, startIdx + ratio_block);
+      ratio_threads_vec.emplace_back(RatioWorker,
+                                    std::cref(matrix),
+                                    std::cref(combinations),
+                                    std::ref(ratio_matrix),
+                                    startIdx,
+                                    endIdx);
+    }
+    for (auto& th : ratio_threads_vec) th.join();
+
 
     NumericMatrix auc_results = calculateAUCParallel(ratio_matrix, group, n_threads);
 

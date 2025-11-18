@@ -676,6 +676,7 @@ average_spectra <- function(matrix, group, min.range ){
 #' @return A list containing two data frames: 'markers_single' for single markers and
 #' 'markers_paired' for paired markers, each with their corresponding AUC scores.
 #' @export Raman.Markers.Roc
+#' @useDynLib RamEx, .registration = TRUE
 #' @importFrom utils combn
 #' @importFrom parallel detectCores
 #' @importFrom parallel makeCluster
@@ -684,7 +685,6 @@ average_spectra <- function(matrix, group, min.range ){
 #' @importFrom parallel parLapply
 #' @importFrom MLmetrics AUC
 #' @importFrom Rcpp sourceCpp
-#' @import RcppParallel
 #' @examples
 #' data(RamEx_data)
 #' data_processed <- Preprocessing.OneStep(RamEx_data)
