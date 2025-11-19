@@ -49,3 +49,61 @@ Preprocessing.Baseline.ALS <- function(object,
 
   object
 }
+
+#' Baseline Correction via SNIP
+#'
+#' This function performs Statistics-Sensitive Non-Linear Iterative
+#' Peak-Clipping (SNIP) baseline correction.
+#'
+#' @param object Ramanome object.
+#' @param iterations Maximum SNIP half-window (default: 100).
+#' @param decreasing Whether to use the decreasing window variant
+#'   (default: \code{TRUE}).
+#' @param n_threads Number of CPU cores to use. Use \code{NULL} or \code{1}
+#'   for single-core execution (default: 1).
+#'
+#' @return Ramanome object with baseline-corrected spectra stored in
+#'   \code{baseline.data}.
+#'
+#' @export Preprocessing.Baseline.SNIP
+#'
+#' @examples
+#' \dontrun{
+#' data(RamEx_data)
+#' data_baseline <- Preprocessing.Baseline.SNIP(
+#'   RamEx_data,
+#'   iterations = 100,
+#'   decreasing = TRUE
+#' )
+#' }
+Preprocessing.Baseline.SNIP <- function(object,
+                                        iterations = 100,
+                                        decreasing = TRUE,
+                                        n_threads = 1) {
+  stopifnot(inherits(object, "Ramanome"))
+
+  spectra <- get.nearest.dataset(object)
+  if (!is.matrix(spectra)) {
+    spectra <- as.matrix(spectra)
+  }
+
+  iterations <- as.integer(iterations)
+  if (is.na(iterations) || iterations < 0) {
+    iterations <- 0L
+  }
+
+  if (is.null(n_threads) || n_threads <= 0) {
+    n_threads <- 1
+  }
+
+  corrected <- SNIPBaselineCpp(
+    spectra,
+    iterations = iterations,
+    decreasing = decreasing,
+    n_threads = n_threads
+  )
+  colnames(corrected) <- object@wavenumber
+  object@datasets$baseline.data <- corrected
+
+  object
+}

@@ -26,6 +26,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// SNIPBaselineCpp
+Rcpp::NumericMatrix SNIPBaselineCpp(const Rcpp::NumericMatrix spectra, int iterations, bool decreasing, int n_threads);
+RcppExport SEXP _RamEx_SNIPBaselineCpp(SEXP spectraSEXP, SEXP iterationsSEXP, SEXP decreasingSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type spectra(spectraSEXP);
+    Rcpp::traits::input_parameter< int >::type iterations(iterationsSEXP);
+    Rcpp::traits::input_parameter< bool >::type decreasing(decreasingSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(SNIPBaselineCpp(spectra, iterations, decreasing, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calculateAUCParallel
 NumericMatrix calculateAUCParallel(const NumericMatrix matrix, const IntegerVector group, int n_threads);
 RcppExport SEXP _RamEx_calculateAUCParallel(SEXP matrixSEXP, SEXP groupSEXP, SEXP n_threadsSEXP) {
@@ -57,6 +71,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_RamEx_ALSBaselineCpp", (DL_FUNC) &_RamEx_ALSBaselineCpp, 5},
+    {"_RamEx_SNIPBaselineCpp", (DL_FUNC) &_RamEx_SNIPBaselineCpp, 4},
     {"_RamEx_calculateAUCParallel", (DL_FUNC) &_RamEx_calculateAUCParallel, 3},
     {"_RamEx_calculatePairedMarkersAUC", (DL_FUNC) &_RamEx_calculatePairedMarkersAUC, 5},
     {NULL, NULL, 0}

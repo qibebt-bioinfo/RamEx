@@ -5,6 +5,10 @@ ALSBaselineCpp <- function(spectra, lambda = 6, p = 0.05, maxIter = 20L, n_threa
     .Call(`_RamEx_ALSBaselineCpp`, spectra, lambda, p, maxIter, n_threads)
 }
 
+SNIPBaselineCpp <- function(spectra, iterations = 100L, decreasing = FALSE, n_threads = 1L) {
+    .Call(`_RamEx_SNIPBaselineCpp`, spectra, iterations, decreasing, n_threads)
+}
+
 calculateAUCParallel <- function(matrix, group, n_threads = 0L) {
     .Call(`_RamEx_calculateAUCParallel`, matrix, group, n_threads)
 }
