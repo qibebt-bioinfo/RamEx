@@ -37,14 +37,14 @@ data(RamEx_data)
 ### Pretreatment
 ```{r}
 RamEx_data %<>%  Preprocessing.Smooth.Sg %>% Preprocessing.Baseline.Polyfit %>% Preprocessing.Normalize(.,'ch') 
-mean.spec(RamEx_data@datasets$normalized.data, RamEx_data@meta.data$group)  
+mean.spec(RamEx_data$normalized.data, RamEx_data$group)  
 ```
 
 ### Quality control
 ```{r}
-qc_icod <- Qualitycontrol.ICOD(RamEx_data@datasets$normalized.data,var_tol = 0.5)
+qc_icod <- Qualitycontrol.ICOD(RamEx_data$normalized.data,var_tol = 0.5)
 data_cleaned <- RamEx_data[qc_icod$quality,] 
-mean.spec(data_cleaned@datasets$normalized.data, data_cleaned@meta.data$group,0.3)
+mean.spec(data_cleaned$normalized.data, data_cleaned$group,0.3)
 ```
 
 ### Interested Bands
@@ -62,8 +62,8 @@ data.reduction <- Feature.Reduction.Umap(data_cleaned, draw=T, save = F)
 
 ### Markers analysis
 ```{r}
-ROC_markers <- Raman.Markers.Roc(data_cleaned$normalized.data[,sample(1:1000, 50)],data_cleaned$group, paired  = TRUE, threshold = 0.8) 
-cor_markers <- Raman.Markers.Correlations(data_cleaned$normalized.data[,sample(1:1000, 50)],as.numeric(data_cleaned$group), min.cor = 0.8) 
+ROC_markers <- Raman.Markers.Roc(data_cleaned$normalized.data,data_cleaned$group, threshold = 0.8) 
+cor_markers <- Raman.Markers.Correlations(data_cleaned$normalized.data,as.numeric(data_cleaned$group), min.cor = 0.8) 
 ```
 
 ### IRCA
@@ -118,4 +118,4 @@ Teng L., ...,  Huang W.E., Xu J., 2016. [Label-free, rapid and quantitative phen
 
 
 ### Contact
-Please post any questions, feedback, comments or suggestions on the [GitHub Discussion board](https://github.com/qibebt-bioinfo) (alternatively can create a GitHub issue) or email SCC.
+Any questions, feedback, comments or suggestions, please create a GitHub issue or contact  [us](zymcongcong@163.com).
