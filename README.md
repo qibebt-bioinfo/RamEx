@@ -176,6 +176,9 @@ RamEx also offers an online version. Please visit (http://ramex.single-cell.cn).
 **Q: How to use RamEx?**  
 **A:** Here the [Getting Started](#getting-started) section provides a step-by-step guide on how to use RamEx, which could be downloaded from [RamEx.Rmd](https://github.com/qibebt-bioinfo/RamEx/releases/download/v0.99.0/RamEx.Rmd). More details and examples could be found in the [article](https://doi.org/10.1101/2025.03.10.642505) and the paper reproducibility for [community analysis](https://www.scidb.cn/en/file?fid=554f1d6b09ee9c606087c8094909b46e&mode=preview). Further user documentation are under construction.
 
+**Q: Questions during the usage?**
+**A:** [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/qibebt-bioinfo/RamEx)
+
 **Q: How to install OpenCL?**  
 **A:** RamEx relies on OpenCL for GPU acceleration. If you encounter issues with OpenCL installation or configuration, please refer to the following additional resources:
 - Linux:
