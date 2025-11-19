@@ -118,4 +118,4 @@ Teng L., ...,  Huang W.E., Xu J., 2016. [Label-free, rapid and quantitative phen
 
 
 ### Contact
-Any questions, feedback, comments or suggestions, please create a GitHub issue or contact  [us](zymcongcong@163.com).
+Any questions, feedback, comments or suggestions, please create a GitHub issue or email [us](mailto:zymcongcong@163.com).
