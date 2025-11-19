@@ -12,13 +12,13 @@ Encoding: UTF-8
 RoxygenNote: 7.3.2
 Depends: R (>= 3.5.0)
 Imports:
-   MASS, RColorBrewer, Rcpp, circlize, pls, mclust, MLmetrics, Matrix, parallel, Rtsne, cowplot, data.table, 
+   MASS, RColorBrewer, Rcpp, RcppProgress, circlize, pls, mclust, MLmetrics, parallel, Rtsne, cowplot, data.table, 
    dplyr, e1071, ggforce, ggplot2, grDevices, graphics, ica, igraph, mdatools, pheatmap, irlba, prospectr, methods,
    randomForest, rlist, stats, stringr, utils, uwot, vegan, Cairo, Hmisc, reshape2, RcppAnnoy, RcppEigen, corr2D, robustbase
 Suggests:
     testthat,knitr,gpuR (>= 2.0.0)
 LinkingTo:
-    Rcpp, RcppEigen
+    Rcpp, RcppEigen, RcppProgress
 biocViews: Visualization, Clustering, Software
 Config/testthat/edition: 3
 VignetteBuilder: knitr

@@ -7,7 +7,7 @@
 Preprocessing.Baseline.SNIP(
   object,
   iterations = 100,
-  decreasing = FALSE,
+  decreasing = TRUE,
   n_threads = 1
 )
 }
@@ -17,7 +17,7 @@ Preprocessing.Baseline.SNIP(
 \item{iterations}{Maximum SNIP half-window (default: 100).}
 
 \item{decreasing}{Whether to use the decreasing window variant
-(default: \code{FALSE}).}
+(default: \code{TRUE}).}
 
 \item{n_threads}{Number of CPU cores to use. Use \code{NULL} or \code{1}
 for single-core execution (default: 1).}
@@ -36,7 +36,7 @@ data(RamEx_data)
 data_baseline <- Preprocessing.Baseline.SNIP(
   RamEx_data,
   iterations = 100,
-  decreasing = FALSE
+  decreasing = TRUE
 )
 }
 }
