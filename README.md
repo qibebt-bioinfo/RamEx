@@ -16,7 +16,7 @@
 - **Powerful tuning options** to enable unconventional experiments
 - **Scalability and speed**: up to 100 runs processed per minutes
 
-**More Details**: [![Wiki] (https://github.com/qibebt-bioinfo/RamEx/wiki)]
+**More Details**: [![Wiki](https://some.cdn/wiki-badge.svg)](https://github.com/qibebt-bioinfo/RamEx/wiki)
 
 **AI Support**: [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/qibebt-bioinfo/RamEx)
 
