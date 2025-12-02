@@ -1,3 +1,145 @@
+#' Leiden Clustering
+#'
+#' Build a shared nearest neighbor (SNN) graph from the latest spectral matrix
+#' stored in a Ramanome object and run Louvain community detection across a
+#' vector of resolution values.
+#'
+#' @export Phenotype.Analysis.Leiden
+Phenotype.Analysis.Leiden <- function(
+    object,
+    resolutions,
+    n_pc = 10,
+    threshold = 0.001,
+    k = 30,
+    n_tree = 50,
+    prune.SNN = 1 / 15,
+    seed = 42,
+    objective_function = c("modularity", "CPM"),
+    n_iterations = 2L,
+    verbose = TRUE
+) {
+  set.seed(seed)
+  stopifnot(inherits(object, "Ramanome"))
+
+  if (missing(resolutions) || length(resolutions) == 0) {
+    stop("Please provide at least one resolution value.")
+  }
+  if (!is.numeric(resolutions) || any(!is.finite(resolutions))) {
+    stop("`resolutions` must be a numeric vector without missing values.")
+  }
+
+  objective_function <- match.arg(objective_function)
+
+  # 1) PCA embedding（完全复用）
+  embedding <- .ramex_prepare_embedding(object, n_pc = n_pc, verbose = verbose)
+  n_cells <- nrow(embedding)
+  if (n_cells < 2) {
+    stop("At least two spectra are required to perform Leiden clustering.")
+  }
+
+  # 2) k-NN 参数处理（复用）
+  k <- as.integer(k)
+  if (k < 1) {
+    stop("`k` must be at least 1.")
+  }
+  if (k >= n_cells) {
+    if (verbose) {
+      message("Reducing k to the number of spectra minus one.")
+    }
+    k <- n_cells - 1L
+  }
+
+  # 3) 用 Annoy 构建 kNN（复用）
+  neighbor_idx <- .ramex_annoy_knn(
+    embedding,
+    k       = k,
+    n_trees = n_tree,
+    seed    = seed
+  )
+
+  # 4) 构建 SNN 图（复用 C++ ComputeSNN）
+  snn_matrix <- .ramex_build_snn_graph(
+    neighbor_idx = neighbor_idx,
+    prune        = prune.SNN,
+    cell_names   = rownames(embedding)
+  )
+
+  graph <- igraph::graph_from_adjacency_matrix(
+    snn_matrix,
+    mode     = "undirected",
+    weighted = TRUE,
+    diag     = FALSE
+  )
+
+  # 5) 不同 resolution 下跑 Leiden
+  cluster_list <- lapply(
+    resolutions,
+    FUN = function(res) {
+      ids <- .ramex_run_leiden(
+        graph              = graph,
+        resolution         = res,
+        seed               = seed,
+        objective_function = objective_function,
+        n_iterations       = n_iterations
+      )
+
+      # 6) 小 cluster 过滤 & 合并（复用你已有的逻辑）
+      ids <- .ramex_filter_clusters(
+        ids      = ids,
+        threshold = threshold,
+        n_cells   = n_cells,
+        graph     = graph
+      )
+      factor(ids, exclude = NULL)
+    }
+  )
+
+  names(cluster_list) <- vapply(resolutions, .ramex_resolution_label, character(1))
+
+  clusters <- as.data.frame(
+    cluster_list,
+    row.names   = rownames(embedding),
+    optional    = FALSE,
+    check.names = FALSE
+  )
+
+  return(clusters)
+}
+
+.ramex_run_leiden <- function(
+    graph,
+    resolution,
+    seed,
+    objective_function = c("modularity", "CPM"),
+    n_iterations = 2L
+) {
+  objective_function <- match.arg(objective_function)
+
+  # 检查 igraph 是否支持 cluster_leiden
+  if (!"cluster_leiden" %in% getNamespaceExports("igraph")) {
+    stop(
+      "The installed 'igraph' package does not provide 'cluster_leiden()'. ",
+      "Please install a newer version of igraph (>= 1.3)."
+    )
+  }
+
+  args <- list(
+    graph                = graph,
+    weights              = igraph::E(graph)$weight,
+    objective_function   = objective_function,
+    resolution_parameter = resolution,
+    n_iterations         = as.integer(n_iterations)
+  )
+
+  # Leiden 内部有随机性，和 Louvain 一样用 seed+res 做扰动
+  set.seed(seed + as.integer(round(resolution * 1000)))
+
+  clusters <- do.call(igraph::cluster_leiden, args)
+  ids <- igraph::membership(clusters)
+  return(ids)
+}
+
+
 #' Louvain Clustering
 #'
 #' Build a shared nearest neighbor (SNN) graph from the latest spectral matrix
