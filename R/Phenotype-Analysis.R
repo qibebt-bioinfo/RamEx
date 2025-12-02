@@ -41,6 +41,7 @@ Phenotype.Analysis.Louvain <- function(
     seed = 42,
     verbose = TRUE
 ) {
+  set.seed(seed)
   stopifnot(inherits(object, "Ramanome"))
   if (missing(resolutions) || length(resolutions) == 0) {
     stop("Please provide at least one resolution value.")
@@ -66,7 +67,7 @@ Phenotype.Analysis.Louvain <- function(
     k <- n_cells - 1L
   }
 
-  neighbor_idx <- .ramex_annoy_knn(embedding, k = k, n_trees = n_tree)
+  neighbor_idx <- .ramex_annoy_knn(embedding, k = k, n_trees = n_tree, seed = seed)
   snn_matrix <- .ramex_build_snn_graph(
     neighbor_idx = neighbor_idx,
     prune = prune.SNN,
@@ -82,7 +83,12 @@ Phenotype.Analysis.Louvain <- function(
     resolutions,
     FUN = function(res) {
       ids <- .ramex_run_louvain(graph = graph, resolution = res, seed = seed)
-      ids <- .ramex_filter_clusters(ids, threshold = threshold, n_cells = n_cells)
+      ids <- .ramex_filter_clusters(
+        ids,
+        threshold = threshold,
+        n_cells = n_cells,
+        graph = graph
+      )
       factor(ids, exclude = NULL)
     }
   )
@@ -126,8 +132,11 @@ Phenotype.Analysis.Louvain <- function(
 }
 
 # Build a k-NN graph with Annoy -------------------------------------------------
-.ramex_annoy_knn <- function(embedding, k, n_trees) {
+.ramex_annoy_knn <- function(embedding, k, n_trees, seed) {
   annoy <- RcppAnnoy::AnnoyEuclidean$new(ncol(embedding))
+  if ("setSeed" %in% ls(annoy)) {
+    annoy$setSeed(seed)
+  }
   for (i in seq_len(nrow(embedding))) {
     annoy$addItem(i - 1L, embedding[i, ])
   }
@@ -178,14 +187,45 @@ Phenotype.Analysis.Louvain <- function(
 }
 
 # Remove clusters smaller than the requested threshold --------------------------
-.ramex_filter_clusters <- function(ids, threshold, n_cells) {
+.ramex_filter_clusters <- function(ids, threshold, n_cells, graph = NULL) {
   labels <- as.character(ids)
   min_size <- if (threshold < 1) ceiling(threshold * n_cells) else ceiling(threshold)
   min_size <- max(1, min(n_cells, min_size))
   cluster_sizes <- table(labels)
   small <- names(cluster_sizes[cluster_sizes < min_size])
-  if (length(small)) {
+  if (!length(small)) {
+    return(labels)
+  }
+
+  # If no graph is supplied, fall back to the original behaviour
+  if (is.null(graph)) {
     labels[labels %in% small] <- NA_character_
+    return(labels)
+  }
+
+  # Merge each cell in a small cluster into the neighbouring cluster with the
+  # strongest connection in the SNN graph. If no neighbours belong to a
+  # sufficiently large cluster, fall back to the largest existing cluster.
+  adj <- igraph::as_adj(graph, sparse = FALSE, attr = "weight")
+  non_small_clusters <- names(cluster_sizes[cluster_sizes >= min_size])
+  fallback_label <- if (length(non_small_clusters)) {
+    non_small_clusters[which.max(cluster_sizes[non_small_clusters])]
+  } else {
+    names(cluster_sizes)[which.max(cluster_sizes)]
+  }
+
+  for (i in seq_along(labels)) {
+    if (!labels[i] %in% small) next
+    weights <- adj[i, ]
+    neighbor_clusters <- labels
+    neighbor_clusters[neighbor_clusters %in% small] <- NA_character_
+    weight_by_cluster <- tapply(weights, neighbor_clusters, sum, na.rm = TRUE)
+    weight_by_cluster <- weight_by_cluster[!is.na(names(weight_by_cluster))]
+    if (length(weight_by_cluster)) {
+      labels[i] <- names(weight_by_cluster)[which.max(weight_by_cluster)]
+    } else {
+      labels[i] <- fallback_label
+    }
   }
   return(labels)
 }
