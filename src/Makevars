@@ -1,1 +1,8 @@
-CXX_STD = CXX11
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
+PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+
+# This build's RcppParallel does not reliably link against TBB on Linux,
+# so fall back to the bundled TinyThread backend instead.
+PKG_CXXFLAGS += -DRCPP_PARALLEL_USE_TBB=0
+PKG_LIBS += $(shell "${R_HOME}/bin/Rscript" \
+              -e "RcppParallel::RcppParallelLibs()")
